@@ -27,11 +27,11 @@ source distribution.
 
 ******************************************************************/
 
+#include <Game.hpp>
+
 #ifdef __linux
 #include <X11/Xlib.h>
 #endif // __linux
-
-#include <Game.hpp>
 
 int main()
 {
