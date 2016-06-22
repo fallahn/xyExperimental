@@ -1,5 +1,5 @@
-project(TrackGenerator)
-SET(PROJECT_NAME TrackGenerator)
+project(PhysicsSandbox)
+SET(PROJECT_NAME PhysicsSandbox)
 cmake_minimum_required(VERSION 2.8)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -37,11 +37,15 @@ if(UNIX)
   find_package(X11 REQUIRED)
 endif()
 
+SET(BOX2D_MIN_VERSION "2.3.2")
+find_package(BOX2D ${BOX2D_MIN_VERSION} REQUIRED)
+
 find_package(XYGINE REQUIRED)
 
 include_directories(
   ${XY_INCLUDE_DIR}
   ${SFML_INCLUDE_DIR} 
+  ${BOX2D_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
@@ -61,6 +65,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   ${SFML_LIBRARIES}
   ${SFML_DEPENDENCIES}
+  ${BOX2D_LIBRARIES}
   ${XY_LIBRARIES})
 
 if(UNIX)
