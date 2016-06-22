@@ -1,7 +1,7 @@
-/*-----------------------------------------------------------------
+/******************************************************************
 
 Matt Marchant 2016
-http://trederia.blogspot.com  
+http://trederia.blogspot.com
 
 xyRacer - Zlib license.
 
@@ -25,10 +25,17 @@ and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any
 source distribution.
 
-------------------------------------------------------------------*/
+******************************************************************/
 
+#ifdef __linux
+#include <X11/Xlib.h>
+#endif // __linux
 
 int main()
 {
+#ifdef __linux
+    XInitThreads();
+#endif //__linux
+
     return 0;
 }

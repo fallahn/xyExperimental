@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------
+/******************************************************************
 
 Matt Marchant 2016
 http://trederia.blogspot.com  
@@ -25,10 +25,22 @@ and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any
 source distribution.
 
-------------------------------------------------------------------*/
+******************************************************************/
 
+#ifdef __linux
+#include <X11/Xlib.h>
+#endif // __linux
+
+#include <Game.hpp>
 
 int main()
 {
+#ifdef __linux
+    XInitThreads();
+#endif //__linux
+
+    Game game;
+    game.run();
+
     return 0;
 }

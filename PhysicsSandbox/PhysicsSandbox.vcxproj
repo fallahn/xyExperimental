@@ -75,12 +75,17 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>include;../extlib/include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG_;_CRT_SECURE_NO_WARNINGS_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG_;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../extlib/lib/box2d-2.3.2;../extlib/lib/sfml;../extlib/lib/xygine</AdditionalLibraryDirectories>
       <AdditionalDependencies>Box2D-d.lib;sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;xygine-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(SolutionDir)extlib\lib\sfml\*-d-2.dll" "$(SolutionDir)Debug\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\openal32.dll" "$(SolutionDir)Debug\"
+xcopy /y /d "$(SolutionDir)extlib\lib\xygine\*-d.dll" "$(SolutionDir)Debug\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -97,7 +102,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>include;../extlib/include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -105,6 +110,15 @@
       <AdditionalLibraryDirectories>../extlib/lib/box2d-2.3.2;../extlib/lib/sfml;../extlib/lib/xygine</AdditionalLibraryDirectories>
       <AdditionalDependencies>Box2D.lib;sfml-audio.lib;sfml-graphics.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;xygine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(SolutionDir)extlib\lib\sfml\sfml-audio-2.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\sfml-graphics-2.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\sfml-network-2.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\sfml-system-2.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\sfml-window-2.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\sfml\openal32.dll" "$(SolutionDir)Release\"
+xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -120,7 +134,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Sandbox.cpp" />
+    <ClCompile Include="src\UserInterface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\Sandbox.hpp" />
+    <ClInclude Include="include\UserInterface.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
