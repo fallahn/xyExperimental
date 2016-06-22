@@ -32,9 +32,10 @@ source distribution.
 #include <SFML/Window/Event.hpp>
 
 Game::Game()
-    : m_sandbox(getMessageBus(), m_userInterface)
+    : m_userInterface   (*this),
+    m_sandbox           (getMessageBus(), m_userInterface)
 {
-
+    setMouseCursorVisible(true);
 }
 
 //private

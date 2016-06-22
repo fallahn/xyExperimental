@@ -27,30 +27,44 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef PS_UI_HPP_
-#define PS_UI_HPP_
+#include <Game.hpp>
 
-#include <functional>
+#include <SFML/Window/Event.hpp>
 
-namespace xy
+Game::Game()
+    : m_sandbox(getMessageBus(), m_userInterface)
 {
-    class App;
+
 }
 
-//responsible for registering custom UI
-//windows with xygine
-class UserInterface final
+//private
+void Game::handleEvent(const sf::Event& evt)
 {
-public:
-    explicit UserInterface(xy::App&);
-    ~UserInterface() = default;
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Escape:
+            xy::App::quit();
+            break;
+        }
+    }
 
-    void addItem(const std::function<void()>&, const void*);
-    void removeItem(const void*);
+    m_sandbox.handleEvent(evt);
+}
 
-private:
+void Game::handleMessage(const xy::Message& msg)
+{
+    m_sandbox.handleMessage(msg);
+}
 
-    xy::App& m_app;
-};
+void Game::updateApp(float dt)
+{
+    m_sandbox.update(dt);
+}
 
-#endif //PS_UI_HPP_
+void Game::draw()
+{
+    getRenderWindow().draw(m_sandbox);
+}

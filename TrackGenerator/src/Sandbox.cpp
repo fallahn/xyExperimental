@@ -27,30 +27,47 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef PS_UI_HPP_
-#define PS_UI_HPP_
+#include <Sandbox.hpp>
+#include <UserInterface.hpp>
 
-#include <functional>
+#include <xygine/MessageBus.hpp>
+#include <xygine/Entity.hpp>
 
-namespace xy
+#include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+
+Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
+    : m_messageBus  (mb),
+    m_ui            (ui),
+    m_scene         (mb)
 {
-    class App;
+
 }
 
-//responsible for registering custom UI
-//windows with xygine
-class UserInterface final
+Sandbox::~Sandbox()
 {
-public:
-    explicit UserInterface(xy::App&);
-    ~UserInterface() = default;
+    m_ui.removeItem(this);
+}
 
-    void addItem(const std::function<void()>&, const void*);
-    void removeItem(const void*);
+//public
+void Sandbox::update(float dt)
+{
+    m_scene.update(dt);
+}
 
-private:
+void Sandbox::handleEvent(const sf::Event& evt)
+{
+    
+}
 
-    xy::App& m_app;
-};
+void Sandbox::handleMessage(const xy::Message& msg)
+{
+    m_scene.handleMessage(msg);
+}
 
-#endif //PS_UI_HPP_
+//private
+void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+{
+    rt.draw(m_scene);
+}

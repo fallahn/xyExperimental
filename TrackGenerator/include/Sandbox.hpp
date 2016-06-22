@@ -27,30 +27,42 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef PS_UI_HPP_
-#define PS_UI_HPP_
+#ifndef TG_SANDBOX_HPP_
+#define TG_SANDBOX_HPP_
 
-#include <functional>
+#include <xygine/Scene.hpp>
+
+#include <SFML/Graphics/Drawable.hpp>
 
 namespace xy
 {
-    class App;
+    class Message;
+    class MessageBus;
 }
 
-//responsible for registering custom UI
-//windows with xygine
-class UserInterface final
+namespace sf
+{
+    class Event;
+}
+
+class UserInterface;
+class Sandbox final : public sf::Drawable
 {
 public:
-    explicit UserInterface(xy::App&);
-    ~UserInterface() = default;
+    Sandbox(xy::MessageBus&, UserInterface&);
+    ~Sandbox();
 
-    void addItem(const std::function<void()>&, const void*);
-    void removeItem(const void*);
+    void update(float);
+    void handleEvent(const sf::Event&);
+    void handleMessage(const xy::Message&);
 
 private:
 
-    xy::App& m_app;
+    xy::MessageBus& m_messageBus;
+    UserInterface& m_ui;
+    xy::Scene m_scene;
+
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //PS_UI_HPP_
+#endif //TG_SANDBOX_HPP_

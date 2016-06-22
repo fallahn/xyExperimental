@@ -42,21 +42,69 @@ namespace
     };
 
     std::vector<Item> items;
+    bool showVideoOptions = false;
+    bool fullScreen = false;
 }
 
-UserInterface::UserInterface()
-{
+UserInterface::UserInterface(xy::App& app)
+    : m_app (app)
+{     
+    //main window
     xy::App::addUserWindow([this]()
     {
-        nim::SetNextWindowSize({ 400.f, 400.f });
-        nim::Begin("Physics Sandbox");
+        //nim::ShowTestWindow();
+        nim::SetNextWindowSize({ 300.f, 400.f });
+        if (!nim::Begin("Menu", 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_ShowBorders))
+        {
+            //window is collapsed so skip out
+            nim::End();
+            return;
+        }
+        if (nim::BeginMenuBar())
+        {
+            if (nim::BeginMenu("Options"))
+            {
+                nim::MenuItem("Video", nullptr, &showVideoOptions);
+                nim::EndMenu();
+            }
 
+            if (nim::BeginMenu("Quit"))
+            {
+                xy::App::quit();
+                nim::EndMenu();
+            }
+            nim::EndMenuBar();
+        }
 
-
+        nim::Separator();
         //draw added items in sub window
+        nim::BeginChild("custom");
         for (const auto& item : items) item.draw();
+        nim::EndChild();
+
+        nim::End();
+    });
+
+    //video options
+    const auto& modes = m_app.getVideoSettings().AvailableVideoModes;
+    xy::App::addUserWindow([this, &modes]()
+    {
+        if (!showVideoOptions) return;
+
+        nim::SetNextWindowSize({ 300.f, 200.f });
+        nim::Begin("Video Options", &showVideoOptions, ImGuiWindowFlags_ShowBorders);
 
 
+
+        nim::Checkbox("Full Screen", &fullScreen);
+        if (nim::Button("Apply", { 50.f, 20.f }))
+        {
+            //TODO apply settings
+            xy::App::VideoSettings settings;
+            settings.WindowStyle = (fullScreen) ? sf::Style::Fullscreen : sf::Style::Close;
+
+            m_app.applyVideoSettings(settings);
+        }
         nim::End();
     });
 }

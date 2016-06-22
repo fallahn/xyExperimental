@@ -31,6 +31,9 @@ source distribution.
 #ifndef TG_GAME_HPP_
 #define TG_GAME_HPP_
 
+#include <Sandbox.hpp>
+#include <UserInterface.hpp>
+
 #include <xygine/App.hpp>
 
 class Game final : public xy::App
@@ -43,15 +46,16 @@ public:
 
 private:
 
+    UserInterface m_userInterface;
+    Sandbox m_sandbox;
+
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;
 
-    void registerStates() override;
+    void registerStates() override {}
+
     void updateApp(float dt) override;
     void draw() override;
-
-    void initialise() override;
-    void finalise() override;
 };
 
 #endif //TG_GAME_HPP_
