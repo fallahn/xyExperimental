@@ -1,5 +1,5 @@
-project(PhysicsSandbox)
-SET(PROJECT_NAME PhysicsSandbox)
+project(TrackGenerator)
+SET(PROJECT_NAME TrackGenerator)
 cmake_minimum_required(VERSION 2.8)
 
 if(NOT CMAKE_BUILD_TYPE)
