@@ -27,7 +27,6 @@ source distribution.
 
 ******************************************************************/
 
-
 #ifndef TG_GAME_HPP_
 #define TG_GAME_HPP_
 

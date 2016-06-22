@@ -27,20 +27,30 @@ source distribution.
 
 ******************************************************************/
 
-#include <Game.hpp>
+#ifndef TG_UI_HPP_
+#define TG_UI_HPP_
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <functional>
 
-int main()
+namespace xy
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
-
-    Game game;
-    game.run();
-
-    return 0;
+    class App;
 }
+
+//responsible for registering custom UI
+//windows with xygine
+class UserInterface final
+{
+public:
+    explicit UserInterface(xy::App&);
+    ~UserInterface() = default;
+
+    void addItem(const std::function<void()>&, const void*);
+    void removeItem(const void*);
+
+private:
+
+    xy::App& m_app;
+};
+
+#endif //TG_UI_HPP_
