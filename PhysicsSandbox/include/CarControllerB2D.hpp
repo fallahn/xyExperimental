@@ -27,49 +27,46 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef PS_SANDBOX_HPP_
-#define PS_SANDBOX_HPP_
+#ifndef PS_CAR_B2D_HPP_
+#define PS_CAR_B2D_HPP_
 
-#include <xygine/Scene.hpp>
-#include <xygine/physics/World.hpp>
-
-#include <SFML/Graphics/Drawable.hpp>
+#include <xygine/components/Component.hpp>
 
 namespace xy
 {
-    class Message;
-    class MessageBus;
+    namespace Physics
+    {
+        class RigidBody;
+    }
 }
 
-namespace sf
+enum Control
 {
-    class Event;
-}
+    Forward = 0x1,
+    Backward = 0x2,
+    Left = 0x4,
+    Right = 0x8
+};
 
 class UserInterface;
-class Sandbox final : public sf::Drawable
+class CarControllerB2D final : public xy::Component
 {
 public:
-    Sandbox(xy::MessageBus&, UserInterface&);
-    ~Sandbox();
+    CarControllerB2D(xy::MessageBus&, xy::Physics::RigidBody*, UserInterface&);
+    ~CarControllerB2D();
 
-    void update(float);
-    void handleEvent(const sf::Event&);
-    void handleMessage(const xy::Message&);
+    xy::Component::Type type() const override { return xy::Component::Type::Script; }
+    void entityUpdate(xy::Entity&, float) override;
 
-    void setView(const sf::View&);
+    void setInput(sf::Uint8 input) { m_input = input; }
 
 private:
 
-    xy::MessageBus& m_messageBus;
+    xy::Physics::RigidBody* m_body;
     UserInterface& m_ui;
-    xy::Scene m_scene;
-    xy::Physics::World m_physWorld;
-    sf::View m_view;
+    sf::Uint8 m_input;
 
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
-
-    void setupVehicles();
+    sf::Vector2f getDirectionalVelocity(const sf::Vector2f&) const;
 };
 
-#endif //PS_SANDBOX_HPP_
+#endif //PS_CAR_B2D_HPP_

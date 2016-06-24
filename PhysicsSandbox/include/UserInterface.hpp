@@ -46,7 +46,7 @@ public:
     ~UserInterface() = default;
 
     void addItem(const std::function<void()>&, const void*);
-    void removeItem(const void*);
+    void removeItems(const void*);
 
 private:
 

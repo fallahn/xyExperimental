@@ -31,11 +31,26 @@ source distribution.
 
 #include <SFML/Window/Event.hpp>
 
+namespace
+{
+    sf::View updateView(sf::Vector2u size)
+    {
+        float ratio = static_cast<float>(size.y) / size.x;
+        const float width = 1024.f;
+        const float height = width * ratio;
+
+        return sf::View({ 0.f, 0.f, width, height });
+    }
+}
+
 Game::Game()
     : m_userInterface   (*this),
     m_sandbox           (getMessageBus(), m_userInterface)
 {
     setMouseCursorVisible(true);
+
+    auto& window = getRenderWindow();
+    m_sandbox.setView(updateView(window.getSize()));
 }
 
 //private
@@ -57,6 +72,15 @@ void Game::handleEvent(const sf::Event& evt)
 
 void Game::handleMessage(const xy::Message& msg)
 {
+    if (msg.id == xy::Message::UIMessage)
+    {
+        const auto& msgData = msg.getData<xy::Message::UIEvent>();
+        if (msgData.type == xy::Message::UIEvent::ResizedWindow)
+        {
+            auto& window = getRenderWindow();
+            m_sandbox.setView(updateView(window.getSize()));
+        }
+    }
     m_sandbox.handleMessage(msg);
 }
 
