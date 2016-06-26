@@ -156,7 +156,7 @@ void UserInterface::addItem(const std::function<void()>& item, const void* owner
     items.back().owner = owner;
 }
 
-void UserInterface::removeItem(const void* owner)
+void UserInterface::removeItems(const void* owner)
 {
     XY_ASSERT(owner, "don't do this!");
 

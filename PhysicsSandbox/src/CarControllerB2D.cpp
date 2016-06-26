@@ -49,6 +49,7 @@ namespace
     float driveForce = 1000.f;
     float turnSpeed = 6.f;
     float drag = 3.f;
+    float density = 0.5f;
 }
 
 CarControllerB2D::CarControllerB2D(xy::MessageBus& mb, xy::Physics::RigidBody* rb, UserInterface& ui)
@@ -68,6 +69,7 @@ CarControllerB2D::CarControllerB2D(xy::MessageBus& mb, xy::Physics::RigidBody* r
         nim::InputFloat("Drive Force", &driveForce, 10.f, 50.f);
         nim::InputFloat("Turn Speed", &turnSpeed, 10.f, 50.f);
         nim::InputFloat("Drag", &drag, 1.f, 10.f);
+        nim::InputFloat("Body Density", &density, 0.1f, 1.f);
     }, this);
 
 }
@@ -138,7 +140,9 @@ void CarControllerB2D::entityUpdate(xy::Entity& entity, float dt)
     default: break;
     }
     m_body->applyTorque(targetTorque);
-    REPORT("Torque Applied", std::to_string(targetTorque));
+    
+
+    //m_body->getCollisionShapes()[0]->setDensity();
 }
 
 //private
