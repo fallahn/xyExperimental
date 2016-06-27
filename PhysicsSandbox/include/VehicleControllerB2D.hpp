@@ -48,23 +48,49 @@ enum Control
     Right = 0x8
 };
 
-class UserInterface;
-class CarControllerB2D final : public xy::Component
+class VehicleControllerB2D final : public xy::Component
 {
 public:
-    CarControllerB2D(xy::MessageBus&, xy::Physics::RigidBody*, UserInterface&);
-    ~CarControllerB2D();
+    enum Type
+    {
+        Bike,
+        Car,
+        Ship
+    };
+
+    struct Parameters final
+    {
+        float maxForwardSpeed = 1000.f;
+        float maxBackwardSpeed = -330.f;
+        float driveForce = 1000.f;
+        float turnSpeed = 6.f;
+        float drag = 3.f;
+        float density = 0.5f;
+        float angularFriction = 0.1f;
+        float grip = 2.5f;
+        Type type = Type::Bike;
+
+        void save(const std::string&);
+        void load(const std::string&);
+    };
+
+    VehicleControllerB2D(xy::MessageBus&, xy::Physics::RigidBody*);
+    ~VehicleControllerB2D() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Script; }
     void entityUpdate(xy::Entity&, float) override;
 
     void setInput(sf::Uint8 input) { m_input = input; }
 
+    void setParameters(const Parameters& p);
+
 private:
 
     xy::Physics::RigidBody* m_body;
-    UserInterface& m_ui;
     sf::Uint8 m_input;
+
+    Parameters m_parameters;
+    float m_lastDensity;
 
     sf::Vector2f getDirectionalVelocity(const sf::Vector2f&) const;
 };

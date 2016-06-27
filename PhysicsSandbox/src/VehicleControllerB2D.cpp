@@ -27,8 +27,7 @@ source distribution.
 
 ******************************************************************/
 
-#include <CarControllerB2D.hpp>
-#include <UserInterface.hpp>
+#include <VehicleControllerB2D.hpp>
 
 #include <xygine/Entity.hpp>
 #include <xygine/Assert.hpp>
@@ -36,51 +35,54 @@ source distribution.
 #include <xygine/util/Vector.hpp>
 #include <xygine/physics/RigidBody.hpp>
 
-#include <xygine/imgui/imgui.h>
+#include <fstream>
+
+void VehicleControllerB2D::Parameters::save(const std::string& path)
+{
+    std::ofstream file(path, std::ios::binary);
+    if (file.good() && file.is_open())
+    {
+        file.write((char*)this, sizeof(Parameters));
+    }
+    else
+    {
+        xy::Logger::log("Failed saving car parameters " + path, xy::Logger::Type::Error);
+    }
+    file.close();
+}
+
+void VehicleControllerB2D::Parameters::load(const std::string& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    if (file.good() && file.is_open())
+    {
+        file.read((char*)this, sizeof(Parameters));
+    }
+    else
+    {
+        xy::Logger::log("Failed reading car parameters " + path, xy::Logger::Type::Error);
+    }
+    file.close();
+}
 
 namespace
 {
     const sf::Vector2f forwardVector(0.f, 1.f);
     const sf::Vector2f rightVector(1.f, 0.f);
-
-    //menu variables
-    float maxForwardSpeed = 1000.f;
-    float maxBackwardSpeed = -330.f;
-    float driveForce = 1000.f;
-    float turnSpeed = 6.f;
-    float drag = 3.f;
-    float density = 0.5f;
 }
 
-CarControllerB2D::CarControllerB2D(xy::MessageBus& mb, xy::Physics::RigidBody* rb, UserInterface& ui)
+VehicleControllerB2D::VehicleControllerB2D(xy::MessageBus& mb, xy::Physics::RigidBody* rb)
     : xy::Component (mb, this),
     m_body          (rb),
-    m_ui            (ui),
-    m_input         (0)
+    m_input         (0),
+    m_lastDensity   (0.f)
 {
     XY_ASSERT(rb, "body can't be nullptr");
     rb->fixedRotation(false);
-    
-
-    ui.addItem([]() 
-    {
-        nim::InputFloat("Max Forward", &maxForwardSpeed, 10.f, 50.f);
-        nim::InputFloat("Max Backward", &maxBackwardSpeed, 10.f, 50.f);
-        nim::InputFloat("Drive Force", &driveForce, 10.f, 50.f);
-        nim::InputFloat("Turn Speed", &turnSpeed, 10.f, 50.f);
-        nim::InputFloat("Drag", &drag, 1.f, 10.f);
-        nim::InputFloat("Body Density", &density, 0.1f, 1.f);
-    }, this);
-
-}
-
-CarControllerB2D::~CarControllerB2D()
-{
-    m_ui.removeItems(this);
 }
 
 //public
-void CarControllerB2D::entityUpdate(xy::Entity& entity, float dt)
+void VehicleControllerB2D::entityUpdate(xy::Entity& entity, float dt)
 {
     const auto& xForm = entity.getTransform();
     auto position = entity.getPosition();
@@ -89,13 +91,19 @@ void CarControllerB2D::entityUpdate(xy::Entity& entity, float dt)
 
     //kill lateral velocity
     sf::Vector2f impulse = m_body->getMass() * -getDirectionalVelocity(rightVec);
+    float impulseSqr = xy::Util::Vector::lengthSquared(impulse);
+    float maxImpulseSqr = m_parameters.grip * m_parameters.grip;
+    if (impulseSqr > maxImpulseSqr)
+    {
+        impulse *= (maxImpulseSqr / impulseSqr);
+    }
     m_body->applyLinearImpulse(impulse, m_body->getWorldCentre());
 
-    //reduce angular velocity - TODO make this const a var in the menu
-    m_body->applyAngularImpulse(0.1f * m_body->getInertia() * -m_body->getAngularVelocity());
+    //reduce angular velocity
+    m_body->applyAngularImpulse(m_parameters.angularFriction * m_body->getInertia() * -m_body->getAngularVelocity());
 
     //apply drag
-    m_body->applyForceToCentre(-m_body->getLinearVelocity() /** xy::Util::Vector::length(getDirectionalVelocity(forwardVec))*/ * drag);
+    m_body->applyForceToCentre(-m_body->getLinearVelocity() /** xy::Util::Vector::length(getDirectionalVelocity(forwardVec))*/ * m_parameters.drag);
 
     //---------------------------------------------//
 
@@ -104,26 +112,26 @@ void CarControllerB2D::entityUpdate(xy::Entity& entity, float dt)
     switch (m_input & (Control::Forward | Control::Backward))
     {
     case Control::Forward:
-        targetSpeed = maxForwardSpeed;
+        targetSpeed = m_parameters.maxForwardSpeed;
         break;
     case Control::Backward:
-        targetSpeed = maxBackwardSpeed;
+        targetSpeed = m_parameters.maxBackwardSpeed;
         break;
     default: break;
     }
 
+    float currentSpeed = xy::Util::Vector::dot(getDirectionalVelocity(forwardVec), forwardVec);
     if (targetSpeed != 0)
-    {
-        float currentSpeed = xy::Util::Vector::dot(getDirectionalVelocity(forwardVec), forwardVec);
+    {        
         float force = 0.f;
         if (targetSpeed > currentSpeed)
         {
-            force = driveForce;
+            force = m_parameters.driveForce;
             m_body->applyForceToCentre(force * forwardVec);
         }
         else if (targetSpeed < currentSpeed)
         {
-            force = -driveForce;
+            force = -m_parameters.driveForce;
             m_body->applyForceToCentre(force * forwardVec);
         }
     }
@@ -132,21 +140,39 @@ void CarControllerB2D::entityUpdate(xy::Entity& entity, float dt)
     switch (m_input & (Control::Left | Control::Right))
     {
     case Control::Left:
-        targetTorque = turnSpeed;
+        targetTorque = m_parameters.turnSpeed * currentSpeed;
         break;
     case Control::Right:
-        targetTorque = -turnSpeed;
+        targetTorque = -m_parameters.turnSpeed * currentSpeed;
         break;
     default: break;
     }
     m_body->applyTorque(targetTorque);
-    
+}
 
-    //m_body->getCollisionShapes()[0]->setDensity();
+void VehicleControllerB2D::setParameters(const Parameters& p)
+{
+    m_parameters = p;
+    if (p.density != m_lastDensity)
+    {
+        const auto& shapes = m_body->getCollisionShapes();
+        if (!shapes.empty())
+        {
+            shapes[0]->setDensity(p.density);
+            //we're assuming there's a second body somewhere to
+            //create a similar influence to being front or rear
+            //wheel drive
+            if (shapes.size() > 1)
+            {
+                shapes[1]->setDensity(p.density * 4.2f);
+            }
+        }
+    }
+    m_lastDensity = p.density;
 }
 
 //private
-sf::Vector2f CarControllerB2D::getDirectionalVelocity(const sf::Vector2f& direction) const
+sf::Vector2f VehicleControllerB2D::getDirectionalVelocity(const sf::Vector2f& direction) const
 {
     return xy::Util::Vector::dot(direction, m_body->getLinearVelocity()) * direction;
 }

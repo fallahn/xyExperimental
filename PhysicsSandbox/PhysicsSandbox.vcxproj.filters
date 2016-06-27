@@ -27,7 +27,7 @@
     <ClCompile Include="src\UserInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CarControllerB2D.cpp">
+    <ClCompile Include="src\VehicleControllerB2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,7 +41,7 @@
     <ClInclude Include="include\Sandbox.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\CarControllerB2D.hpp">
+    <ClInclude Include="include\VehicleControllerB2D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

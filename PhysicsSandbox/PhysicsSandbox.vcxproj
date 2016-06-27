@@ -134,14 +134,14 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CarControllerB2D.cpp" />
+    <ClCompile Include="src\VehicleControllerB2D.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
     <ClCompile Include="src\UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\CarControllerB2D.hpp" />
+    <ClInclude Include="include\VehicleControllerB2D.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\Sandbox.hpp" />
     <ClInclude Include="include\UserInterface.hpp" />

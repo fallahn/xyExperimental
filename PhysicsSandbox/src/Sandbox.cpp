@@ -29,13 +29,16 @@ source distribution.
 
 #include <Sandbox.hpp>
 #include <UserInterface.hpp>
-#include <CarControllerB2D.hpp>
+#include <VehicleControllerB2D.hpp>
 
 #include <xygine/MessageBus.hpp>
 #include <xygine/Entity.hpp>
 #include <xygine/physics/RigidBody.hpp>
 #include <xygine/physics/CollisionRectangleShape.hpp>
-#include <xygine/physics/JointFriction.hpp>
+#include <xygine/physics/CollisionPolygonShape.hpp>
+#include <xygine/physics/CollisionEdgeShape.hpp>
+
+#include <xygine/imgui/imgui.h>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -43,8 +46,14 @@ source distribution.
 
 namespace
 {
-    CarControllerB2D* controller = nullptr;
+    VehicleControllerB2D* car = nullptr;
+    VehicleControllerB2D* bike = nullptr;
+    VehicleControllerB2D* ship = nullptr;
+    
+    VehicleControllerB2D* controller = nullptr;
     sf::Uint8 input = 0;
+
+    VehicleControllerB2D::Parameters vehicleParameters;
 }
 
 Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
@@ -54,10 +63,61 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
     m_physWorld     (mb)
 {
     setupVehicles();
+
+    ui.addItem([]()
+    {
+        nim::InputFloat("Max Forward", &vehicleParameters.maxForwardSpeed, 10.f, 50.f);
+        nim::InputFloat("Max Backward", &vehicleParameters.maxBackwardSpeed, 10.f, 50.f);
+        nim::InputFloat("Drive Force", &vehicleParameters.driveForce, 10.f, 50.f);
+        nim::InputFloat("Turn Speed", &vehicleParameters.turnSpeed, 0.01f, 0.05f);
+        nim::InputFloat("Drag", &vehicleParameters.drag, 0.1f, 1.f);
+        nim::InputFloat("Body Density", &vehicleParameters.density, 0.1f, 1.f);
+        nim::InputFloat("Angular Friction", &vehicleParameters.angularFriction, 0.1f, 1.f);
+        nim::InputFloat("Grip", &vehicleParameters.grip, 0.1f, 1.f);
+
+        nim::Combo("Vehicle", (int*)&vehicleParameters.type, "Bike\0Car\0Ship");
+        switch (vehicleParameters.type)
+        {
+        default: case 0:
+            controller = bike;
+            break;
+        case 1:
+            controller = car;
+            break;
+        case 2:
+            controller = ship;
+            break;
+        }
+
+        nim::Separator();
+        if (nim::Button("Save"))
+        {
+            nim::OpenPopup("Choose file");
+        }
+        if (nim::BeginPopupModal("Save file", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            //nim::InputText("Save path");
+            if (nim::Button("OK"))
+            {
+                vehicleParameters.save("test.car");
+                nim::CloseCurrentPopup();
+            }
+            nim::SameLine();
+            if (nim::Button("Cancel"))
+            {
+                nim::CloseCurrentPopup();
+            }
+            nim::EndPopup();
+        }
+
+    }, this);
+
+    vehicleParameters.load("default.car");
 }
 
 Sandbox::~Sandbox()
 {
+    vehicleParameters.save("default.car");
     m_ui.removeItems(this);
 }
 
@@ -65,6 +125,7 @@ Sandbox::~Sandbox()
 void Sandbox::update(float dt)
 {
     controller->setInput(input);
+    controller->setParameters(vehicleParameters);
     m_scene.update(dt);
 }
 
@@ -133,32 +194,98 @@ void Sandbox::setupVehicles()
 {
     m_physWorld.setGravity({ 0.f, 0.f });
     
+    //bounds
     auto body = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
-    auto shape = xy::Physics::CollisionRectangleShape({ 10.f, 576.f });
+    auto shape = xy::Physics::CollisionRectangleShape({ 10.f, 720.f });
     body->addCollisionShape(shape);
-    shape.setRect({ 10.f, 576.f }, { 1014.f, 0.f });
+    shape.setRect({ 10.f, 720.f }, { 1270.f, 0.f });
     body->addCollisionShape(shape);
-    shape.setRect({ 1004.f, 10.f }, { 10.f, 0.f });
+    shape.setRect({ 1260.f, 10.f }, { 10.f, 0.f });
     body->addCollisionShape(shape);
-    shape.setRect({ 1004.f, 10.f }, { 10.f, 566.f });
+    shape.setRect({ 1260.f, 10.f }, { 10.f, 710.f });
     body->addCollisionShape(shape);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(body);
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
-    //vehicle
+    //bike
     body = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
-    shape.setRect({ 25.f, 64.f }, { -12.5f, -32.f });
-    shape.setDensity(0.5f);
+
+    std::vector<sf::Vector2f> points = 
+    {
+        sf::Vector2f(6.f, 19.f),
+        {34.f, 19.f},
+        {37.f, 124.f},
+        {20.f, 129.f},
+        {3.f, 124.f}
+    };
+    xy::Physics::CollisionPolygonShape ps(points);
+    ps.setDensity(1.f);
+    body->addCollisionShape(ps);
+
+    shape.setRect({ 28.f, 22.f }, { 6.f, 20.f });
+    shape.setDensity(1.5f);
     body->addCollisionShape(shape);
 
     entity = xy::Entity::create(m_messageBus);
     entity->setPosition(512.f, 288.f);
     auto bodyPtr = entity->addComponent(body);
 
-    auto carController = xy::Component::create<CarControllerB2D>(m_messageBus, bodyPtr, m_ui);
-    controller = entity->addComponent(carController);
+    auto vehicleController = xy::Component::create<VehicleControllerB2D>(m_messageBus, bodyPtr);
+    bike = entity->addComponent(vehicleController);
+    controller = bike;
 
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+
+    //car
+    points = 
+    {
+        {32.f, 4.f},
+        {45.f, 4.f},
+        {73.f, 31.f},
+        {71.f, 128.f},
+        {38.f, 172.f},
+        {6.f, 128.f},
+        {4.f, 31.f}
+    };
+    ps.setPoints(points);
+    body = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
+    body->addCollisionShape(ps);
+    shape.setRect({ 32.f, 40.f }, { 22.5f, 10.f });
+    body->addCollisionShape(shape);
+    entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(780.f, 288.f);
+    bodyPtr = entity->addComponent(body);
+    vehicleController = xy::Component::create<VehicleControllerB2D>(m_messageBus, bodyPtr);
+    car = entity->addComponent(vehicleController);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+
+    //ship
+    points = 
+    {
+        {8.f, 17.f},
+        {49.f, 0.f },
+        {71.f, 0.f},
+        {112.f, 17.f},
+        {120.f, 25.f},
+        {120.f, 50.f},
+        {102.f, 84.f},
+        {72.f, 132.f},
+        {48.f, 132.f},
+        {18.f, 84.f},
+        {0.f, 50.f},
+        {0.f, 25.f}
+    };
+    xy::Physics::CollisionEdgeShape es(points, xy::Physics::CollisionEdgeShape::Option::Loop);
+    body = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
+    body->addCollisionShape(es);
+    shape.setRect({ 60.f, 80.f }, { 30.f, 20.f });
+    body->addCollisionShape(shape);
+    entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(960.f, 288.f);
+    bodyPtr = entity->addComponent(body);
+    vehicleController = xy::Component::create<VehicleControllerB2D>(m_messageBus, bodyPtr);
+    ship = entity->addComponent(vehicleController);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 }

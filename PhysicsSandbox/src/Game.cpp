@@ -36,7 +36,7 @@ namespace
     sf::View updateView(sf::Vector2u size)
     {
         float ratio = static_cast<float>(size.y) / size.x;
-        const float width = 1024.f;
+        const float width = 1280.f;
         const float height = width * ratio;
 
         return sf::View({ 0.f, 0.f, width, height });
