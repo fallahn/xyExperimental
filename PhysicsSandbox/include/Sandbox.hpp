@@ -68,8 +68,8 @@ private:
     sf::View m_view;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
-
     void setupVehicles();
+    void updateFileList();
 };
 
 #endif //PS_SANDBOX_HPP_

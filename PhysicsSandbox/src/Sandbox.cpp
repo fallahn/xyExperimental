@@ -33,6 +33,7 @@ source distribution.
 
 #include <xygine/MessageBus.hpp>
 #include <xygine/Entity.hpp>
+#include <xygine/FileSystem.hpp>
 #include <xygine/physics/RigidBody.hpp>
 #include <xygine/physics/CollisionRectangleShape.hpp>
 #include <xygine/physics/CollisionPolygonShape.hpp>
@@ -54,6 +55,9 @@ namespace
     sf::Uint8 input = 0;
 
     VehicleControllerB2D::Parameters vehicleParameters;
+
+    std::vector<std::string> vehicleFiles;
+    const std::string vehicleDir("vehicledefs/");
 }
 
 Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
@@ -62,9 +66,11 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
     m_scene         (mb),
     m_physWorld     (mb)
 {
+    updateFileList();
+    
     setupVehicles();
 
-    ui.addItem([]()
+    ui.addItem([this]()
     {
         nim::InputFloat("Max Forward", &vehicleParameters.maxForwardSpeed, 10.f, 50.f);
         nim::InputFloat("Max Backward", &vehicleParameters.maxBackwardSpeed, 10.f, 50.f);
@@ -78,13 +84,13 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
         nim::Combo("Vehicle", (int*)&vehicleParameters.type, "Bike\0Car\0Ship");
         switch (vehicleParameters.type)
         {
-        default: case 0:
+        default: case VehicleControllerB2D::Type::Bike:
             controller = bike;
             break;
-        case 1:
+        case VehicleControllerB2D::Type::Car:
             controller = car;
             break;
-        case 2:
+        case VehicleControllerB2D::Type::Ship:
             controller = ship;
             break;
         }
@@ -92,14 +98,43 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
         nim::Separator();
         if (nim::Button("Save"))
         {
-            nim::OpenPopup("Choose file");
+            nim::OpenPopup("Save File");
         }
-        if (nim::BeginPopupModal("Save file", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (nim::BeginPopupModal("Save File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            //nim::InputText("Save path");
+            static char filename[50];
+            
+            nim::InputText("File Name", filename, 49);
             if (nim::Button("OK"))
             {
-                vehicleParameters.save("test.car");
+                vehicleParameters.save(vehicleDir + std::string(filename) + ".car");
+                updateFileList();
+                nim::CloseCurrentPopup();
+            }
+            nim::SameLine();
+            if (nim::Button("Cancel"))
+            {
+                nim::CloseCurrentPopup();
+            }
+            nim::EndPopup();
+        }
+        nim::SameLine();
+        if (nim::Button("Load"))
+        {
+            nim::OpenPopup("Load File");
+        }
+        if (nim::BeginPopupModal("Load File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            static int index;
+            nim::Combo("Select File", &index, [](void* data, int idx, const char** out_text) 
+            { 
+                *out_text = ((const std::vector<std::string>*)data)->at(idx).c_str();
+                return true;
+            }, (void*)&vehicleFiles, vehicleFiles.size());
+            
+            if (nim::Button("OK"))
+            {
+                vehicleParameters.load(vehicleDir + vehicleFiles[index]);
                 nim::CloseCurrentPopup();
             }
             nim::SameLine();
@@ -288,4 +323,14 @@ void Sandbox::setupVehicles()
     vehicleController = xy::Component::create<VehicleControllerB2D>(m_messageBus, bodyPtr);
     ship = entity->addComponent(vehicleController);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+}
+
+void Sandbox::updateFileList()
+{
+    vehicleFiles = xy::FileSystem::listFiles(vehicleDir);
+    vehicleFiles.erase(std::remove_if(vehicleFiles.begin(), vehicleFiles.end(),
+        [](const std::string& str)
+    {
+        return xy::FileSystem::getFileExtension(str) != ".car";
+    }), vehicleFiles.end());
 }

@@ -51,7 +51,7 @@ enum Control
 class VehicleControllerB2D final : public xy::Component
 {
 public:
-    enum Type
+    enum class Type : int
     {
         Bike,
         Car,
