@@ -66,6 +66,10 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
     m_scene         (mb),
     m_physWorld     (mb)
 {
+    if (!xy::FileSystem::directoryExists(vehicleDir))
+    {
+        xy::FileSystem::createDirectory(vehicleDir);
+    }
     updateFileList();
     
     setupVehicles();
@@ -81,7 +85,7 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
         nim::InputFloat("Angular Friction", &vehicleParameters.angularFriction, 0.1f, 1.f);
         nim::InputFloat("Grip", &vehicleParameters.grip, 0.1f, 1.f);
 
-        nim::Combo("Vehicle", (int*)&vehicleParameters.type, "Bike\0Car\0Ship");
+        nim::Combo("Vehicle", (int*)&vehicleParameters.type, "Bike\0Car\0Ship\0");
         switch (vehicleParameters.type)
         {
         default: case VehicleControllerB2D::Type::Bike:

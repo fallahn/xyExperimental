@@ -91,6 +91,10 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
 {
     parameters.load("default.tgn");
 
+    if (!xy::FileSystem::directoryExists(trackDir))
+    {
+        xy::FileSystem::createDirectory(trackDir);
+    }
     updateFileList();
 
     m_ui.addItem([this]()
