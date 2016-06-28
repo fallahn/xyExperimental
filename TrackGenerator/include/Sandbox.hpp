@@ -63,6 +63,7 @@ private:
     xy::Scene m_scene;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    void updateFileList();
 };
 
 #endif //TG_SANDBOX_HPP_
