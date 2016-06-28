@@ -47,7 +47,7 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
 
 Sandbox::~Sandbox()
 {
-    m_ui.removeItem(this);
+    m_ui.removeItems(this);
 }
 
 //public

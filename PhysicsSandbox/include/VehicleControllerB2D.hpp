@@ -42,10 +42,11 @@ namespace xy
 
 enum Control
 {
-    Forward = 0x1,
-    Backward = 0x2,
-    Left = 0x4,
-    Right = 0x8
+    Forward   = 0x1,
+    Backward  = 0x2,
+    Left      = 0x4,
+    Right     = 0x8,
+    Handbrake = 0x10
 };
 
 class VehicleControllerB2D final : public xy::Component

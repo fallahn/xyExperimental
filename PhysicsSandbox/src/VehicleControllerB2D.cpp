@@ -91,11 +91,24 @@ void VehicleControllerB2D::entityUpdate(xy::Entity& entity, float dt)
 
     //kill lateral velocity
     sf::Vector2f impulse = m_body->getMass() * -getDirectionalVelocity(rightVec);
-    float impulseSqr = xy::Util::Vector::lengthSquared(impulse);
-    float maxImpulseSqr = m_parameters.grip * m_parameters.grip;
-    if (impulseSqr > maxImpulseSqr)
+    
+    //if(m_input & Control::Handbrake)
+    //{
+    //    impulse *= 0.01f;
+    //}
+    //else
     {
-        impulse *= (maxImpulseSqr / impulseSqr);
+        float impulseSqr = xy::Util::Vector::lengthSquared(impulse);
+        float maxImpulseSqr = m_parameters.grip * m_parameters.grip;
+        if (impulseSqr > maxImpulseSqr)
+        {
+            impulse *= (maxImpulseSqr / impulseSqr);
+        }
+
+        if (m_input & Control::Handbrake)
+        {
+            impulse *= 0.01f;
+        }
     }
     m_body->applyLinearImpulse(impulse, m_body->getWorldCentre());
 

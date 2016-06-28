@@ -183,6 +183,9 @@ void Sandbox::handleEvent(const sf::Event& evt)
         case sf::Keyboard::D:
             input |= Control::Right;
             break;
+        case sf::Keyboard::Space:
+            input |= Control::Handbrake;
+            break;
         }
     }
     else if (evt.type == sf::Event::KeyReleased)
@@ -201,6 +204,9 @@ void Sandbox::handleEvent(const sf::Event& evt)
             break;
         case sf::Keyboard::D:
             input &= ~Control::Right;
+            break;
+        case sf::Keyboard::Space:
+            input &= ~Control::Handbrake;
             break;
         }
     }
