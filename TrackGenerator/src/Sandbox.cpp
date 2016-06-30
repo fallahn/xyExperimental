@@ -29,6 +29,7 @@ source distribution.
 
 #include <Sandbox.hpp>
 #include <UserInterface.hpp>
+#include <TrackRenderer.hpp>
 
 #include <xygine/MessageBus.hpp>
 #include <xygine/Entity.hpp>
@@ -38,47 +39,10 @@ source distribution.
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
-#include <fstream>
-
 namespace
 {
-    struct Parameters final
-    {
-        int minPoints = 40;
-        int maxPoints = 80;
-        float minSegmentLength = 2.f;
-        float maxSegmentLength = 16.f;
-        float curviness = 0.3f;
-        float maxAngle = 150.f;
-
-        void save(const std::string& path)
-        {
-            std::ofstream file(path, std::ios::binary);
-            if (file.good() && file.is_open())
-            {
-                file.write((char*)this, sizeof(Parameters));
-            }
-            else
-            {
-                xy::Logger::log("Failed saving track gen parameters " + path, xy::Logger::Type::Error);
-            }
-            file.close();
-        }
-
-        void load(const std::string& path)
-        {
-            std::ifstream file(path, std::ios::binary);
-            if (file.good() && file.is_open())
-            {
-                file.read((char*)this, sizeof(Parameters));
-            }
-            else
-            {
-                xy::Logger::log("Failed reading track gen parameters " + path, xy::Logger::Type::Error);
-            }
-            file.close();
-        }
-    } parameters;
+    Parameters parameters;
+    TrackRenderer* renderer = nullptr;
 
     const std::string trackDir("tracks/");
     std::vector<std::string> trackFiles;
@@ -160,7 +124,8 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
         //generate / export results
         if (nim::Button("Generate", { 70.f, 20.f }))
         {
-            //TODO update track output
+            m_trackGenerator.generate(parameters);
+            renderer->setData(m_trackGenerator.getData());
         }
         nim::SameLine();
         if (nim::Button("Export", { 70.f, 20.f }))
@@ -185,6 +150,8 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
             nim::EndPopup();
         }
     }, this);
+
+    initScene();
 }
 
 Sandbox::~Sandbox()

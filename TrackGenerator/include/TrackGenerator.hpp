@@ -27,48 +27,23 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef TG_SANDBOX_HPP_
-#define TG_SANDBOX_HPP_
+#ifndef TG_TRACKGENERATOR_HPP_
+#define TG_TRACKGENERATOR_HPP_
 
-#include <TrackGenerator.hpp>
+#include <TrackData.hpp>
 
-#include <xygine/Scene.hpp>
-
-#include <SFML/Graphics/Drawable.hpp>
-
-namespace xy
-{
-    class Message;
-    class MessageBus;
-}
-
-namespace sf
-{
-    class Event;
-}
-
-class UserInterface;
-class Sandbox final : public sf::Drawable
+class TrackGenerator final
 {
 public:
-    Sandbox(xy::MessageBus&, UserInterface&);
-    ~Sandbox();
+    TrackGenerator();
+    ~TrackGenerator() = default;
 
-    void update(float);
-    void handleEvent(const sf::Event&);
-    void handleMessage(const xy::Message&);
+    void generate(const Parameters&);
+    const TrackData& getData() const { return m_trackData; }
 
 private:
 
-    xy::MessageBus& m_messageBus;
-    UserInterface& m_ui;
-    xy::Scene m_scene;
-
-    TrackGenerator m_trackGenerator;
-
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
-    void updateFileList();
-    void initScene();
+    TrackData m_trackData;
 };
 
-#endif //TG_SANDBOX_HPP_
+#endif //TG_TRACKGENERATOR_HPP_

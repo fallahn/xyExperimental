@@ -27,48 +27,27 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef TG_SANDBOX_HPP_
-#define TG_SANDBOX_HPP_
+#ifndef XYR_TRACK_RENDERER_HPP_
+#define XYR_TRACK_RENDERER_HPP_
 
-#include <TrackGenerator.hpp>
-
-#include <xygine/Scene.hpp>
+#include <xygine/components/Component.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 
-namespace xy
-{
-    class Message;
-    class MessageBus;
-}
-
-namespace sf
-{
-    class Event;
-}
-
-class UserInterface;
-class Sandbox final : public sf::Drawable
+struct TrackData;
+class TrackRenderer final : public sf::Drawable, public xy::Component
 {
 public:
-    Sandbox(xy::MessageBus&, UserInterface&);
-    ~Sandbox();
+    TrackRenderer(xy::MessageBus&);
+    ~TrackRenderer() = default;
 
-    void update(float);
-    void handleEvent(const sf::Event&);
-    void handleMessage(const xy::Message&);
+    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
+    void entityUpdate(xy::Entity&, float) override;
 
+    void setData(const TrackData&);
 private:
 
-    xy::MessageBus& m_messageBus;
-    UserInterface& m_ui;
-    xy::Scene m_scene;
-
-    TrackGenerator m_trackGenerator;
-
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
-    void updateFileList();
-    void initScene();
 };
 
-#endif //TG_SANDBOX_HPP_
+#endif //XYR_TRACK_RENDERER_HPP_
