@@ -191,3 +191,11 @@ void Sandbox::updateFileList()
         return xy::FileSystem::getFileExtension(str) != ".tgn";
     }), trackFiles.end());
 }
+
+void Sandbox::initScene()
+{
+    auto trackRenderer = xy::Component::create<TrackRenderer>(m_messageBus);
+    auto entity = xy::Entity::create(m_messageBus);
+    renderer = entity->addComponent(trackRenderer);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
+}

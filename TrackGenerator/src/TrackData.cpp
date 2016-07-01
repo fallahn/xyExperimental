@@ -30,7 +30,7 @@ source distribution.
 #include <TrackData.hpp>
 
 //public
-bool TrackData::save(const std::string&)
+bool TrackData::save(const std::string&) const
 {
     return false;
 }

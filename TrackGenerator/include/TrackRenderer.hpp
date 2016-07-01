@@ -33,6 +33,9 @@ source distribution.
 #include <xygine/components/Component.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+
+#include <array>
 
 struct TrackData;
 class TrackRenderer final : public sf::Drawable, public xy::Component
@@ -46,6 +49,9 @@ public:
 
     void setData(const TrackData&);
 private:
+
+    std::array<sf::Vertex, 100> m_vertices;
+    std::size_t m_vertexCount;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

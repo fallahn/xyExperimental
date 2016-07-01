@@ -33,8 +33,14 @@ source distribution.
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
+namespace
+{
+    const std::size_t MAX_VERTS = 100u;
+}
+
 TrackRenderer::TrackRenderer(xy::MessageBus& mb)
-    : xy::Component(mb, this)
+    : xy::Component(mb, this),
+    m_vertexCount(0u)
 {
 
 }
@@ -45,13 +51,18 @@ void TrackRenderer::entityUpdate(xy::Entity&, float)
 
 }
 
-void TrackRenderer::setData(const TrackData&)
+void TrackRenderer::setData(const TrackData& td)
 {
-
+    m_vertexCount = std::min(MAX_VERTS, td.points.size());
+    
+    for (auto i = 0u; i < m_vertexCount; ++i)
+    {
+        m_vertices[i].position = td.points[i];
+    }
 }
 
 //private
 void TrackRenderer::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-
+    rt.draw(m_vertices.data(), m_vertexCount, sf::PrimitiveType::LinesStrip, states);
 }
