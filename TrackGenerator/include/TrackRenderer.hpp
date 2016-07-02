@@ -47,8 +47,12 @@ public:
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
 
+    sf::FloatRect globalBounds() const override { return m_bounds; }
+
     void setData(const TrackData&);
 private:
+
+    sf::FloatRect m_bounds;
 
     std::array<sf::Vertex, 100> m_vertices;
     std::size_t m_vertexCount;

@@ -53,7 +53,6 @@ namespace
     const std::string trackDir("tracks/");
     std::vector<std::string> trackFiles;
 
-    const sf::Vector2f MAX_AREA(21000.f, 21000.f);
     std::array<sf::Vertex, 4u> backgroundQuad =
     {
         sf::Vertex({0.f, 0.f}, sf::Color(0, 120, 255, 120)),
@@ -92,6 +91,7 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui, sf::RenderWindow& rw)
         nim::InputFloat("Max Seg Length", &parameters.maxSegmentLength, 1.f, 10.f);
         nim::InputFloat("Curviness", &parameters.curviness, 0.1f, 1.f);
         nim::InputFloat("Max Angle", &parameters.maxAngle, 1.f, 10.f);
+        nim::Checkbox("No Crossings", &parameters.noCrossing);
 
         //save / load params
         if (nim::Button("Save", {70.f, 20.f}))

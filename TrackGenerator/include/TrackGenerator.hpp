@@ -44,6 +44,8 @@ public:
 private:
 
     TrackData m_trackData;
+
+    void createConvexHull();
 };
 
 #endif //TG_TRACKGENERATOR_HPP_

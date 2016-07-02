@@ -38,6 +38,8 @@ source distribution.
 #include <string>
 #include <fstream>
 
+static const sf::Vector2f MAX_AREA(21000.f, 21000.f);
+
 struct TrackData final 
 {
 public:
@@ -59,6 +61,7 @@ struct Parameters final
     float maxSegmentLength = 16.f;
     float curviness = 0.3f;
     float maxAngle = 150.f;
+    bool noCrossing = false;
 
     void save(const std::string& path) const
     {

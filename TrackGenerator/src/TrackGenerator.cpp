@@ -29,8 +29,11 @@ source distribution.
 
 #include <xygine/util/Random.hpp>
 #include <xygine/util/Const.hpp>
+#include <xygine/util/Math.hpp>
 
 #include <TrackGenerator.hpp>
+
+#include <SFML/Graphics/Rect.hpp>
 
 TrackGenerator::TrackGenerator()
 {
@@ -43,8 +46,8 @@ void TrackGenerator::generate(const Parameters& params)
     auto pointCount = xy::Util::Random::value(params.minPoints, params.maxPoints);   
     m_trackData.points.resize(pointCount);
 
-    //TODO set some limit on world/track size and make this centre
-    m_trackData.points[0] = { 500.f, 500.f };
+    //centre of area
+    m_trackData.points[0] = MAX_AREA / 2.f;
 
     //create the random points using the determent of the
     //last angle to steer the next section
@@ -86,5 +89,49 @@ void TrackGenerator::generate(const Parameters& params)
     }
     m_trackData.points.push_back(m_trackData.points.front());
 
-    //calc the min/max points of the bounds
+    if (params.noCrossing)
+    {
+        //convert the path to a convex hull
+        createConvexHull();
+    }
+
+    //calc the bounds
+    auto bounds = sf::FloatRect(MAX_AREA, { 0.f, 0.f });
+    for (const auto& point : m_trackData.points)
+    {
+        if (point.x < bounds.left)
+        {
+            bounds.left = point.x;
+        }
+        else if (point.x - bounds.left > bounds.width)
+        {
+            bounds.width = point.x - bounds.left;
+        }
+
+        if (point.y < bounds.top)
+        {
+            bounds.top = point.y;
+        }
+        else if (point.y - bounds.top > bounds.height)
+        {
+            bounds.height = point.y - bounds.top;
+        }
+    }
+
+    //shift the track to best fit max area
+    sf::Vector2f shift(bounds.left, bounds.top);
+    shift.x -= ((MAX_AREA.x - bounds.width) / 2.f);
+    shift.y -= ((MAX_AREA.y - bounds.height) / 2.f);
+    for (auto& p : m_trackData.points)
+    {
+        p -= shift;
+        p.x = xy::Util::Math::clamp(p.x, 0.f, MAX_AREA.x);
+        p.y = xy::Util::Math::clamp(p.y, 0.f, MAX_AREA.y);
+    }
+}
+
+//private
+void TrackGenerator::createConvexHull()
+{
+
 }

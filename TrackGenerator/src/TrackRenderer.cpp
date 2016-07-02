@@ -55,9 +55,28 @@ void TrackRenderer::setData(const TrackData& td)
 {
     m_vertexCount = std::min(MAX_VERTS, td.points.size());
     
+    m_bounds = sf::FloatRect(MAX_AREA, { 0.f, 0.f });
     for (auto i = 0u; i < m_vertexCount; ++i)
     {
         m_vertices[i].position = td.points[i];
+        //update bounds
+        if (m_vertices[i].position.x < m_bounds.left)
+        {
+            m_bounds.left = m_vertices[i].position.x;
+        }
+        else if (m_vertices[i].position.x - m_bounds.left > m_bounds.width)
+        {
+            m_bounds.width = m_vertices[i].position.x - m_bounds.left;
+        }
+
+        if (m_vertices[i].position.y < m_bounds.top)
+        {
+            m_bounds.top = m_vertices[i].position.y;
+        }
+        else if (m_vertices[i].position.y - m_bounds.top > m_bounds.height)
+        {
+            m_bounds.height = m_vertices[i].position.y - m_bounds.top;
+        }
     }
 }
 
