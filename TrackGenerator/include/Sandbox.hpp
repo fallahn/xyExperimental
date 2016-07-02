@@ -51,7 +51,7 @@ class UserInterface;
 class Sandbox final : public sf::Drawable
 {
 public:
-    Sandbox(xy::MessageBus&, UserInterface&);
+    Sandbox(xy::MessageBus&, UserInterface&, sf::RenderWindow&);
     ~Sandbox();
 
     void update(float);
@@ -62,6 +62,7 @@ private:
 
     xy::MessageBus& m_messageBus;
     UserInterface& m_ui;
+    sf::RenderWindow& m_renderWindow;
     xy::Scene m_scene;
 
     TrackGenerator m_trackGenerator;

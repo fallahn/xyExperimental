@@ -238,6 +238,8 @@ void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 void Sandbox::setupVehicles()
 {
     m_physWorld.setGravity({ 0.f, 0.f });
+    //we're going to use a scale of 30px/m
+    m_physWorld.setPixelScale(30.f);
     
     //bounds
     auto body = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);

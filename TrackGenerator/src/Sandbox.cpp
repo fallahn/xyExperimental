@@ -34,10 +34,16 @@ source distribution.
 #include <xygine/MessageBus.hpp>
 #include <xygine/Entity.hpp>
 #include <xygine/imgui/imgui.h>
+#include <xygine/Command.hpp>
+#include <xygine/components/Camera.hpp>
+#include <xygine/App.hpp>
+#include <xygine/Reports.hpp>
+#include <xygine/util/Vector.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 namespace
 {
@@ -46,11 +52,28 @@ namespace
 
     const std::string trackDir("tracks/");
     std::vector<std::string> trackFiles;
+
+    const sf::Vector2f MAX_AREA(21000.f, 21000.f);
+    std::array<sf::Vertex, 4u> backgroundQuad =
+    {
+        sf::Vertex({0.f, 0.f}, sf::Color(0, 120, 255, 120)),
+        sf::Vertex({ MAX_AREA.x, 0.f }, sf::Color(0, 120, 255, 120)),
+        sf::Vertex(MAX_AREA, sf::Color(0, 120, 255, 120)),
+        sf::Vertex({ 0.f, MAX_AREA.y }, sf::Color(0, 120, 255, 120))
+    };
+
+    xy::Camera* camera = nullptr;
+
+    enum CommandID
+    {
+        Camera = 0x1
+    };
 }
 
-Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui)
+Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui, sf::RenderWindow& rw)
     : m_messageBus  (mb),
     m_ui            (ui),
+    m_renderWindow  (rw),
     m_scene         (mb)
 {
     parameters.load("default.tgn");
@@ -168,7 +191,67 @@ void Sandbox::update(float dt)
 
 void Sandbox::handleEvent(const sf::Event& evt)
 {
-    
+    static sf::Vector2f mousePos;
+    static float zoom = 1.f;
+
+    if (evt.type == sf::Event::MouseWheelMoved)
+    {
+        m_renderWindow.setView(camera->getView());
+        auto startPos = xy::App::getMouseWorldPosition();
+        
+        if (evt.mouseWheel.delta > 0)
+        {
+            zoom *= 1.1f;
+        }
+        else
+        {
+            zoom *= 0.9f;
+        }
+        camera->setZoom(zoom);
+        m_renderWindow.setView(camera->getView());
+        auto movement = startPos - xy::App::getMouseWorldPosition();
+
+        xy::Command cmd;
+        cmd.category = CommandID::Camera;
+        cmd.action = [movement](xy::Entity& entity, float)
+        {
+            entity.move(movement);
+        };
+        m_scene.sendCommand(cmd);
+    }
+    else if (evt.type == sf::Event::MouseMoved)
+    {       
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+        {
+            sf::Vector2f evtPos = { static_cast<float>(evt.mouseMove.x), static_cast<float>(evt.mouseMove.y) };
+            auto movement = mousePos - evtPos;
+
+            //prevent random movement spikes
+            if (xy::Util::Vector::lengthSquared(movement) > 10000.f) return;
+
+            movement *= (1.f / zoom);
+
+            xy::Command cmd;
+            cmd.category = CommandID::Camera;
+            cmd.action = [movement](xy::Entity& entity, float)
+            {
+                entity.move(movement);
+                REPORT("Camera Position", std::to_string(entity.getPosition().x) + ", " + std::to_string(entity.getPosition().y));
+            };
+            m_scene.sendCommand(cmd);
+
+            mousePos = evtPos;
+
+            REPORT("Camera Movement", std::to_string(movement.x) + ", " + std::to_string(movement.y));
+        }
+    }
+    else if (evt.type == sf::Event::MouseButtonPressed)
+    {
+        if (evt.mouseButton.button == sf::Mouse::Middle)
+        {
+            mousePos = { static_cast<float>(evt.mouseButton.x), static_cast<float>(evt.mouseButton.y) };
+        }
+    }
 }
 
 void Sandbox::handleMessage(const xy::Message& msg)
@@ -179,6 +262,8 @@ void Sandbox::handleMessage(const xy::Message& msg)
 //private
 void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    rt.setView(camera->getView());
+    rt.draw(backgroundQuad.data(), backgroundQuad.size(), sf::Quads);
     rt.draw(m_scene);
 }
 
@@ -198,4 +283,12 @@ void Sandbox::initScene()
     auto entity = xy::Entity::create(m_messageBus);
     renderer = entity->addComponent(trackRenderer);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
+
+    auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
+    entity = xy::Entity::create(m_messageBus);
+    camera = entity->addComponent(cam);
+    entity->setPosition(m_renderWindow.getView().getCenter());
+    entity->addCommandCategories(CommandID::Camera);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+    m_scene.setActiveCamera(camera);
 }

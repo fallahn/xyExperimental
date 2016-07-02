@@ -33,7 +33,7 @@ source distribution.
 
 Game::Game()
     : m_userInterface   (*this),
-    m_sandbox           (getMessageBus(), m_userInterface)
+    m_sandbox           (getMessageBus(), m_userInterface, getRenderWindow())
 {
     setMouseCursorVisible(true);
 }
