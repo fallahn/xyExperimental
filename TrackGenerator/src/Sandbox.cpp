@@ -192,7 +192,8 @@ void Sandbox::update(float dt)
 void Sandbox::handleEvent(const sf::Event& evt)
 {
     static sf::Vector2f mousePos;
-    static float zoom = 1.f;
+    static float zoom = 0.03f;
+    REPORT("zoom", std::to_string(zoom));
 
     if (evt.type == sf::Event::MouseWheelMoved)
     {
@@ -285,9 +286,10 @@ void Sandbox::initScene()
     m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
 
     auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
+    cam->setZoom(0.03f);
     entity = xy::Entity::create(m_messageBus);
     camera = entity->addComponent(cam);
-    entity->setPosition(m_renderWindow.getView().getCenter());
+    entity->setPosition(MAX_AREA / 2.f);
     entity->addCommandCategories(CommandID::Camera);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     m_scene.setActiveCamera(camera);

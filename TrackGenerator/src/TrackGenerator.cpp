@@ -30,6 +30,7 @@ source distribution.
 #include <xygine/util/Random.hpp>
 #include <xygine/util/Const.hpp>
 #include <xygine/util/Math.hpp>
+#include <xygine/util/Vector.hpp>
 
 #include <TrackGenerator.hpp>
 
@@ -87,13 +88,13 @@ void TrackGenerator::generate(const Parameters& params)
         m_trackData.points[i].x = destX * aOverCurrent + x * (1.f - aOverCurrent);
         m_trackData.points[i].y = destY * aOverCurrent + y * (1.f - aOverCurrent);
     }
-    m_trackData.points.push_back(m_trackData.points.front());
-
+    
     if (params.noCrossing)
     {
-        //convert the path to a convex hull
-        createConvexHull();
+        //convert the path to a hull
+        createHull();
     }
+    m_trackData.points.push_back(m_trackData.points.front());
 
     //calc the bounds
     auto bounds = sf::FloatRect(MAX_AREA, { 0.f, 0.f });
@@ -131,7 +132,70 @@ void TrackGenerator::generate(const Parameters& params)
 }
 
 //private
-void TrackGenerator::createConvexHull()
+void TrackGenerator::createHull()
 {
+    //sort by x distance, sub sort by y
+    std::sort(m_trackData.points.begin(), m_trackData.points.end(), []
+    (const sf::Vector2f& a, const sf::Vector2f& b)
+    {
+        return a.x < b.x || (a.x == b.x && a.y < b.y);
+    });
 
+    //calcs cross product of OA OB. returns negative value for clockwise turn
+    //positive for CCW and 0 if vectors are parallel
+    std::function<float(const sf::Vector2f&, const sf::Vector2f&, const sf::Vector2f&)> cross = 
+        [](const sf::Vector2f& o, const sf::Vector2f& a, const sf::Vector2f& b)
+    {
+        return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    };
+
+    std::size_t size = m_trackData.points.size();
+    std::size_t j = 0;
+
+    std::vector<sf::Vector2f> results(size * 2);
+
+    //build lower hull
+    for (auto i = 0u; i < size; ++i)
+    {
+        while (j >= 2 && cross(results[j - 2], results[j - 1], m_trackData.points[i]) <= 0)
+        {
+            j--;
+        }
+        results[j++] = m_trackData.points[i];
+    }
+
+    //build upper hull
+    for (int i = size - 2, t = j + 1; i >= 0; --i)
+    {
+        while (j >= t && cross(results[j - 2], results[j - 1], m_trackData.points[i]) <= 0)
+        {
+            j--;
+        }
+        results[j++] = m_trackData.points[i];
+    }
+
+    results.resize(j - 1);
+
+
+    //find long straights and split them
+    const float minLength = 5000.f;
+    std::vector<sf::Vector2f> resizedPoints(results.size() * 2);
+    for (auto i = 0u, j = 0u; i < results.size() - 1; ++i)
+    {
+        resizedPoints[j++] = results[i];
+        
+        auto segment = results[i + 1] - results[i];
+        if (xy::Util::Vector::length(segment) > minLength)
+        {
+            LOG("Split track segment", xy::Logger::Type::Info);
+            //split and offset          
+            auto offset = xy::Util::Vector::normalise(segment) * 1000.f; //TODO hook this up as a var somewhere
+            offset = xy::Util::Vector::rotate(offset, xy::Util::Random::value(0.f, 180.f) - 90.f);
+            auto newPoint = (segment / 2.f) + offset;
+            resizedPoints[j++] = results[i] + offset;
+        }
+    }
+
+    resizedPoints.resize(j - 1);
+    m_trackData.points.swap(resizedPoints);
 }
