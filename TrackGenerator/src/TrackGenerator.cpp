@@ -89,11 +89,38 @@ void TrackGenerator::generate(const Parameters& params)
         m_trackData.points[i].y = destY * aOverCurrent + y * (1.f - aOverCurrent);
     }
     
+    //make sure the points are at least
+    //minimum distance apart
+    std::function<void()> checkDistance = 
+        [this]()
+    {
+        const float minDist = 800.f;
+        const float minDist2 = minDist * minDist;
+
+        for (auto i = 0u; i < m_trackData.points.size(); ++i)
+        {
+            for (auto j = 0u; j < m_trackData.points.size(); ++j)
+            {
+                if (i == j) continue;
+                auto diff = m_trackData.points[i] - m_trackData.points[j];
+                if (xy::Util::Vector::lengthSquared(diff) < minDist2)
+                {
+                    float shift = minDist - xy::Util::Vector::length(diff);
+                    diff = xy::Util::Vector::normalise(diff) * shift;
+                    m_trackData.points[i] -= diff;
+                    m_trackData.points[j] += diff;
+                }
+            }
+        }
+    };
+    checkDistance(); checkDistance(); checkDistance();
+
     if (params.noCrossing)
     {
         //convert the path to a hull
         createHull();
     }
+
     m_trackData.points.push_back(m_trackData.points.front());
 
     //calc the bounds
@@ -187,7 +214,7 @@ void TrackGenerator::createHull()
         auto segment = results[i + 1] - results[i];
         if (xy::Util::Vector::length(segment) > minLength)
         {
-            LOG("Split track segment", xy::Logger::Type::Info);
+            //LOG("Split track segment", xy::Logger::Type::Info);
             //split and offset          
             auto offset = xy::Util::Vector::normalise(segment) * 1000.f; //TODO hook this up as a var somewhere
             offset = xy::Util::Vector::rotate(offset, xy::Util::Random::value(0.f, 180.f) - 90.f);

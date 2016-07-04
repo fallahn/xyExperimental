@@ -35,7 +35,7 @@ source distribution.
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 
-#include <array>
+#include <vector>
 
 struct TrackData;
 class TrackRenderer final : public sf::Drawable, public xy::Component
@@ -54,8 +54,7 @@ private:
 
     sf::FloatRect m_bounds;
 
-    std::array<sf::Vertex, 100> m_vertices;
-    std::size_t m_vertexCount;
+    std::vector<sf::Vertex> m_vertices;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
