@@ -192,7 +192,7 @@ void TrackGenerator::createHull()
             auto offset = xy::Util::Vector::normalise(segment) * 1000.f; //TODO hook this up as a var somewhere
             offset = xy::Util::Vector::rotate(offset, xy::Util::Random::value(0.f, 180.f) - 90.f);
             auto newPoint = (segment / 2.f) + offset;
-            resizedPoints[j++] = results[i] + offset;
+            resizedPoints[j++] = results[i] + newPoint;
         }
     }
 
