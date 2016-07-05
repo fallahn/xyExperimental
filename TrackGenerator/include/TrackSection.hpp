@@ -47,7 +47,7 @@ public:
     TrackSection();
     ~TrackSection() = default;
 
-    xy::Entity::Ptr create(sf::Uint16, xy::MessageBus&);
+    xy::Entity::Ptr create(sf::Uint16, xy::MessageBus&, float = 0.f);
 
 private:
 

@@ -86,7 +86,7 @@ TrackSection::TrackSection()
 }
 
 //public
-xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb)
+xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb, float height)
 {   
     auto body = xy::Component::create<xy::Physics::RigidBody>(mb, xy::Physics::BodyType::Kinematic);
     
@@ -178,8 +178,27 @@ xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb)
     body->addCollisionShape(es);
     es.setPoints({ tr, br });
     body->addCollisionShape(es);
+    body->setLinearVelocity({ 0.f, 190.f }); //TODO get this value from somewhere
+
+
+    //add a handler to spawn a new section when this one is deaded
+    xy::Component::MessageHandler mh;
+    mh.id = xy::Message::EntityMessage;
+    mh.action = [this, &mb](xy::Component* c, const xy::Message& msg)
+    {
+        auto& msgData = msg.getData<xy::Message::EntityEvent>();
+        //auto component = dynamic_cast<xy::Physics::RigidBody*>(c);
+        if (msgData.action == xy::Message::EntityEvent::Destroyed
+            && msgData.entity->getUID() == c->getParentUID())
+        {
+            create(0x33, mb, msgData.entity->getWorldPosition().y - (sectionSize * 2.f));
+        }
+    };
+    body->addMessageHandler(mh);
 
     auto entity = xy::Entity::create(mb);
+    entity->setPosition((xy::DefaultSceneSize.x - sectionSize) / 2.f, height);
     entity->addComponent(body);
+
     return std::move(entity);
 }

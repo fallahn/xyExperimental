@@ -297,4 +297,6 @@ void Sandbox::initScene()
 
     auto trackSection = m_trackSection.create(0x17, m_messageBus);
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
+
+    trackSection = m_trackSection.create(0x61, m_messageBus, -1024.f);
 }
