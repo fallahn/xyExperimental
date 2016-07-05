@@ -126,6 +126,7 @@
     <ClCompile Include="src\TrackData.cpp" />
     <ClCompile Include="src\TrackGenerator.cpp" />
     <ClCompile Include="src\TrackRenderer.cpp" />
+    <ClCompile Include="src\TrackSection.cpp" />
     <ClCompile Include="src\UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -134,6 +135,7 @@
     <ClInclude Include="include\TrackData.hpp" />
     <ClInclude Include="include\TrackGenerator.hpp" />
     <ClInclude Include="include\TrackRenderer.hpp" />
+    <ClInclude Include="include\TrackSection.hpp" />
     <ClInclude Include="include\UserInterface.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

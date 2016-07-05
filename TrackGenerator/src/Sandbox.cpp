@@ -29,7 +29,6 @@ source distribution.
 
 #include <Sandbox.hpp>
 #include <UserInterface.hpp>
-#include <TrackRenderer.hpp>
 
 #include <xygine/MessageBus.hpp>
 #include <xygine/Entity.hpp>
@@ -47,8 +46,8 @@ source distribution.
 
 namespace
 {
-    Parameters parameters;
-    TrackRenderer* renderer = nullptr;
+    //Parameters parameters;
+    //TrackRenderer* renderer = nullptr;
 
     const std::string trackDir("tracks/");
     std::vector<std::string> trackFiles;
@@ -56,130 +55,132 @@ namespace
     std::array<sf::Vertex, 4u> backgroundQuad =
     {
         sf::Vertex({0.f, 0.f}, sf::Color(0, 120, 255, 120)),
-        sf::Vertex({ MAX_AREA.x, 0.f }, sf::Color(0, 120, 255, 120)),
-        sf::Vertex(MAX_AREA, sf::Color(0, 120, 255, 120)),
-        sf::Vertex({ 0.f, MAX_AREA.y }, sf::Color(0, 120, 255, 120))
+        sf::Vertex({ xy::DefaultSceneSize.x, 0.f }, sf::Color(0, 120, 255, 120)),
+        sf::Vertex(xy::DefaultSceneSize, sf::Color(0, 120, 255, 120)),
+        sf::Vertex({ 0.f, xy::DefaultSceneSize.y }, sf::Color(0, 120, 255, 120))
     };
 
     xy::Camera* camera = nullptr;
 
     enum CommandID
     {
-        Camera = 0x1
+        Camera = 0x1,
     };
+    const float defaultZoom = 0.5f;
 }
 
 Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui, sf::RenderWindow& rw)
     : m_messageBus  (mb),
     m_ui            (ui),
     m_renderWindow  (rw),
-    m_scene         (mb)
+    m_scene         (mb),
+    m_physWorld     (mb)
 {
-    parameters.load("default.tgn");
+    //parameters.load("default.tgn");
 
-    if (!xy::FileSystem::directoryExists(trackDir))
-    {
-        xy::FileSystem::createDirectory(trackDir);
-    }
-    updateFileList();
+    //if (!xy::FileSystem::directoryExists(trackDir))
+    //{
+    //    xy::FileSystem::createDirectory(trackDir);
+    //}
+    //updateFileList();
 
-    m_ui.addItem([this]()
-    {
-        nim::InputInt("Min Points", &parameters.minPoints, 1, 10);
-        nim::InputInt("Max Points", &parameters.maxPoints, 1, 10);
-        nim::InputFloat("Min Seg Length", &parameters.minSegmentLength, 1.f, 10.f);
-        nim::InputFloat("Max Seg Length", &parameters.maxSegmentLength, 1.f, 10.f);
-        nim::InputFloat("Curviness", &parameters.curviness, 0.1f, 1.f);
-        nim::InputFloat("Max Angle", &parameters.maxAngle, 1.f, 10.f);
-        nim::Checkbox("No Crossings", &parameters.noCrossing);
+    //m_ui.addItem([this]()
+    //{
+    //    nim::InputInt("Min Points", &parameters.minPoints, 1, 10);
+    //    nim::InputInt("Max Points", &parameters.maxPoints, 1, 10);
+    //    nim::InputFloat("Min Seg Length", &parameters.minSegmentLength, 1.f, 10.f);
+    //    nim::InputFloat("Max Seg Length", &parameters.maxSegmentLength, 1.f, 10.f);
+    //    nim::InputFloat("Curviness", &parameters.curviness, 0.1f, 1.f);
+    //    nim::InputFloat("Max Angle", &parameters.maxAngle, 1.f, 10.f);
+    //    nim::Checkbox("No Crossings", &parameters.noCrossing);
 
-        //save / load params
-        if (nim::Button("Save", {70.f, 20.f}))
-        {
-            nim::OpenPopup("Save File");
-        }
-        if (nim::BeginPopupModal("Save File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            static char filename[50];
+    //    //save / load params
+    //    if (nim::Button("Save", {70.f, 20.f}))
+    //    {
+    //        nim::OpenPopup("Save File");
+    //    }
+    //    if (nim::BeginPopupModal("Save File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    //    {
+    //        static char filename[50];
 
-            nim::InputText("File Name", filename, 49);
-            if (nim::Button("OK"))
-            {
-                parameters.save(trackDir + std::string(filename) + ".tgn");
-                updateFileList();
-                nim::CloseCurrentPopup();
-            }
-            nim::SameLine();
-            if (nim::Button("Cancel"))
-            {
-                nim::CloseCurrentPopup();
-            }
-            nim::EndPopup();
-        }
+    //        nim::InputText("File Name", filename, 49);
+    //        if (nim::Button("OK"))
+    //        {
+    //            parameters.save(trackDir + std::string(filename) + ".tgn");
+    //            updateFileList();
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::SameLine();
+    //        if (nim::Button("Cancel"))
+    //        {
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::EndPopup();
+    //    }
 
-        nim::SameLine();
-        if (nim::Button("Load", { 70.f, 20.f }))
-        {
-            nim::OpenPopup("Load File");
-        }
-        if (nim::BeginPopupModal("Load File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            static int index;
-            nim::Combo("Select File", &index, [](void* data, int idx, const char** out_text)
-            {
-                *out_text = ((const std::vector<std::string>*)data)->at(idx).c_str();
-                return true;
-            }, (void*)&trackFiles, trackFiles.size());
+    //    nim::SameLine();
+    //    if (nim::Button("Load", { 70.f, 20.f }))
+    //    {
+    //        nim::OpenPopup("Load File");
+    //    }
+    //    if (nim::BeginPopupModal("Load File", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    //    {
+    //        static int index;
+    //        nim::Combo("Select File", &index, [](void* data, int idx, const char** out_text)
+    //        {
+    //            *out_text = ((const std::vector<std::string>*)data)->at(idx).c_str();
+    //            return true;
+    //        }, (void*)&trackFiles, trackFiles.size());
 
-            if (nim::Button("OK"))
-            {
-                parameters.load(trackDir + trackFiles[index]);
-                nim::CloseCurrentPopup();
-            }
-            nim::SameLine();
-            if (nim::Button("Cancel"))
-            {
-                nim::CloseCurrentPopup();
-            }
-            nim::EndPopup();
-        }
+    //        if (nim::Button("OK"))
+    //        {
+    //            parameters.load(trackDir + trackFiles[index]);
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::SameLine();
+    //        if (nim::Button("Cancel"))
+    //        {
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::EndPopup();
+    //    }
 
-        //generate / export results
-        if (nim::Button("Generate", { 70.f, 20.f }))
-        {
-            m_trackGenerator.generate(parameters);
-            renderer->setData(m_trackGenerator.getData());
-        }
-        nim::SameLine();
-        if (nim::Button("Export", { 70.f, 20.f }))
-        {
-            nim::OpenPopup("Export File");
-        }
-        if (nim::BeginPopupModal("Export File"))
-        {
-            static char filename[50];
+    //    //generate / export results
+    //    if (nim::Button("Generate", { 70.f, 20.f }))
+    //    {
+    //        m_trackGenerator.generate(parameters);
+    //        renderer->setData(m_trackGenerator.getData());
+    //    }
+    //    nim::SameLine();
+    //    if (nim::Button("Export", { 70.f, 20.f }))
+    //    {
+    //        nim::OpenPopup("Export File");
+    //    }
+    //    if (nim::BeginPopupModal("Export File"))
+    //    {
+    //        static char filename[50];
 
-            nim::InputText("File Name", filename, 49);
-            if (nim::Button("OK"))
-            {
-                //TODO export the generated data file
-                nim::CloseCurrentPopup();
-            }
-            nim::SameLine();
-            if (nim::Button("Cancel"))
-            {
-                nim::CloseCurrentPopup();
-            }
-            nim::EndPopup();
-        }
-    }, this);
+    //        nim::InputText("File Name", filename, 49);
+    //        if (nim::Button("OK"))
+    //        {
+    //            //TODO export the generated data file
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::SameLine();
+    //        if (nim::Button("Cancel"))
+    //        {
+    //            nim::CloseCurrentPopup();
+    //        }
+    //        nim::EndPopup();
+    //    }
+    //}, this);
 
     initScene();
 }
 
 Sandbox::~Sandbox()
 {
-    parameters.save("default.tgn");
+    //parameters.save("default.tgn");
     m_ui.removeItems(this);
 }
 
@@ -192,7 +193,7 @@ void Sandbox::update(float dt)
 void Sandbox::handleEvent(const sf::Event& evt)
 {
     static sf::Vector2f mousePos;
-    static float zoom = 0.03f;
+    static float zoom = defaultZoom;
     REPORT("zoom", std::to_string(zoom));
 
     if (evt.type == sf::Event::MouseWheelMoved)
@@ -266,6 +267,8 @@ void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.setView(camera->getView());
     rt.draw(backgroundQuad.data(), backgroundQuad.size(), sf::Quads);
     rt.draw(m_scene);
+    rt.setView(camera->getView());
+    rt.draw(m_physWorld);
 }
 
 void Sandbox::updateFileList()
@@ -280,17 +283,18 @@ void Sandbox::updateFileList()
 
 void Sandbox::initScene()
 {
-    auto trackRenderer = xy::Component::create<TrackRenderer>(m_messageBus);
-    auto entity = xy::Entity::create(m_messageBus);
-    renderer = entity->addComponent(trackRenderer);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
-
     auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
-    cam->setZoom(0.03f);
-    entity = xy::Entity::create(m_messageBus);
+    cam->setZoom(defaultZoom);
+    auto entity = xy::Entity::create(m_messageBus);
     camera = entity->addComponent(cam);
-    entity->setPosition(MAX_AREA / 2.f);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
     entity->addCommandCategories(CommandID::Camera);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     m_scene.setActiveCamera(camera);
+
+    m_physWorld.setGravity({ 0.f, 0.f });
+    m_physWorld.setPixelScale(30.f);
+
+    auto trackSection = m_trackSection.create(0x17, m_messageBus);
+    m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
 }

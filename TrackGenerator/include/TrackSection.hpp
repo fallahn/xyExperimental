@@ -27,51 +27,30 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef TG_SANDBOX_HPP_
-#define TG_SANDBOX_HPP_
+#ifndef XYR_TRACK_SECTION_HPP_
+#define XYR_TRACK_SECTION_HPP_
 
-#include <TrackSection.hpp>
+#include <xygine/Entity.hpp>
 
-#include <xygine/Scene.hpp>
-#include <xygine/physics/World.hpp>
+#include <SFML/Config.hpp>
 
-#include <SFML/Graphics/Drawable.hpp>
+#include <memory>
 
 namespace xy
 {
-    class Message;
     class MessageBus;
 }
 
-namespace sf
-{
-    class Event;
-}
-
-class UserInterface;
-class Sandbox final : public sf::Drawable
+class TrackSection final
 {
 public:
-    Sandbox(xy::MessageBus&, UserInterface&, sf::RenderWindow&);
-    ~Sandbox();
+    TrackSection();
+    ~TrackSection() = default;
 
-    void update(float);
-    void handleEvent(const sf::Event&);
-    void handleMessage(const xy::Message&);
+    xy::Entity::Ptr create(sf::Uint16, xy::MessageBus&);
 
 private:
 
-    xy::MessageBus& m_messageBus;
-    UserInterface& m_ui;
-    sf::RenderWindow& m_renderWindow;
-    xy::Scene m_scene;
-    xy::Physics::World m_physWorld;
-
-    TrackSection m_trackSection;
-
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
-    void updateFileList();
-    void initScene();
 };
 
-#endif //TG_SANDBOX_HPP_
+#endif //XYR_TRACK_SECTION_HPP_
