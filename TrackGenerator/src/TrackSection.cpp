@@ -28,10 +28,12 @@ source distribution.
 ******************************************************************/
 
 #include <TrackSection.hpp>
+#include <SectionController.hpp>
 
 #include <xygine/Assert.hpp>
 #include <xygine/physics/RigidBody.hpp>
 #include <xygine/physics/CollisionEdgeShape.hpp>
+#include <xygine/Reports.hpp>
 
 #include <array>
 #include <vector>
@@ -45,10 +47,12 @@ namespace
 
     //set up some consts for these values
     const float sectionSize = 1024.f;
-    const float connectionWidth = 300;
+    const float connectionWidth = 300.f;
     const float connectionHeight = 256.f;
     const float connectionBend = 200.f;
     const float connectionGap = 62.f;
+
+    const float speedIncrease = 5.f;
 
     struct Connection final
     {
@@ -61,8 +65,10 @@ namespace
 }
 
 TrackSection::TrackSection()
+    : m_index           (0u),
+    m_initialVelocity   (600.f)
 {
-    if (!created) //TODO we might get better performance if we directly cache the collision edges
+    if (!created) //TODO constify these
     {
         created = true;
         connections[0].leftEdge = { sf::Vector2f(), sf::Vector2f(0.f, 256.f) };
@@ -86,16 +92,32 @@ TrackSection::TrackSection()
 }
 
 //public
-xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb, float height)
+void TrackSection::cacheParts(const std::vector<sf::Uint8>& ids)
+{
+    m_uids = ids;
+
+    //TODO move building edge shapes here
+
+
+    //TODO build meshes as needed
+
+}
+
+xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
 {   
+    XY_ASSERT(!m_uids.empty(), "parts not yet cached!");
+    
     auto body = xy::Component::create<xy::Physics::RigidBody>(mb, xy::Physics::BodyType::Kinematic);
     
+    auto uid = m_uids[m_index];
+    m_index = (m_index + 1) % m_uids.size();
+
     //top two points of centre part
     sf::Vector2f tl(sectionSize, connectionHeight);
     sf::Vector2f tr(0.f, connectionHeight);
 
-    //lower half of ID represents top 3 connections
-    auto bits = uid & 0x0f;
+    //upper half of ID represents top 3 connections
+    auto bits = uid & 0xf;
     XY_ASSERT(bits != 0 && bits != 0x8, "can't have empty segments");
     if (bits & 0x4)
     {
@@ -130,13 +152,20 @@ xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb, float h
         if (tl.x >(connectionWidth * 2.f) + connectionGap) tl.x = (connectionWidth * 2.f) + connectionGap;
         if (tr.x < sectionSize) tr.x = sectionSize;
     }
+    if (bits == (0x4 | 0x1))
+    {
+        //we have left and right but no middle
+        //TODO constify
+        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(362.f, 256.f), sf::Vector2f(662.f, 256.f) });
+        body->addCollisionShape(es);
+    }
 
     //bottom two points of centre part
     sf::Vector2f bl(sectionSize, connectionHeight * 3.f);
     sf::Vector2f br(0.f, connectionHeight * 3.f);
 
     //else bottom 3
-    bits = ((uid & 0xf0) >> 4);
+    bits = (uid & 0xf0) >> 4;
     XY_ASSERT(bits != 0 && bits != 0x8, "can't have empty segments");
 
     if (bits & 0x4)
@@ -172,33 +201,44 @@ xy::Entity::Ptr TrackSection::create(sf::Uint16 uid, xy::MessageBus& mb, float h
         if (bl.x >(connectionWidth * 2.f) + connectionGap) bl.x = (connectionWidth * 2.f) + connectionGap;
         if (br.x < sectionSize) br.x = sectionSize;
     }
+    if (bits == (0x4 | 0x1))
+    {
+        //we have left and right but no middle
+        //TODO constify
+        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(362.f, 768.f), sf::Vector2f(662.f, 768.f) });
+        body->addCollisionShape(es);
+    }
 
     //create centre part
     xy::Physics::CollisionEdgeShape es({ tl, bl });
     body->addCollisionShape(es);
     es.setPoints({ tr, br });
     body->addCollisionShape(es);
-    body->setLinearVelocity({ 0.f, 190.f }); //TODO get this value from somewhere
+    body->setLinearVelocity({ 0.f, m_initialVelocity });
 
 
-    //add a handler to spawn a new section when this one is deaded
-    xy::Component::MessageHandler mh;
-    mh.id = xy::Message::EntityMessage;
-    mh.action = [this, &mb](xy::Component* c, const xy::Message& msg)
-    {
-        auto& msgData = msg.getData<xy::Message::EntityEvent>();
-        //auto component = dynamic_cast<xy::Physics::RigidBody*>(c);
-        if (msgData.action == xy::Message::EntityEvent::Destroyed
-            && msgData.entity->getUID() == c->getParentUID())
-        {
-            create(0x33, mb, msgData.entity->getWorldPosition().y - (sectionSize * 2.f));
-        }
-    };
-    body->addMessageHandler(mh);
+    auto controller = xy::Component::create<SectionController>(mb, *this);
 
     auto entity = xy::Entity::create(mb);
     entity->setPosition((xy::DefaultSceneSize.x - sectionSize) / 2.f, height);
     entity->addComponent(body);
+    entity->addComponent(controller);
 
     return std::move(entity);
+}
+
+void TrackSection::update(float dt)
+{
+    m_initialVelocity += dt * speedIncrease;
+    REPORT("track velocity", std::to_string(m_initialVelocity));
+}
+
+float TrackSection::getSectionSize()
+{
+    return sectionSize;
+}
+
+float TrackSection::getSpeedIncrease()
+{
+    return speedIncrease;
 }

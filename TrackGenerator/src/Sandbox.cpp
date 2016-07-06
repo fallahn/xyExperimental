@@ -38,6 +38,7 @@ source distribution.
 #include <xygine/App.hpp>
 #include <xygine/Reports.hpp>
 #include <xygine/util/Vector.hpp>
+#include <xygine/util/Random.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -187,6 +188,7 @@ Sandbox::~Sandbox()
 //public
 void Sandbox::update(float dt)
 {
+    m_trackSection.update(dt);
     m_scene.update(dt);
 }
 
@@ -295,8 +297,25 @@ void Sandbox::initScene()
     m_physWorld.setGravity({ 0.f, 0.f });
     m_physWorld.setPixelScale(30.f);
 
-    auto trackSection = m_trackSection.create(0x17, m_messageBus);
+
+    //generate a sequence of IDs using the
+    //exist value of the last section as the entrance of the new one.
+    std::vector<sf::Uint8> sequenceIDs;
+    sequenceIDs.push_back(0x77);
+
+    sf::Uint8 lastExit = 0x7;
+    for (auto i = 0; i < 10; ++i) //TODO set up a variable somewhere for the number of track pieces
+    {
+        sf::Uint8 uid = (lastExit << 4) | xy::Util::Random::value(1, 7);
+        lastExit = uid & 0xf;
+        sequenceIDs.push_back(uid);
+    }
+    sequenceIDs.push_back((lastExit << 4) | 0x7);
+    m_trackSection.cacheParts(sequenceIDs);
+
+    auto trackSection = m_trackSection.create(m_messageBus);
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
 
-    trackSection = m_trackSection.create(0x61, m_messageBus, -1024.f);
+    trackSection = m_trackSection.create( m_messageBus, -1024.f);
+    m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
 }

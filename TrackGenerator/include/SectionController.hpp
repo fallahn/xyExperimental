@@ -27,39 +27,23 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef XYR_TRACK_SECTION_HPP_
-#define XYR_TRACK_SECTION_HPP_
+#ifndef XYR_SECTION_CONTROLLER_HPP_
+#define XYR_SECTION_CONTROLLER_HPP_
 
-#include <xygine/Entity.hpp>
+#include <xygine/components/Component.hpp>
 
-#include <SFML/Config.hpp>
-
-#include <memory>
-
-namespace xy
-{
-    class MessageBus;
-}
-
-class TrackSection final
+class TrackSection;
+class SectionController final : public xy::Component
 {
 public:
-    TrackSection();
-    ~TrackSection() = default;
+    SectionController(xy::MessageBus&, TrackSection&);
+    ~SectionController() = default;
 
-    void cacheParts(const std::vector<sf::Uint8>&);
-    xy::Entity::Ptr create(xy::MessageBus&, float = 0.f);
+    xy::Component::Type type() const override { return xy::Component::Type::Script; }
+    void entityUpdate(xy::Entity&, float) override;
 
-    void update(float);
-
-    static float getSectionSize();
-    static float getSpeedIncrease();
 private:
-
-    std::size_t m_index;
-    std::vector<sf::Uint8> m_uids;
-
-    float m_initialVelocity;
+    TrackSection& m_trackSection;
 };
 
-#endif //XYR_TRACK_SECTION_HPP_
+#endif //XYR_SECTION_CONTROLLER_HPP_

@@ -27,39 +27,32 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef XYR_TRACK_SECTION_HPP_
-#define XYR_TRACK_SECTION_HPP_
+#include <SectionController.hpp>
+#include <TrackSection.hpp>
 
 #include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
+#include <xygine/physics/RigidBody.hpp>
 
-#include <SFML/Config.hpp>
-
-#include <memory>
-
-namespace xy
+SectionController::SectionController(xy::MessageBus& mb, TrackSection& ts)
+    : xy::Component (mb, this),
+    m_trackSection  (ts)
 {
-    class MessageBus;
+    //LOG("ent created", xy::Logger::Type::Info);
 }
 
-class TrackSection final
+//public
+void SectionController::entityUpdate(xy::Entity& entity, float dt)
 {
-public:
-    TrackSection();
-    ~TrackSection() = default;
+    if (entity.getPosition().y > TrackSection::getSectionSize())
+    {
+        entity.destroy();
+        auto newSection = m_trackSection.create(getMessageBus(), entity.getPosition().y - (2.f * TrackSection::getSectionSize()));
+        entity.getScene()->addEntity(newSection, xy::Scene::Layer::FrontRear);
+        //LOG("ent destroyed", xy::Logger::Type::Info);
+    }
 
-    void cacheParts(const std::vector<sf::Uint8>&);
-    xy::Entity::Ptr create(xy::MessageBus&, float = 0.f);
-
-    void update(float);
-
-    static float getSectionSize();
-    static float getSpeedIncrease();
-private:
-
-    std::size_t m_index;
-    std::vector<sf::Uint8> m_uids;
-
-    float m_initialVelocity;
-};
-
-#endif //XYR_TRACK_SECTION_HPP_
+    //speed up over time
+    auto rb = entity.getComponent<xy::Physics::RigidBody>();
+    rb->setLinearVelocity({ 0.f, rb->getLinearVelocity().y + (dt * TrackSection::getSpeedIncrease()) });
+}
