@@ -31,10 +31,12 @@ source distribution.
 #define XYR_TRACK_SECTION_HPP_
 
 #include <xygine/Entity.hpp>
+#include <xygine/physics/CollisionEdgeShape.hpp>
 
 #include <SFML/Config.hpp>
 
 #include <memory>
+#include <map>
 
 namespace xy
 {
@@ -60,6 +62,13 @@ private:
     std::vector<sf::Uint8> m_uids;
 
     float m_initialVelocity;
+
+    struct EdgeCollection final
+    {
+        std::vector<xy::Physics::CollisionEdgeShape> top;
+        std::vector<xy::Physics::CollisionEdgeShape> bottom;
+    };
+    std::map<sf::Uint8, EdgeCollection> m_edges;
 };
 
 #endif //XYR_TRACK_SECTION_HPP_

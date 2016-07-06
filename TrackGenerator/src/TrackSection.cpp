@@ -32,7 +32,6 @@ source distribution.
 
 #include <xygine/Assert.hpp>
 #include <xygine/physics/RigidBody.hpp>
-#include <xygine/physics/CollisionEdgeShape.hpp>
 #include <xygine/Reports.hpp>
 
 #include <array>
@@ -41,16 +40,16 @@ source distribution.
 namespace
 {
     /*
-    Track sections are 1024x1024 in size.
-    A connection section is 300x256
+    Track sections are 1080x1080 in size.
+    A connection section is 340x270
     */
 
     //set up some consts for these values
-    const float sectionSize = 1024.f;
-    const float connectionWidth = 300.f;
-    const float connectionHeight = 256.f;
+    const float sectionSize = xy::DefaultSceneSize.y;
+    const float connectionWidth = 340.f;
+    const float connectionHeight = sectionSize / 4.f;
     const float connectionBend = 200.f;
-    const float connectionGap = 62.f;
+    const float connectionGap = (sectionSize - (connectionWidth * 3.f)) / 2.f;
 
     const float speedIncrease = 5.f;
 
@@ -60,7 +59,7 @@ namespace
         std::vector<sf::Vector2f> rightEdge;
     };
     //left to right, top to bottom
-    std::array<Connection, 6u> connections;
+    std::array<Connection, 6u> connections; //TODO remove this once edges cached
     bool created = false;
 }
 
@@ -68,27 +67,41 @@ TrackSection::TrackSection()
     : m_index           (0u),
     m_initialVelocity   (600.f)
 {
-    if (!created) //TODO constify these
+    if (!created)
     {
         created = true;
-        connections[0].leftEdge = { sf::Vector2f(), sf::Vector2f(0.f, 256.f) };
-        connections[0].rightEdge = { sf::Vector2f(300.f, 0.f), sf::Vector2f(300.f, 200.f), sf::Vector2f(362.f, 256.f) };
+        connections[0].leftEdge = { sf::Vector2f(), sf::Vector2f(0.f, connectionHeight) };
+        connections[0].rightEdge = { sf::Vector2f(connectionWidth, 0.f), sf::Vector2f(connectionWidth, connectionBend), sf::Vector2f(connectionWidth + connectionGap, connectionHeight) };
 
-        connections[1].leftEdge = { sf::Vector2f(362.f, 0.f), sf::Vector2f(362.f, 256.f) };
-        connections[1].rightEdge = { sf::Vector2f(662.f, 0.f), sf::Vector2f(662.f, 256.f) };
+        connections[1].leftEdge = { sf::Vector2f(connectionWidth + connectionGap, 0.f), sf::Vector2f(connectionWidth + connectionGap, connectionHeight) };
+        connections[1].rightEdge = { sf::Vector2f((connectionWidth * 2.f) + connectionGap, 0.f), sf::Vector2f((connectionWidth * 2.f) + connectionGap, connectionHeight) };
 
-        connections[2].leftEdge = { sf::Vector2f(662.f, 256.f), sf::Vector2f(724.f, 200.f), sf::Vector2f(724.f, 0.f) };
-        connections[2].rightEdge = { sf::Vector2f(1024.f, 0.f), sf::Vector2f(1024.f, 256.f) };
+        connections[2].leftEdge = { sf::Vector2f((connectionWidth * 2.f) + connectionGap, connectionHeight), sf::Vector2f(sectionSize - connectionWidth, connectionBend), sf::Vector2f(sectionSize - connectionWidth, 0.f) };
+        connections[2].rightEdge = { sf::Vector2f(sectionSize, 0.f), sf::Vector2f(sectionSize, connectionHeight) };
 
-        connections[3].leftEdge = { sf::Vector2f(0.f, 768.f), sf::Vector2f(0.f, 1024.f) };
-        connections[3].rightEdge = { sf::Vector2f(362.f, 768.f), sf::Vector2f(300.f, 824.f), sf::Vector2f(300.f, 1024.f) };
+        connections[3].leftEdge = { sf::Vector2f(0.f, sectionSize - connectionHeight), sf::Vector2f(0.f, sectionSize) };
+        connections[3].rightEdge = { sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f(connectionWidth, sectionSize - connectionBend), sf::Vector2f(connectionWidth, sectionSize) };
 
-        connections[4].leftEdge = { sf::Vector2f(362.f, 768.f), sf::Vector2f(362.f, 1024.f) };
-        connections[4].rightEdge = { sf::Vector2f(662.f, 768.f), sf::Vector2f(662.f, 1024.f) };
+        connections[4].leftEdge = { sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f(connectionWidth + connectionGap, sectionSize) };
+        connections[4].rightEdge = { sf::Vector2f((connectionWidth * 2.f) + connectionGap, sectionSize - connectionHeight), sf::Vector2f((connectionWidth * 2.f) + connectionGap, sectionSize) };
 
-        connections[5].leftEdge = { sf::Vector2f(662.f, 768.f), sf::Vector2f(724.f, 824.f), sf::Vector2f(724.f, 1024.f) };
-        connections[5].rightEdge = { sf::Vector2f(1024.f, 768.f), sf::Vector2f(1024.f, 1024.f) };
+        connections[5].leftEdge = { sf::Vector2f((connectionWidth * 2.f) + connectionGap, sectionSize - connectionHeight), sf::Vector2f(sectionSize - connectionWidth, sectionSize - connectionBend), sf::Vector2f(sectionSize - connectionWidth, sectionSize) };
+        connections[5].rightEdge = { sf::Vector2f(sectionSize, sectionSize - connectionHeight), sf::Vector2f(sectionSize, sectionSize) };
     }
+
+    EdgeCollection ec;
+    ec.top = 
+    {
+        xy::Physics::CollisionEdgeShape({ sf::Vector2f(), sf::Vector2f(0.f, connectionHeight) }),
+        xy::Physics::CollisionEdgeShape({ sf::Vector2f(connectionWidth, 0.f), sf::Vector2f(connectionWidth, connectionBend), sf::Vector2f(connectionWidth + connectionGap, connectionHeight) })
+    };
+
+    ec.bottom =
+    {
+        xy::Physics::CollisionEdgeShape({ sf::Vector2f(0.f, sectionSize - connectionHeight), sf::Vector2f(0.f, sectionSize) }),
+        xy::Physics::CollisionEdgeShape({ sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f(connectionWidth, sectionSize - connectionBend), sf::Vector2f(connectionWidth, sectionSize) })
+    };
+    m_edges.insert(std::make_pair(0x4, ec));
 }
 
 //public
@@ -122,10 +135,11 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits & 0x4)
     {
         //top left
-        xy::Physics::CollisionEdgeShape es(connections[0].leftEdge);
+        /*xy::Physics::CollisionEdgeShape es(connections[0].leftEdge);
         body->addCollisionShape(es);
         es.setPoints(connections[0].rightEdge);
-        body->addCollisionShape(es);
+        body->addCollisionShape(es);*/
+        for (const auto& ec : m_edges[0x4].top) body->addCollisionShape(ec);
 
         if (tl.x > 0.f) tl.x = 0.f;
         if (tr.x < connectionWidth + connectionGap) tr.x = connectionWidth + connectionGap;
@@ -155,8 +169,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits == (0x4 | 0x1))
     {
         //we have left and right but no middle
-        //TODO constify
-        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(362.f, 256.f), sf::Vector2f(662.f, 256.f) });
+        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(connectionWidth + connectionGap, connectionHeight), sf::Vector2f((connectionWidth  * 2.f) + connectionGap, connectionHeight) });
         body->addCollisionShape(es);
     }
 
@@ -171,10 +184,11 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits & 0x4)
     {
         //bottom left
-        xy::Physics::CollisionEdgeShape es(connections[3].leftEdge);
+        /*xy::Physics::CollisionEdgeShape es(connections[3].leftEdge);
         body->addCollisionShape(es);
         es.setPoints(connections[3].rightEdge);
-        body->addCollisionShape(es);
+        body->addCollisionShape(es);*/
+        for (const auto& ec : m_edges[0x4].bottom) body->addCollisionShape(ec);
 
         if (bl.x > 0.f) bl.x = 0.f;
         if (br.x < connectionWidth + connectionGap) br.x = connectionWidth + connectionGap;
@@ -204,8 +218,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits == (0x4 | 0x1))
     {
         //we have left and right but no middle
-        //TODO constify
-        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(362.f, 768.f), sf::Vector2f(662.f, 768.f) });
+        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f((connectionWidth  * 2.f) + connectionGap, sectionSize - connectionHeight) });
         body->addCollisionShape(es);
     }
 

@@ -295,7 +295,7 @@ void Sandbox::initScene()
     m_scene.setActiveCamera(camera);
 
     m_physWorld.setGravity({ 0.f, 0.f });
-    m_physWorld.setPixelScale(30.f);
+    m_physWorld.setPixelScale(100.f); //there's a bug here copying collision shapes more than once
 
 
     //generate a sequence of IDs using the
@@ -316,6 +316,6 @@ void Sandbox::initScene()
     auto trackSection = m_trackSection.create(m_messageBus);
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
 
-    trackSection = m_trackSection.create( m_messageBus, -1024.f);
+    trackSection = m_trackSection.create( m_messageBus, -TrackSection::getSectionSize());
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
 }
