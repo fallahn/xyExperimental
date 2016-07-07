@@ -41,12 +41,13 @@ source distribution.
 namespace xy
 {
     class MessageBus;
+    class MeshRenderer;
 }
 
 class TrackSection final
 {
 public:
-    TrackSection();
+    explicit TrackSection(xy::MeshRenderer&);
     ~TrackSection() = default;
 
     void cacheParts(const std::vector<sf::Uint8>&);
@@ -58,17 +59,12 @@ public:
     static float getSpeedIncrease();
 private:
 
+    xy::MeshRenderer& m_meshRenderer;
+
     std::size_t m_index;
     std::vector<sf::Uint8> m_uids;
 
     float m_initialVelocity;
-
-    struct EdgeCollection final
-    {
-        std::vector<xy::Physics::CollisionEdgeShape> top;
-        std::vector<xy::Physics::CollisionEdgeShape> bottom;
-    };
-    std::map<sf::Uint8, EdgeCollection> m_edges;
 };
 
 #endif //XYR_TRACK_SECTION_HPP_

@@ -34,6 +34,7 @@ source distribution.
 
 #include <xygine/Scene.hpp>
 #include <xygine/physics/World.hpp>
+#include <xygine/mesh/MeshRenderer.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 
@@ -67,7 +68,9 @@ private:
     xy::Scene m_scene;
     xy::Physics::World m_physWorld;
 
+    xy::MeshRenderer m_meshRenderer;
     TrackSection m_trackSection;
+
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
     void updateFileList();

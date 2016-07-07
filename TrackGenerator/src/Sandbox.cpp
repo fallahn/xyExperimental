@@ -75,7 +75,9 @@ Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui, sf::RenderWindow& rw)
     m_ui            (ui),
     m_renderWindow  (rw),
     m_scene         (mb),
-    m_physWorld     (mb)
+    m_physWorld     (mb),
+    m_meshRenderer  (rw.getSize(), m_scene),
+    m_trackSection  (m_meshRenderer)
 {
     //parameters.load("default.tgn");
 
@@ -189,6 +191,7 @@ Sandbox::~Sandbox()
 void Sandbox::update(float dt)
 {
     m_trackSection.update(dt);
+    m_meshRenderer.update();
     m_scene.update(dt);
 }
 
@@ -261,6 +264,7 @@ void Sandbox::handleEvent(const sf::Event& evt)
 void Sandbox::handleMessage(const xy::Message& msg)
 {
     m_scene.handleMessage(msg);
+    m_meshRenderer.handleMessage(msg);
 }
 
 //private
@@ -269,6 +273,8 @@ void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.setView(camera->getView());
     rt.draw(backgroundQuad.data(), backgroundQuad.size(), sf::Quads);
     rt.draw(m_scene);
+    rt.setView(rt.getDefaultView());
+    rt.draw(m_meshRenderer);
     rt.setView(camera->getView());
     rt.draw(m_physWorld);
 }
@@ -285,6 +291,11 @@ void Sandbox::updateFileList()
 
 void Sandbox::initScene()
 {
+    m_scene.getSkyLight().setIntensity(0.4f);
+    m_scene.getSkyLight().setDiffuseColour({ 255, 255, 100 });
+    m_scene.getSkyLight().setSpecularColour({ 120, 255, 58 });
+    m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.f });
+    
     auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
     cam->setZoom(defaultZoom);
     auto entity = xy::Entity::create(m_messageBus);
@@ -295,7 +306,7 @@ void Sandbox::initScene()
     m_scene.setActiveCamera(camera);
 
     m_physWorld.setGravity({ 0.f, 0.f });
-    m_physWorld.setPixelScale(100.f); //there's a bug here copying collision shapes more than once
+    m_physWorld.setPixelScale(30.f);
 
 
     //generate a sequence of IDs using the
@@ -304,7 +315,7 @@ void Sandbox::initScene()
     sequenceIDs.push_back(0x77);
 
     sf::Uint8 lastExit = 0x7;
-    for (auto i = 0; i < 10; ++i) //TODO set up a variable somewhere for the number of track pieces
+    for (auto i = 0; i < 50; ++i) //TODO set up a variable somewhere for the number of track pieces
     {
         sf::Uint8 uid = (lastExit << 4) | xy::Util::Random::value(1, 7);
         lastExit = uid & 0xf;

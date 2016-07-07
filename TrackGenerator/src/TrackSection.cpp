@@ -33,6 +33,9 @@ source distribution.
 #include <xygine/Assert.hpp>
 #include <xygine/physics/RigidBody.hpp>
 #include <xygine/Reports.hpp>
+#include <xygine/mesh/MeshRenderer.hpp>
+#include <xygine/components/Model.hpp>
+#include <xygine/mesh/CubeBuilder.hpp>
 
 #include <array>
 #include <vector>
@@ -63,8 +66,9 @@ namespace
     bool created = false;
 }
 
-TrackSection::TrackSection()
-    : m_index           (0u),
+TrackSection::TrackSection(xy::MeshRenderer& mr)
+    : m_meshRenderer    (mr),
+    m_index             (0u),
     m_initialVelocity   (600.f)
 {
     if (!created)
@@ -88,20 +92,6 @@ TrackSection::TrackSection()
         connections[5].leftEdge = { sf::Vector2f((connectionWidth * 2.f) + connectionGap, sectionSize - connectionHeight), sf::Vector2f(sectionSize - connectionWidth, sectionSize - connectionBend), sf::Vector2f(sectionSize - connectionWidth, sectionSize) };
         connections[5].rightEdge = { sf::Vector2f(sectionSize, sectionSize - connectionHeight), sf::Vector2f(sectionSize, sectionSize) };
     }
-
-    EdgeCollection ec;
-    ec.top = 
-    {
-        xy::Physics::CollisionEdgeShape({ sf::Vector2f(), sf::Vector2f(0.f, connectionHeight) }),
-        xy::Physics::CollisionEdgeShape({ sf::Vector2f(connectionWidth, 0.f), sf::Vector2f(connectionWidth, connectionBend), sf::Vector2f(connectionWidth + connectionGap, connectionHeight) })
-    };
-
-    ec.bottom =
-    {
-        xy::Physics::CollisionEdgeShape({ sf::Vector2f(0.f, sectionSize - connectionHeight), sf::Vector2f(0.f, sectionSize) }),
-        xy::Physics::CollisionEdgeShape({ sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f(connectionWidth, sectionSize - connectionBend), sf::Vector2f(connectionWidth, sectionSize) })
-    };
-    m_edges.insert(std::make_pair(0x4, ec));
 }
 
 //public
@@ -109,11 +99,20 @@ void TrackSection::cacheParts(const std::vector<sf::Uint8>& ids)
 {
     m_uids = ids;
 
-    //TODO move building edge shapes here
-
-
     //TODO build meshes as needed
+    std::vector<sf::Uint8> cached;
+    for (auto id : ids)
+    {
+        if (std::find(cached.begin(), cached.end(), id) == cached.end())
+        {
+            cached.push_back(id);
+            //create mesh builder for id
+            //cache mesh in mesh renderer and map to id
+        }
+    }
 
+    xy::CubeBuilder cb(50.f);
+    m_meshRenderer.loadModel(0, cb);
 }
 
 xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
@@ -135,11 +134,10 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits & 0x4)
     {
         //top left
-        /*xy::Physics::CollisionEdgeShape es(connections[0].leftEdge);
+        xy::Physics::CollisionEdgeShape es(connections[0].leftEdge);
         body->addCollisionShape(es);
         es.setPoints(connections[0].rightEdge);
-        body->addCollisionShape(es);*/
-        for (const auto& ec : m_edges[0x4].top) body->addCollisionShape(ec);
+        body->addCollisionShape(es);
 
         if (tl.x > 0.f) tl.x = 0.f;
         if (tr.x < connectionWidth + connectionGap) tr.x = connectionWidth + connectionGap;
@@ -184,11 +182,10 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits & 0x4)
     {
         //bottom left
-        /*xy::Physics::CollisionEdgeShape es(connections[3].leftEdge);
+        xy::Physics::CollisionEdgeShape es(connections[3].leftEdge);
         body->addCollisionShape(es);
         es.setPoints(connections[3].rightEdge);
-        body->addCollisionShape(es);*/
-        for (const auto& ec : m_edges[0x4].bottom) body->addCollisionShape(ec);
+        body->addCollisionShape(es);
 
         if (bl.x > 0.f) bl.x = 0.f;
         if (br.x < connectionWidth + connectionGap) br.x = connectionWidth + connectionGap;
@@ -231,11 +228,13 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
 
 
     auto controller = xy::Component::create<SectionController>(mb, *this);
+    auto model = m_meshRenderer.createModel(0, mb);
 
     auto entity = xy::Entity::create(mb);
     entity->setPosition((xy::DefaultSceneSize.x - sectionSize) / 2.f, height);
     entity->addComponent(body);
     entity->addComponent(controller);
+    entity->addComponent(model);
 
     return std::move(entity);
 }
