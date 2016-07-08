@@ -270,12 +270,12 @@ void Sandbox::handleMessage(const xy::Message& msg)
 //private
 void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.setView(camera->getView());
+    //rt.setView(m_scene.getView());
     rt.draw(backgroundQuad.data(), backgroundQuad.size(), sf::Quads);
     rt.draw(m_scene);
-    rt.setView(rt.getDefaultView());
+    rt.setView(rt.getView());
     rt.draw(m_meshRenderer);
-    rt.setView(camera->getView());
+    rt.setView(m_scene.getView());
     rt.draw(m_physWorld);
 }
 
@@ -291,11 +291,11 @@ void Sandbox::updateFileList()
 
 void Sandbox::initScene()
 {
-    m_scene.getSkyLight().setIntensity(0.4f);
+    m_scene.getSkyLight().setIntensity(0.6f);
     m_scene.getSkyLight().setDiffuseColour({ 255, 255, 100 });
     m_scene.getSkyLight().setSpecularColour({ 120, 255, 58 });
-    m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.f });
-    
+    m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.7f });
+
     auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
     cam->setZoom(defaultZoom);
     auto entity = xy::Entity::create(m_messageBus);
@@ -303,7 +303,8 @@ void Sandbox::initScene()
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     entity->addCommandCategories(CommandID::Camera);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
-    m_scene.setActiveCamera(camera);
+    //m_scene.setView(m_renderWindow.getView());
+    //m_scene.setActiveCamera(camera);
 
     m_physWorld.setGravity({ 0.f, 0.f });
     m_physWorld.setPixelScale(30.f);

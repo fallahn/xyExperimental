@@ -27,46 +27,33 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef XYR_TRACK_SECTION_HPP_
-#define XYR_TRACK_SECTION_HPP_
+#ifndef XYR_TRACKMESH_BUILDER_HPP_
+#define XYR_TRACKMESH_BUILDER_HPP_
 
-#include <xygine/Entity.hpp>
-#include <xygine/physics/CollisionEdgeShape.hpp>
+#include <xygine/mesh/ModelBuilder.hpp>
 
-#include <SFML/Config.hpp>
-
-#include <memory>
-#include <map>
-
-namespace xy
+class TrackMeshBuilder : public xy::ModelBuilder
 {
-    class MessageBus;
-    class MeshRenderer;
-}
-
-class TrackSection final
-{    
-public:
     using PointData = std::array<std::pair<std::vector<sf::Vector2f>, std::vector<sf::Vector2f>>, 6u>;
+public:
+    TrackMeshBuilder(sf::Uint8, const PointData&);
+    ~TrackMeshBuilder() = default;
 
-    explicit TrackSection(xy::MeshRenderer&);
-    ~TrackSection() = default;
+    void build() override;
+    xy::VertexLayout getVertexLayout() const override;
+    const float* getVertexData() const override { return m_vertexData.data(); }
+    std::size_t getVertexCount() const override { return m_vertexCount; }
+    const xy::BoundingBox& getBoundingBox() const override { return m_boundingBox; }
 
-    void cacheParts(const std::vector<sf::Uint8>&);
-    xy::Entity::Ptr create(xy::MessageBus&, float = 0.f);
-
-    void update(float);
-
-    static float getSectionSize();
-    static float getSpeedIncrease();
 private:
+    sf::Uint8 m_id;
+    const PointData& m_pointData;
 
-    xy::MeshRenderer& m_meshRenderer;
+    std::vector<float> m_vertexData;
+    std::size_t m_vertexCount;
+    xy::BoundingBox m_boundingBox;
 
-    std::size_t m_index;
-    std::vector<sf::Uint8> m_uids;
-
-    float m_initialVelocity;
+    std::vector<std::vector<std::int16_t>> m_indexArrays;
 };
 
-#endif //XYR_TRACK_SECTION_HPP_
+#endif // XYR_TRACKMESH_BUILDER_HPP_
