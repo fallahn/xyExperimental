@@ -79,12 +79,14 @@ void TrackMeshBuilder::build()
             m_vertexCount++;
         };
 
-        std::function<void(const std::vector<std::int16_t>&)> addIndices = [this](const std::vector<std::int16_t>& idxArray)
+        std::function<void(const std::vector<std::uint8_t>&)> addIndices = [this](const std::vector<std::uint8_t>& idxArray)
         {
             m_indexArrays.push_back(idxArray);
 
+            XY_WARNING(m_indexArrays.size() > 10, "Consider reserving greater index array size: Index array count " + std::to_string(m_indexArrays.size()));
+
             xy::ModelBuilder::SubMeshLayout sml;
-            sml.indexFormat = xy::Mesh::IndexFormat::I16;
+            sml.indexFormat = xy::Mesh::IndexFormat::I8;
             sml.type = xy::Mesh::PrimitiveType::Triangles;
             sml.data = m_indexArrays.back().data();
             sml.size = m_indexArrays.back().size();
@@ -92,8 +94,9 @@ void TrackMeshBuilder::build()
         };
         
         //top two points of centre part
-        sf::Vector2f tl(sectionSize, connectionHeight);
-        sf::Vector2f tr(0.f, connectionHeight);
+        float leftPoint = sectionSize;
+        float rightPoint = 0.f;
+        std::uint8_t tlIdx, trIdx;
 
         //top bits
         auto bits = m_id & 0xf;
@@ -101,7 +104,7 @@ void TrackMeshBuilder::build()
         if (bits & 0x4)
         {
             //left
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
             
             //add the vertices
             for (const auto& p : m_pointData[0].first)
@@ -118,24 +121,35 @@ void TrackMeshBuilder::build()
             //I wish there was a better way to do this than work it out by hand :/
             addIndices(
             {
-                subMeshStart + 2,
-                subMeshStart + 1,
-                subMeshStart + 0,
-                subMeshStart + 3,
-                subMeshStart + 1,
-                subMeshStart + 2,
-                subMeshStart + 4,
-                subMeshStart + 1,
-                subMeshStart + 3
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 4),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 3)
             });
 
-            if (tl.x > 0.f) tl.x = 0.f;
-            if (tr.x < connectionWidth + connectionGap) tr.x = connectionWidth + connectionGap;
+            if (leftPoint > 0.f)
+            {
+                leftPoint = 0.f;
+                tlIdx = std::uint8_t(subMeshStart + 1);
+            }
+            if (rightPoint < connectionWidth + connectionGap)
+            {
+                rightPoint = connectionWidth + connectionGap;
+                trIdx = std::uint8_t(subMeshStart + 4);
+            }
         }
         if (bits & 0x2)
         {
             //middle
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
+
+            //TODO we could potentially optimise this by checking
+            //for the previous connection and sharing a vertex
 
             //add the vertices
             for (const auto& p : m_pointData[1].first)
@@ -149,21 +163,31 @@ void TrackMeshBuilder::build()
             }
 
             addIndices({
-                subMeshStart + 2,
-                subMeshStart + 1,
-                subMeshStart + 0,
-                subMeshStart + 3,
-                subMeshStart + 1,
-                subMeshStart + 2
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 2)
             });
 
-            if (tl.x > connectionWidth + connectionGap) tl.x = connectionWidth + connectionGap;
-            if (tr.x < (connectionWidth * 2.f) + connectionGap) tr.x = (connectionWidth * 2.f) + connectionGap;
+            if (leftPoint > connectionWidth + connectionGap)
+            {
+                leftPoint = connectionWidth + connectionGap;
+                tlIdx = std::uint8_t(subMeshStart + 1);
+            }
+            if (rightPoint < (connectionWidth * 2.f) + connectionGap)
+            {
+                rightPoint = (connectionWidth * 2.f) + connectionGap;
+                trIdx = std::uint8_t(subMeshStart + 3);
+            }
         }
         if (bits & 0x1)
         {
             //right
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
+
+            //TODO check for middle section and share a vertex
 
             //add the vertices
             for (const auto& p : m_pointData[2].first)
@@ -177,24 +201,33 @@ void TrackMeshBuilder::build()
             }
 
             addIndices({
-                subMeshStart + 3,
-                subMeshStart + 1,
-                subMeshStart + 2,
-                subMeshStart + 4,
-                subMeshStart + 1,
-                subMeshStart + 3,
-                subMeshStart + 4,
-                subMeshStart + 0,
-                subMeshStart + 1
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 4),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 4),
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 1)
             });
 
-            if (tl.x >(connectionWidth * 2.f) + connectionGap) tl.x = (connectionWidth * 2.f) + connectionGap;
-            if (tr.x < sectionSize) tr.x = sectionSize;
+            if (leftPoint > (connectionWidth * 2.f) + connectionGap)
+            {
+                leftPoint = (connectionWidth * 2.f) + connectionGap;
+                tlIdx = std::uint8_t(subMeshStart);
+            }
+            if (rightPoint < sectionSize)
+            {
+                rightPoint = sectionSize;
+                trIdx = std::uint8_t(subMeshStart + 4);
+            }
         }
 
         //bottom two points of centre part
-        sf::Vector2f bl(sectionSize, connectionHeight * 3.f);
-        sf::Vector2f br(0.f, connectionHeight * 3.f);
+        leftPoint = sectionSize;
+        rightPoint = 0.f;
+        std::uint8_t blIdx, brIdx;
 
         //bottom bits
         bits = (m_id & 0xf0) >> 4;
@@ -202,7 +235,7 @@ void TrackMeshBuilder::build()
         if (bits & 0x4)
         {
             //left
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
 
             //add the vertices
             for (const auto& p : m_pointData[3].first)
@@ -216,24 +249,32 @@ void TrackMeshBuilder::build()
             }
 
             addIndices({
-                subMeshStart + 0,
-                subMeshStart + 2,
-                subMeshStart + 3,
-                subMeshStart + 0,
-                subMeshStart + 3,
-                subMeshStart + 1,
-                subMeshStart + 1,
-                subMeshStart + 3,
-                subMeshStart + 4
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 4)
             });
 
-            if (bl.x > 0.f) bl.x = 0.f;
-            if (br.x < connectionWidth + connectionGap) br.x = connectionWidth + connectionGap;
+            if (leftPoint > 0.f)
+            {
+                leftPoint = 0.f;
+                blIdx = std::uint8_t(subMeshStart);
+            }
+            if (rightPoint < connectionWidth + connectionGap)
+            {
+                rightPoint = connectionWidth + connectionGap;
+                brIdx = std::uint8_t(subMeshStart + 2);
+            }
         }
         if (bits & 0x2)
         {
             //middle
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
 
             //add the vertices
             for (const auto& p : m_pointData[4].first)
@@ -247,21 +288,29 @@ void TrackMeshBuilder::build()
             }
 
             addIndices({
-                subMeshStart + 0,
-                subMeshStart + 2,
-                subMeshStart + 1,
-                subMeshStart + 1,
-                subMeshStart + 2,
-                subMeshStart + 3
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 2),
+                std::uint8_t(subMeshStart + 3)
             });
 
-            if (bl.x > connectionWidth + connectionGap) bl.x = connectionWidth + connectionGap;
-            if (br.x < (connectionWidth * 2.f) + connectionGap) br.x = (connectionWidth * 2.f) + connectionGap;
+            if (leftPoint > connectionWidth + connectionGap)
+            {
+                leftPoint = connectionWidth + connectionGap;
+                blIdx = std::uint8_t(subMeshStart);
+            }
+            if (rightPoint < (connectionWidth * 2.f) + connectionGap)
+            {
+                rightPoint = (connectionWidth * 2.f) + connectionGap;
+                brIdx = std::uint8_t(subMeshStart + 2);
+            }
         }
         if (bits & 0x1)
         {
             //right
-            std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
+            auto subMeshStart = m_vertexCount;
 
             //add the vertices
             for (const auto& p : m_pointData[5].first)
@@ -275,30 +324,41 @@ void TrackMeshBuilder::build()
             }
 
             addIndices({
-                subMeshStart + 0,
-                subMeshStart + 3,
-                subMeshStart + 1,
-                subMeshStart + 1,
-                subMeshStart + 3,
-                subMeshStart + 4,
-                subMeshStart + 1,
-                subMeshStart + 4,
-                subMeshStart + 2
+                std::uint8_t(subMeshStart + 0),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 3),
+                std::uint8_t(subMeshStart + 4),
+                std::uint8_t(subMeshStart + 1),
+                std::uint8_t(subMeshStart + 4),
+                std::uint8_t(subMeshStart + 2)
             });
 
-            if (bl.x >(connectionWidth * 2.f) + connectionGap) bl.x = (connectionWidth * 2.f) + connectionGap;
-            if (br.x < sectionSize) br.x = sectionSize;
+            if (leftPoint > (connectionWidth * 2.f) + connectionGap)
+            {
+                leftPoint = (connectionWidth * 2.f) + connectionGap;
+                blIdx = std::uint8_t(subMeshStart);
+            }
+            if (rightPoint < sectionSize)
+            {
+                rightPoint = sectionSize;
+                brIdx = std::uint8_t(subMeshStart + 3);
+            }
         }
 
-        //create the centre part - TODO we already have vertices in place, really we just need to sub mesh here...
-        std::int16_t subMeshStart = static_cast<std::int16_t>(m_vertexCount);
-        addVertex(tl.x, tl.y, trackFarZ);
-        addVertex(bl.x, bl.y, trackFarZ);
-        addVertex(tr.x, tr.y, trackFarZ);
-        addVertex(br.x, br.y, trackFarZ);
-
-        addIndices({ subMeshStart, subMeshStart + 2, subMeshStart + 1, subMeshStart + 2, subMeshStart + 3, subMeshStart + 1 });
+        //create the centre part from existing verts
+        addIndices({
+            tlIdx,
+            trIdx,
+            blIdx,
+            trIdx,
+            brIdx,
+            blIdx });
     }
+
+    //warning if too many vertices because this will break 8 bit indexing
+    XY_WARNING(m_vertexCount > 255, "LARGE VERTEX COUNT! Index data likely to be incorrect (more than 255 vertices!");
 }
 
 xy::VertexLayout TrackMeshBuilder::getVertexLayout() const

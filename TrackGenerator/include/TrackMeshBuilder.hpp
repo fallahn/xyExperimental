@@ -53,7 +53,7 @@ private:
     std::size_t m_vertexCount;
     xy::BoundingBox m_boundingBox;
 
-    std::vector<std::vector<std::int16_t>> m_indexArrays;
+    std::vector<std::vector<std::uint8_t>> m_indexArrays;
 };
 
 #endif // XYR_TRACKMESH_BUILDER_HPP_
