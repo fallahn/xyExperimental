@@ -32,6 +32,8 @@ source distribution.
 
 #include <xygine/mesh/ModelBuilder.hpp>
 
+#include <functional>
+
 class TrackMeshBuilder : public xy::ModelBuilder
 {
     using PointData = std::array<std::pair<std::vector<sf::Vector2f>, std::vector<sf::Vector2f>>, 6u>;
@@ -54,6 +56,8 @@ private:
     xy::BoundingBox m_boundingBox;
 
     std::vector<std::vector<std::uint8_t>> m_indexArrays;
+
+    void buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&)>&, std::function<void(const std::vector<std::uint8_t>&)>&);
 };
 
 #endif // XYR_TRACKMESH_BUILDER_HPP_
