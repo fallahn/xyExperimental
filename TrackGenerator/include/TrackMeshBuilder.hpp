@@ -47,6 +47,7 @@ public:
     std::size_t getVertexCount() const override { return m_vertexCount; }
     const xy::BoundingBox& getBoundingBox() const override { return m_boundingBox; }
 
+    std::size_t getFirstBarrierIndex() const { return m_firstBarrierIndex; }
 private:
     sf::Uint8 m_id;
     const PointData& m_pointData;
@@ -57,7 +58,9 @@ private:
 
     std::vector<std::vector<std::uint8_t>> m_indexArrays;
 
-    void buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&)>&, std::function<void(const std::vector<std::uint8_t>&)>&);
+    std::size_t m_firstBarrierIndex;
+    void buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec2&)>&,
+        std::function<void(const std::vector<std::uint8_t>&)>&);
 };
 
 #endif // XYR_TRACKMESH_BUILDER_HPP_

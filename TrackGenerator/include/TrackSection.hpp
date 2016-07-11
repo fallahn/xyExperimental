@@ -42,6 +42,7 @@ namespace xy
 {
     class MessageBus;
     class MeshRenderer;
+    class Material;
 }
 
 class TrackSection final
@@ -57,6 +58,9 @@ public:
 
     void update(float);
 
+    void setTrackMaterial(const xy::Material& m) { m_trackMaterial = &m; }
+    void setBarrierMaterial(const xy::Material& m) { m_barrierMaterial = &m; }
+
     static float getSectionSize();
     static float getSpeedIncrease();
 private:
@@ -64,7 +68,17 @@ private:
     xy::MeshRenderer& m_meshRenderer;
 
     std::size_t m_index;
-    std::vector<sf::Uint8> m_uids;
+    struct ModelID final
+    {
+        ModelID() = default;
+        ModelID(sf::Uint8 i, std::size_t bo) : id(i), barrierOffset(bo) {}
+        sf::Uint8 id = 0;
+        std::size_t barrierOffset = 0;
+    };
+    std::vector<ModelID> m_uids;
+
+    const xy::Material* m_trackMaterial;
+    const xy::Material* m_barrierMaterial;
 
     float m_initialVelocity;
 };

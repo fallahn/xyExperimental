@@ -52,10 +52,11 @@ namespace
 }
 
 TrackMeshBuilder::TrackMeshBuilder(sf::Uint8 id, const PointData& pointData)
-    : m_id          (id),
-    m_pointData     (pointData),
-    m_vertexCount   (0),
-    m_boundingBox   ({}, { xy::DefaultSceneSize.y, xy::DefaultSceneSize.y, 100.f })
+    : m_id              (id),
+    m_pointData         (pointData),
+    m_vertexCount       (0),
+    m_boundingBox       ({}, { xy::DefaultSceneSize.y, xy::DefaultSceneSize.y, 100.f }),
+    m_firstBarrierIndex (0u)
 {
     m_indexArrays.reserve(reservedIndexArrays);
 }
@@ -66,8 +67,8 @@ void TrackMeshBuilder::build()
     //remember to update vertex count!
     if (m_vertexData.empty())
     {
-        std::function<void(const glm::vec3&, const glm::vec3&)> addVertex = 
-            [this](const glm::vec3& position, const glm::vec3& normal)
+        std::function<void(const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec2&)> addVertex =
+            [this](const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tan, const glm::vec3& bitan, const glm::vec2& uv)
         {
             m_vertexData.push_back(position.x);
             m_vertexData.push_back(position.y);
@@ -78,12 +79,19 @@ void TrackMeshBuilder::build()
             m_vertexData.push_back(normal.y);
             m_vertexData.push_back(normal.z);
 
-            //TODO tangents
+            //tangents
+            m_vertexData.push_back(tan.x);
+            m_vertexData.push_back(tan.y);
+            m_vertexData.push_back(tan.z);
 
+            m_vertexData.push_back(bitan.x);
+            m_vertexData.push_back(bitan.y);
+            m_vertexData.push_back(bitan.z);
 
-            //TODO UVs
-
-
+            //UVs
+            m_vertexData.push_back(uv.x);
+            m_vertexData.push_back(uv.y);
+            
             m_vertexCount++;
         };
 
@@ -117,12 +125,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[0].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[0].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             //create a submesh for this part
@@ -164,12 +172,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[1].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[1].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             addIndices({
@@ -202,12 +210,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[2].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[2].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             addIndices({
@@ -250,12 +258,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[3].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[3].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             addIndices({
@@ -289,12 +297,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[4].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[4].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             addIndices({
@@ -325,12 +333,12 @@ void TrackMeshBuilder::build()
             //add the vertices
             for (const auto& p : m_pointData[5].first)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             for (const auto& p : m_pointData[5].second)
             {
-                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f });
+                addVertex({ p.x, p.y, trackFarZ }, { 0.f, 0.f, 1.f }, { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, { p.x / sectionSize, p.y / sectionSize });
             }
 
             addIndices({
@@ -377,13 +385,19 @@ xy::VertexLayout TrackMeshBuilder::getVertexLayout() const
 {
     xy::VertexLayout vl({ 
         xy::VertexLayout::Element(xy::VertexLayout::Element::Type::Position, 3),
-        xy::VertexLayout::Element(xy::VertexLayout::Element::Type::Normal, 3) });
+        xy::VertexLayout::Element(xy::VertexLayout::Element::Type::Normal, 3),
+        xy::VertexLayout::Element(xy::VertexLayout::Element::Type::Tangent, 3),
+        xy::VertexLayout::Element(xy::VertexLayout::Element::Type::Bitangent, 3),
+        xy::VertexLayout::Element(xy::VertexLayout::Element::Type::UV0, 2) });
     return vl;
 }
 
 //private
-void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&)>& addVertex, std::function<void(const std::vector<std::uint8_t>&)>& addIndices)
+void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec2&)>& addVertex,
+    std::function<void(const std::vector<std::uint8_t>&)>& addIndices)
 {
+    m_firstBarrierIndex = m_indexArrays.size();
+    
     std::function<void(const std::array<glm::vec3, 4u>&)> addWall = 
         [this, &addVertex, &addIndices](const std::array<glm::vec3, 4u>& quad)
     {
@@ -395,7 +409,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         auto firstIndex = m_vertexCount;
         for (const auto& v : quad)
         {
-            addVertex(v, normal);
+            addVertex(v, normal, tan, bitan, glm::vec2()); //TODO calc UVs
         }
         //TODO log the first submesh ID of the first barrier so we can use  a different material if we like
         addIndices({
@@ -407,6 +421,10 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
             std::uint8_t(firstIndex)
         });
     };
+
+    //top two points of centre part
+    sf::Vector2f tl(sectionSize, connectionHeight);
+    sf::Vector2f tr(0.f, connectionHeight);
     
     auto bits = m_id & 0xf;
     //top
@@ -428,21 +446,24 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         //2 quads make up right edge - TODO we can cull these if capping hides them
         quad =
         {
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
             glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackFarZ),
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ),
-            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackNearZ)
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackNearZ),
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ)
         };
         addWall(quad);
 
         quad =
         {
-            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackFarZ),
             glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
-            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackNearZ),
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ)
+            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackFarZ),
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ),
+            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackNearZ)
         };
         addWall(quad);
+
+        if (tl.x > 0.f) tl.x = 0.f;
+        if (tr.x < connectionWidth + connectionGap) tr.x = connectionWidth + connectionGap;
     }
 
     if (bits & 0x2)
@@ -464,6 +485,9 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
             glm::vec3(m_pointData[1].second[1].x, m_pointData[1].second[1].y, trackNearZ)
         };
         addWall(quad);
+
+        if (tl.x > connectionWidth + connectionGap) tl.x = connectionWidth + connectionGap;
+        if (tr.x < (connectionWidth * 2.f) + connectionGap) tr.x = (connectionWidth * 2.f) + connectionGap;
     }
 
     if (bits & 0x1)
@@ -477,26 +501,165 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         };
         addWall(quad);
 
-        //TODO decide if we want to bother with inside walls
+        quad =
+        {
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackNearZ),
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ)
+        };
+        addWall(quad);
+
+        quad =
+        {
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[2].x, m_pointData[2].first[2].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[2].first[2].x, m_pointData[2].first[2].y, trackNearZ)
+        };
+        addWall(quad);
+
+        if (tl.x >(connectionWidth * 2.f) + connectionGap) tl.x = (connectionWidth * 2.f) + connectionGap;
+        if (tr.x < sectionSize) tr.x = sectionSize;
     }
+
+    //cap centre if we have only left / right
+    if (bits == (0x4 | 0x1))
+    {
+        std::array<glm::vec3, 4u> quad =
+        {
+            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackNearZ),
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackNearZ)
+        };
+        addWall(quad);
+    }
+
+    //bottom two points of centre part
+    sf::Vector2f bl(sectionSize, connectionHeight * 3.f);
+    sf::Vector2f br(0.f, connectionHeight * 3.f);
 
     bits = (m_id & 0xf0) >> 4;
     //bottom
     if (bits & 0x4)
     {
+        std::array<glm::vec3, 4u> quad =
+        {
+            glm::vec3(m_pointData[3].first[1].x, m_pointData[3].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[3].first[0].x, m_pointData[3].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[3].first[1].x, m_pointData[3].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[3].first[0].x, m_pointData[3].first[0].y, trackNearZ)
+        };
+        addWall(quad);
 
+        quad =
+        {
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackNearZ),
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ)
+        };
+        addWall(quad);
+
+        quad =
+        {
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[2].x, m_pointData[3].second[2].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ),
+            glm::vec3(m_pointData[3].second[2].x, m_pointData[3].second[2].y, trackNearZ)
+        };
+        addWall(quad);
+
+        if (bl.x > 0.f) bl.x = 0.f;
+        if (br.x < connectionWidth + connectionGap) br.x = connectionWidth + connectionGap;
     }
 
     if (bits & 0x2)
     {
+        std::array<glm::vec3, 4u> quad =
+        {
+            glm::vec3(m_pointData[4].first[1].x, m_pointData[4].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[4].first[0].x, m_pointData[4].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[4].first[1].x, m_pointData[4].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[4].first[0].x, m_pointData[4].first[0].y, trackNearZ)
+        };
+        addWall(quad);
 
+        quad =
+        {
+            glm::vec3(m_pointData[4].second[0].x, m_pointData[4].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[4].second[1].x, m_pointData[4].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[4].second[0].x, m_pointData[4].second[0].y, trackNearZ),
+            glm::vec3(m_pointData[4].second[1].x, m_pointData[4].second[1].y, trackNearZ)
+        };
+        addWall(quad);
+
+        if (bl.x > connectionWidth + connectionGap) bl.x = connectionWidth + connectionGap;
+        if (br.x < (connectionWidth * 2.f) + connectionGap) br.x = (connectionWidth * 2.f) + connectionGap;
     }
 
     if (bits & 0x1)
     {
+        std::array<glm::vec3, 4u> quad =
+        {
+            glm::vec3(m_pointData[5].second[0].x, m_pointData[5].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[5].second[1].x, m_pointData[5].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[5].second[0].x, m_pointData[5].second[0].y, trackNearZ),
+            glm::vec3(m_pointData[5].second[1].x, m_pointData[5].second[1].y, trackNearZ)
+        };
+        addWall(quad);
 
+        quad =
+        {
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackNearZ)
+        };
+        addWall(quad);
+
+        quad =
+        {
+            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackNearZ),
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ)
+        };
+        addWall(quad);
+
+        if (bl.x >(connectionWidth * 2.f) + connectionGap) bl.x = (connectionWidth * 2.f) + connectionGap;
+        if (br.x < sectionSize) br.x = sectionSize;
     }
 
-    //TODO add barriers for centre part
-    //TODO barriers for end caps when middle is missing
+    if (bits == (0x4 | 0x1))
+    {
+        std::array<glm::vec3, 4u> quad =
+        {
+            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackNearZ),
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackNearZ)            
+        };
+        addWall(quad);
+    }
+
+    //add barriers for centre part
+    std::array<glm::vec3, 4u> quad =
+    {
+        glm::vec3(bl.x, bl.y, trackFarZ),
+        glm::vec3(tl.x, tl.y, trackFarZ),
+        glm::vec3(bl.x, bl.y, trackNearZ),
+        glm::vec3(tl.x, tl.y, trackNearZ)
+    };
+    addWall(quad);
+
+    quad =
+    {
+        glm::vec3(tr.x, tr.y, trackFarZ),
+        glm::vec3(br.x, br.y, trackFarZ),
+        glm::vec3(tr.x, tr.y, trackNearZ),
+        glm::vec3(br.x, br.y, trackNearZ)
+    };
+    addWall(quad);
 }

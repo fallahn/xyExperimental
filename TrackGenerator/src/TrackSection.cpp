@@ -36,7 +36,6 @@ source distribution.
 #include <xygine/Reports.hpp>
 #include <xygine/mesh/MeshRenderer.hpp>
 #include <xygine/components/Model.hpp>
-#include <xygine/mesh/CubeBuilder.hpp>
 #include <xygine/mesh/shaders/DeferredRenderer.hpp>
 
 #include <array>
@@ -66,7 +65,9 @@ namespace
 TrackSection::TrackSection(xy::MeshRenderer& mr)
     : m_meshRenderer    (mr),
     m_index             (0u),
-    m_initialVelocity   (600.f)
+    m_initialVelocity   (600.f),
+    m_trackMaterial     (nullptr),
+    m_barrierMaterial   (nullptr)
 {
     if (!created)
     {
@@ -94,26 +95,28 @@ TrackSection::TrackSection(xy::MeshRenderer& mr)
 //public
 void TrackSection::cacheParts(const std::vector<sf::Uint8>& ids)
 {
-    m_uids = ids;
-
     //build meshes as needed
-    std::vector<sf::Uint8> cached;
+    std::vector<ModelID> cached;
     for (auto id : ids)
     {
-        if (std::find(cached.begin(), cached.end(), id) == cached.end())
+        auto result = std::find_if(cached.begin(), cached.end(), [id](const ModelID& mi) {return mi.id == id; });
+        if (result == cached.end())
         {
-            cached.push_back(id);
-
             //create mesh builder for id
             TrackMeshBuilder tbm(id, connections);
 
             //cache mesh in mesh renderer and map to id
             m_meshRenderer.loadModel(id, tbm);
+
+            m_uids.emplace_back(id, tbm.getFirstBarrierIndex());
+            cached.emplace_back(id, tbm.getFirstBarrierIndex());
+        }
+        else
+        {
+            m_uids.emplace_back(result->id, result->barrierOffset);
         }
     }
-
-    xy::CubeBuilder cb(50.f);
-    m_meshRenderer.loadModel(0, cb);
+    int buns = 0;
 }
 
 xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
@@ -122,9 +125,8 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     
     auto body = xy::Component::create<xy::Physics::RigidBody>(mb, xy::Physics::BodyType::Kinematic);
     
-    auto uid = m_uids[m_index];
-    m_index = (m_index + 1) % m_uids.size();
-
+    auto uid = m_uids[m_index].id;
+    
     //top two points of centre part
     sf::Vector2f tl(sectionSize, connectionHeight);
     sf::Vector2f tr(0.f, connectionHeight);
@@ -229,6 +231,21 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
 
     auto controller = xy::Component::create<SectionController>(mb, *this);
     auto model = m_meshRenderer.createModel(uid, mb);
+    if (m_trackMaterial)
+    {
+        for (auto i = 0u; i < m_uids[m_index].barrierOffset; ++i)
+        {
+            model->setSubMaterial(*m_trackMaterial, i);
+        }
+    }
+    if (m_barrierMaterial)
+    {
+        for (auto i = m_uids[m_index].barrierOffset; i < model->getMesh().getSubMeshCount(); ++i)
+        {
+            model->setSubMaterial(*m_barrierMaterial, i);
+        }
+    }
+    
 
     auto entity = xy::Entity::create(mb);
     entity->setPosition((xy::DefaultSceneSize.x - sectionSize) / 2.f, height);
@@ -236,6 +253,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     entity->addComponent(controller);
     entity->addComponent(model);
 
+    m_index = (m_index + 1) % m_uids.size(); //remember to do this as late as possible
     return std::move(entity);
 }
 

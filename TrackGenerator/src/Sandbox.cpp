@@ -39,6 +39,7 @@ source distribution.
 #include <xygine/Reports.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/util/Random.hpp>
+#include <xygine/mesh/shaders/DeferredRenderer.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -68,6 +69,20 @@ namespace
         Camera = 0x1,
     };
     const float defaultZoom = 0.5f;
+
+    enum ShaderID
+    {
+        ColouredSmooth,
+        ColouredBumped,
+        TexturedBumped,
+        ShadowCaster
+    };
+
+    enum MaterialID
+    {
+        Track,
+        Barrier
+    };
 }
 
 Sandbox::Sandbox(xy::MessageBus& mb, UserInterface& ui, sf::RenderWindow& rw)
@@ -275,8 +290,8 @@ void Sandbox::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.draw(m_scene);
     rt.setView(rt.getView());
     rt.draw(m_meshRenderer);
-    rt.setView(m_scene.getView());
-    rt.draw(m_physWorld);
+    /*rt.setView(m_scene.getView());
+    rt.draw(m_physWorld);*/
 }
 
 void Sandbox::updateFileList()
@@ -291,9 +306,9 @@ void Sandbox::updateFileList()
 
 void Sandbox::initScene()
 {
-    m_scene.getSkyLight().setIntensity(0.6f);
-    m_scene.getSkyLight().setDiffuseColour({ 255, 255, 100 });
-    m_scene.getSkyLight().setSpecularColour({ 120, 255, 58 });
+    m_scene.getSkyLight().setIntensity(0.96f);
+    m_scene.getSkyLight().setDiffuseColour({ 255, 255, 240 });
+    m_scene.getSkyLight().setSpecularColour({ 220, 255, 251 });
     m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.7f });
 
     auto cam = xy::Camera::create<xy::Camera>(m_messageBus, m_renderWindow.getView());
@@ -324,6 +339,26 @@ void Sandbox::initScene()
     }
     sequenceIDs.push_back((lastExit << 4) | 0x7);
     m_trackSection.cacheParts(sequenceIDs);
+
+    //set up the materials for the track parts
+    m_shaderResource.preload(ShaderID::ColouredSmooth, DEFERRED_COLOURED_VERTEX, DEFERRED_COLOURED_FRAGMENT);
+    m_shaderResource.preload(ShaderID::TexturedBumped, DEFERRED_TEXTURED_BUMPED_VERTEX, DEFERRED_TEXTURED_BUMPED_FRAGMENT);
+    m_shaderResource.preload(ShaderID::ShadowCaster, SHADOW_VERTEX, xy::Shader::Mesh::ShadowFragment);
+
+    auto& barrierMaterial = m_materialResource.add(MaterialID::Barrier, m_shaderResource.get(ShaderID::ColouredSmooth));
+    barrierMaterial.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    barrierMaterial.addProperty({ "u_colour", sf::Color(170, 20, 20) });
+    barrierMaterial.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(ShaderID::ShadowCaster));
+    barrierMaterial.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+    //TODO disable face culling per pass
+    m_trackSection.setBarrierMaterial(barrierMaterial);
+
+    auto& trackMaterial = m_materialResource.add(MaterialID::Track, m_shaderResource.get(ShaderID::TexturedBumped));
+    trackMaterial.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    trackMaterial.addProperty({ "u_diffuseMap", m_textureResource.get("assets/tarmac_diffuse.png") });
+    trackMaterial.addProperty({ "u_normalMap", m_textureResource.get("assets/tarmac_normal.png") });
+    trackMaterial.addProperty({ "u_maskMap", m_textureResource.get("assets/tarmac_mask.png") });
+    m_trackSection.setTrackMaterial(trackMaterial);
 
     auto trackSection = m_trackSection.create(m_messageBus);
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
