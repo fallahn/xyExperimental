@@ -124,10 +124,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
     <ClCompile Include="src\SectionController.cpp" />
-    <ClCompile Include="src\TrackData.cpp" />
-    <ClCompile Include="src\TrackGenerator.cpp" />
     <ClCompile Include="src\TrackMeshBuilder.cpp" />
-    <ClCompile Include="src\TrackRenderer.cpp" />
     <ClCompile Include="src\TrackSection.cpp" />
     <ClCompile Include="src\UserInterface.cpp" />
   </ItemGroup>
@@ -135,10 +132,7 @@
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\Sandbox.hpp" />
     <ClInclude Include="include\SectionController.hpp" />
-    <ClInclude Include="include\TrackData.hpp" />
-    <ClInclude Include="include\TrackGenerator.hpp" />
     <ClInclude Include="include\TrackMeshBuilder.hpp" />
-    <ClInclude Include="include\TrackRenderer.hpp" />
     <ClInclude Include="include\TrackSection.hpp" />
     <ClInclude Include="include\UserInterface.hpp" />
   </ItemGroup>

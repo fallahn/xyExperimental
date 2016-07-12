@@ -49,10 +49,10 @@ namespace
     */
 
     //set up some consts for these values
-    const float sectionSize = xy::DefaultSceneSize.y;
-    const float connectionWidth = 340.f;
+    const float sectionSize = 1650.f;// xy::DefaultSceneSize.y;
+    const float connectionWidth = 520.f;
     const float connectionHeight = sectionSize / 4.f;
-    const float connectionBend = 200.f;
+    const float connectionBend = 300.f;
     const float connectionGap = (sectionSize - (connectionWidth * 3.f)) / 2.f;
 
     const float speedIncrease = 5.f;

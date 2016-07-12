@@ -40,10 +40,10 @@ source distribution.
 namespace
 {
     const float trackFarZ = -1.f;
-    const float trackNearZ = 80.f;
+    const float trackNearZ = 480.f;
 
-    const float sectionSize = xy::DefaultSceneSize.y; //ugh, duplicate, at least it's based on a const value....
-    const float connectionWidth = 340.f;
+    const float sectionSize = 1650.f;// xy::DefaultSceneSize.y; //ugh, duplicate, at least it's based on a const value....
+    const float connectionWidth = 520.f;
     const float connectionHeight = sectionSize / 4.f;
     const float connectionBend = 200.f;
     const float connectionGap = (sectionSize - (connectionWidth * 3.f)) / 2.f;
@@ -393,23 +393,45 @@ xy::VertexLayout TrackMeshBuilder::getVertexLayout() const
 }
 
 //private
+namespace
+{
+    struct Quad final
+    {
+        Quad() = default;
+        Quad(const glm::vec3& p) : pos(p) {}
+        glm::vec2 uv;
+        glm::vec3 pos;
+    };
+}
+
 void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec3&, const glm::vec2&)>& addVertex,
     std::function<void(const std::vector<std::uint8_t>&)>& addIndices)
 {
     m_firstBarrierIndex = m_indexArrays.size();
     
-    std::function<void(const std::array<glm::vec3, 4u>&)> addWall = 
-        [this, &addVertex, &addIndices](const std::array<glm::vec3, 4u>& quad)
+    std::function<void(std::array<Quad, 4u>&)> addWall = 
+        [this, &addVertex, &addIndices](std::array<Quad, 4u>& quad)
     {
         //use the cross product of 2 edges to discover the face normal
-        glm::vec3 tan = glm::normalize(quad[1] - quad[0]);
-        glm::vec3 bitan = glm::normalize(quad[2] - quad[0]);
+        glm::vec3 tan = glm::normalize(quad[1].pos - quad[0].pos);
+        glm::vec3 bitan = glm::normalize(quad[2].pos - quad[0].pos);
         glm::vec3 normal = glm::cross(tan, bitan);
+
+        quad[1].uv = glm::vec2(quad[1].pos.x - quad[0].pos.x, 0.f);
+        quad[1].uv /= sectionSize;
+        quad[1].uv.x += glm::dot(tan, { 1.f, 0.f, 0.f });
+
+        quad[2].uv = glm::vec2(0.f, quad[2].pos.z - quad[0].pos.z);
+        quad[2].uv /= sectionSize;
+
+        quad[3].uv.x = quad[1].uv.x;
+        quad[3].uv.y = quad[2].uv.y;
+        //LOG("V: " + std::to_string(quad[2].pos.y), xy::Logger::Type::Info);
 
         auto firstIndex = m_vertexCount;
         for (const auto& v : quad)
         {
-            addVertex(v, normal, tan, bitan, glm::vec2()); //TODO calc UVs
+            addVertex(v.pos, normal, tan, bitan, v.uv);
         }
         //TODO log the first submesh ID of the first barrier so we can use  a different material if we like
         addIndices({
@@ -434,7 +456,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         //verts are duplicated to stop smoothing on bends
         //verts arranged so that 0-1 will be bottom x axis
         //making sure normal points in correct direction
-        std::array<glm::vec3, 4u> quad = 
+        std::array<Quad, 4u> quad = 
         {
             glm::vec3(m_pointData[0].first[1].x, m_pointData[0].first[1].y, trackFarZ),
             glm::vec3(m_pointData[0].first[0].x, m_pointData[0].first[0].y, trackFarZ),
@@ -468,7 +490,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
     if (bits & 0x2)
     {
-        std::array<glm::vec3, 4u> quad = 
+        std::array<Quad, 4u> quad = 
         {
             glm::vec3(m_pointData[1].first[1].x, m_pointData[1].first[1].y, trackFarZ),
             glm::vec3(m_pointData[1].first[0].x, m_pointData[1].first[0].y, trackFarZ),
@@ -492,7 +514,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
     if (bits & 0x1)
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[2].second[0].x, m_pointData[2].second[0].y, trackFarZ),
             glm::vec3(m_pointData[2].second[1].x, m_pointData[2].second[1].y, trackFarZ),
@@ -526,7 +548,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
     //cap centre if we have only left / right
     if (bits == (0x4 | 0x1))
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackFarZ),
             glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackFarZ),
@@ -544,7 +566,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
     //bottom
     if (bits & 0x4)
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[3].first[1].x, m_pointData[3].first[1].y, trackFarZ),
             glm::vec3(m_pointData[3].first[0].x, m_pointData[3].first[0].y, trackFarZ),
@@ -577,7 +599,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
     if (bits & 0x2)
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[4].first[1].x, m_pointData[4].first[1].y, trackFarZ),
             glm::vec3(m_pointData[4].first[0].x, m_pointData[4].first[0].y, trackFarZ),
@@ -601,7 +623,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
     if (bits & 0x1)
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[5].second[0].x, m_pointData[5].second[0].y, trackFarZ),
             glm::vec3(m_pointData[5].second[1].x, m_pointData[5].second[1].y, trackFarZ),
@@ -634,7 +656,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
     if (bits == (0x4 | 0x1))
     {
-        std::array<glm::vec3, 4u> quad =
+        std::array<Quad, 4u> quad =
         {
             glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackFarZ),
             glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackFarZ),
@@ -645,7 +667,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
     }
 
     //add barriers for centre part
-    std::array<glm::vec3, 4u> quad =
+    std::array<Quad, 4u> quad =
     {
         glm::vec3(bl.x, bl.y, trackFarZ),
         glm::vec3(tl.x, tl.y, trackFarZ),

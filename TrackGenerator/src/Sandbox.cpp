@@ -306,7 +306,7 @@ void Sandbox::updateFileList()
 
 void Sandbox::initScene()
 {
-    m_scene.getSkyLight().setIntensity(0.96f);
+    m_scene.getSkyLight().setIntensity(0.76f);
     m_scene.getSkyLight().setDiffuseColour({ 255, 255, 240 });
     m_scene.getSkyLight().setSpecularColour({ 220, 255, 251 });
     m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.7f });
@@ -345,9 +345,12 @@ void Sandbox::initScene()
     m_shaderResource.preload(ShaderID::TexturedBumped, DEFERRED_TEXTURED_BUMPED_VERTEX, DEFERRED_TEXTURED_BUMPED_FRAGMENT);
     m_shaderResource.preload(ShaderID::ShadowCaster, SHADOW_VERTEX, xy::Shader::Mesh::ShadowFragment);
 
-    auto& barrierMaterial = m_materialResource.add(MaterialID::Barrier, m_shaderResource.get(ShaderID::ColouredSmooth));
+    auto& barrierMaterial = m_materialResource.add(MaterialID::Barrier, m_shaderResource.get(ShaderID::TexturedBumped));
     barrierMaterial.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
-    barrierMaterial.addProperty({ "u_colour", sf::Color(170, 20, 20) });
+    barrierMaterial.addProperty({ "u_diffuseMap", m_textureResource.get("assets/metal_diffuse.png") });
+    barrierMaterial.addProperty({ "u_normalMap", m_textureResource.get("assets/metal_normal.png") });
+    barrierMaterial.addProperty({ "u_maskMap", m_textureResource.get("assets/metal_mask.png") });
+    //barrierMaterial.addProperty({ "u_colour", sf::Color(170, 20, 20) });
     barrierMaterial.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(ShaderID::ShadowCaster));
     barrierMaterial.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
     //TODO disable face culling per pass
@@ -355,9 +358,9 @@ void Sandbox::initScene()
 
     auto& trackMaterial = m_materialResource.add(MaterialID::Track, m_shaderResource.get(ShaderID::TexturedBumped));
     trackMaterial.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
-    trackMaterial.addProperty({ "u_diffuseMap", m_textureResource.get("assets/tarmac_diffuse.png") });
-    trackMaterial.addProperty({ "u_normalMap", m_textureResource.get("assets/tarmac_normal.png") });
-    trackMaterial.addProperty({ "u_maskMap", m_textureResource.get("assets/tarmac_mask.png") });
+    trackMaterial.addProperty({ "u_diffuseMap", m_textureResource.get("assets/metal_diffuse.png") });
+    trackMaterial.addProperty({ "u_normalMap", m_textureResource.get("assets/metal_normal.png") });
+    trackMaterial.addProperty({ "u_maskMap", m_textureResource.get("assets/metal_mask.png") });
     m_trackSection.setTrackMaterial(trackMaterial);
 
     auto trackSection = m_trackSection.create(m_messageBus);
