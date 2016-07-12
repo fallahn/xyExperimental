@@ -64,10 +64,10 @@ namespace
 
 TrackSection::TrackSection(xy::MeshRenderer& mr)
     : m_meshRenderer    (mr),
-    m_index             (0u),
-    m_initialVelocity   (600.f),
+    m_index             (0u), 
     m_trackMaterial     (nullptr),
-    m_barrierMaterial   (nullptr)
+    m_barrierMaterial   (nullptr),
+    m_initialVelocity   (600.f)
 {
     if (!created)
     {
@@ -116,7 +116,6 @@ void TrackSection::cacheParts(const std::vector<sf::Uint8>& ids)
             m_uids.emplace_back(result->id, result->barrierOffset);
         }
     }
-    int buns = 0;
 }
 
 xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
