@@ -49,4 +49,17 @@ enum MaterialID
     Barrier
 };
 
+enum ModelID
+{
+    Cube
+};
+
+enum PhysCat
+{
+    SmallBody = 0x1,
+    Trap = 0x2,
+    Wall = 0x4,
+    Destroyer = 0x8
+};
+
 #endif //XYR_GAME_IDS_HPP_

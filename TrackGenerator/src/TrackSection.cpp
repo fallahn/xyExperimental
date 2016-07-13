@@ -30,6 +30,7 @@ source distribution.
 #include <TrackSection.hpp>
 #include <SectionController.hpp>
 #include <TrackMeshBuilder.hpp>
+#include <GameIDs.hpp>
 
 #include <xygine/Assert.hpp>
 #include <xygine/physics/RigidBody.hpp>
@@ -113,7 +114,10 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     XY_ASSERT(!m_uids.empty(), "parts not yet cached!");
     
     auto body = xy::Component::create<xy::Physics::RigidBody>(mb, xy::Physics::BodyType::Kinematic);
-    
+    xy::Physics::CollisionFilter cf;
+    cf.categoryFlags |= PhysCat::Wall;
+    cf.maskFlags |= PhysCat::SmallBody;
+
     auto uid = m_uids[m_index].id;
     
     //top two points of centre part
@@ -127,6 +131,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //top left
         xy::Physics::CollisionEdgeShape es(connections[0].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[0].second);
         body->addCollisionShape(es);
@@ -138,6 +143,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //top middle
         xy::Physics::CollisionEdgeShape es(connections[1].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[1].second);
         body->addCollisionShape(es);
@@ -149,6 +155,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //top right
         xy::Physics::CollisionEdgeShape es(connections[2].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[2].second);
         body->addCollisionShape(es);
@@ -159,7 +166,13 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits == (0x4 | 0x1))
     {
         //we have left and right but no middle
-        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(connectionWidth + connectionGap, connectionHeight), sf::Vector2f((connectionWidth  * 2.f) + connectionGap, connectionHeight) });
+        xy::Physics::CollisionEdgeShape es(
+        { 
+            sf::Vector2f(connectionWidth + connectionGap, connectionHeight),
+            sf::Vector2f(sectionSize / 2.f, connectionHeight + 30.f), //just enough to prevent squashed balls
+            sf::Vector2f((connectionWidth  * 2.f) + connectionGap, connectionHeight)
+        });
+        es.setFilter(cf);
         body->addCollisionShape(es);
     }
 
@@ -175,6 +188,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //bottom left
         xy::Physics::CollisionEdgeShape es(connections[3].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[3].second);
         body->addCollisionShape(es);
@@ -186,6 +200,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //bottom middle
         xy::Physics::CollisionEdgeShape es(connections[4].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[4].second);
         body->addCollisionShape(es);
@@ -197,6 +212,7 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     {
         //bottom right
         xy::Physics::CollisionEdgeShape es(connections[5].first);
+        es.setFilter(cf);
         body->addCollisionShape(es);
         es.setPoints(connections[5].second);
         body->addCollisionShape(es);
@@ -207,12 +223,16 @@ xy::Entity::Ptr TrackSection::create(xy::MessageBus& mb, float height)
     if (bits == (0x4 | 0x1))
     {
         //we have left and right but no middle
-        xy::Physics::CollisionEdgeShape es({ sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight), sf::Vector2f((connectionWidth  * 2.f) + connectionGap, sectionSize - connectionHeight) });
+        xy::Physics::CollisionEdgeShape es({
+            sf::Vector2f(connectionWidth + connectionGap, sectionSize - connectionHeight),
+            sf::Vector2f((connectionWidth  * 2.f) + connectionGap, sectionSize - connectionHeight) });
+        es.setFilter(cf);
         body->addCollisionShape(es);
     }
 
     //create centre part
     xy::Physics::CollisionEdgeShape es({ tl, bl });
+    es.setFilter(cf);
     body->addCollisionShape(es);
     es.setPoints({ tr, br });
     body->addCollisionShape(es);

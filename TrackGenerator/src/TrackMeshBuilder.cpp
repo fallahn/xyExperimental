@@ -42,7 +42,7 @@ source distribution.
 namespace
 {
     const float trackFarZ = -1.f;
-    const float trackNearZ = 480.f;
+    const float trackNearZ = 80.f;
     const std::size_t reservedIndexArrays = 26u;
 }
 
@@ -50,7 +50,7 @@ TrackMeshBuilder::TrackMeshBuilder(sf::Uint8 id, const PointData& pointData)
     : m_id              (id),
     m_pointData         (pointData),
     m_vertexCount       (0),
-    m_boundingBox       ({}, { xy::DefaultSceneSize.y, xy::DefaultSceneSize.y, 100.f }),
+    m_boundingBox       ({}, { sectionSize, sectionSize * 1.5f, 100.f }),
     m_firstBarrierIndex (0u)
 {
     m_indexArrays.reserve(reservedIndexArrays);
@@ -412,15 +412,13 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         glm::vec3 bitan = glm::normalize(quad[2].pos - quad[0].pos);
         glm::vec3 normal = glm::cross(tan, bitan);
 
-        quad[1].uv = glm::vec2(quad[1].pos.x - quad[0].pos.x, 0.f);
-        quad[1].uv /= sectionSize;
-        quad[1].uv.x += glm::dot(tan, { 1.f, 0.f, 0.f });
+        float u = glm::length(quad[1].pos - quad[0].pos) / sectionSize;
+        float v = trackNearZ / sectionSize;
 
-        quad[2].uv = glm::vec2(0.f, quad[2].pos.z - quad[0].pos.z);
-        quad[2].uv /= sectionSize;
-
-        quad[3].uv.x = quad[1].uv.x;
-        quad[3].uv.y = quad[2].uv.y;
+        quad[1].uv = glm::vec2(0.f, v);
+        quad[2].uv = glm::vec2(u, 0.f);
+        quad[3].uv.x = quad[2].uv.x;
+        quad[3].uv.y = quad[1].uv.y;
         //LOG("V: " + std::to_string(quad[2].pos.y), xy::Logger::Type::Info);
 
         auto firstIndex = m_vertexCount;
@@ -428,7 +426,7 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         {
             addVertex(v.pos, normal, tan, bitan, v.uv);
         }
-        //TODO log the first submesh ID of the first barrier so we can use  a different material if we like
+        
         addIndices({
             std::uint8_t(firstIndex + 2),
             std::uint8_t(firstIndex + 3),
@@ -463,19 +461,19 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
         //2 quads make up right edge - TODO we can cull these if capping hides them
         quad =
         {
-            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackFarZ),
             glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
-            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackNearZ),
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ)
+            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ),
+            glm::vec3(m_pointData[0].second[0].x, m_pointData[0].second[0].y, trackNearZ)
         };
         addWall(quad);
 
         quad =
         {
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
             glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackFarZ),
-            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ),
-            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackNearZ)
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[0].second[2].x, m_pointData[0].second[2].y, trackNearZ),
+            glm::vec3(m_pointData[0].second[1].x, m_pointData[0].second[1].y, trackNearZ)
         };
         addWall(quad);
 
@@ -520,19 +518,19 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
         quad =
         {
-            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackFarZ),
             glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackFarZ),
-            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackNearZ),
-            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ)
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[2].first[0].x, m_pointData[2].first[0].y, trackNearZ)
         };
         addWall(quad);
 
         quad =
         {
-            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackFarZ),
             glm::vec3(m_pointData[2].first[2].x, m_pointData[2].first[2].y, trackFarZ),
-            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ),
-            glm::vec3(m_pointData[2].first[2].x, m_pointData[2].first[2].y, trackNearZ)
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[2].first[2].x, m_pointData[2].first[2].y, trackNearZ),
+            glm::vec3(m_pointData[2].first[1].x, m_pointData[2].first[1].y, trackNearZ)
         };
         addWall(quad);
 
@@ -572,19 +570,19 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
         quad =
         {
-            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackFarZ),
             glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackFarZ),
-            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackNearZ),
-            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ)
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ),
+            glm::vec3(m_pointData[3].second[0].x, m_pointData[3].second[0].y, trackNearZ)
         };
         addWall(quad);
 
         quad =
         {
-            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackFarZ),
             glm::vec3(m_pointData[3].second[2].x, m_pointData[3].second[2].y, trackFarZ),
-            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ),
-            glm::vec3(m_pointData[3].second[2].x, m_pointData[3].second[2].y, trackNearZ)
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackFarZ),
+            glm::vec3(m_pointData[3].second[2].x, m_pointData[3].second[2].y, trackNearZ),
+            glm::vec3(m_pointData[3].second[1].x, m_pointData[3].second[1].y, trackNearZ)
         };
         addWall(quad);
 
@@ -629,19 +627,19 @@ void TrackMeshBuilder::buildBarriers(std::function<void(const glm::vec3&, const 
 
         quad =
         {
-            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackFarZ),
             glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackFarZ),
-            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ),
-            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackNearZ)
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[0].x, m_pointData[5].first[0].y, trackNearZ),
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ)
         };
         addWall(quad);
 
         quad =
         {
-            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackFarZ),
             glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackFarZ),
-            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackNearZ),
-            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ)
+            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackFarZ),
+            glm::vec3(m_pointData[5].first[1].x, m_pointData[5].first[1].y, trackNearZ),
+            glm::vec3(m_pointData[5].first[2].x, m_pointData[5].first[2].y, trackNearZ)
         };
         addWall(quad);
 

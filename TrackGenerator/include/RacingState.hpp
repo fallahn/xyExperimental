@@ -67,6 +67,7 @@ private:
     xy::MaterialResource m_materialResource;
 
     void init();
+    void addBodies();
 };
 
 #endif //XYR_RACING_STATE_HPP_

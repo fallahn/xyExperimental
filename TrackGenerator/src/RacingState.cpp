@@ -32,6 +32,13 @@ source distribution.
 #include <xygine/App.hpp>
 #include <xygine/mesh/shaders/DeferredRenderer.hpp>
 #include <xygine/util/Random.hpp>
+#include <xygine/mesh/CubeBuilder.hpp>
+
+#include <xygine/physics/CollisionCircleShape.hpp>
+#include <xygine/physics/RigidBody.hpp>
+#include <xygine/physics/CollisionRectangleShape.hpp>
+
+#include <SFML/Window/Event.hpp>
 
 RacingState::RacingState(xy::StateStack& stateStack, Context context)
     : xy::State     (stateStack, context),
@@ -50,14 +57,14 @@ RacingState::RacingState(xy::StateStack& stateStack, Context context)
     m_scene.getSkyLight().setDirection({ 0.2f, 0.4f, -0.7f });
 
     init();
+    addBodies();
+
     quitLoadingScreen();
 }
 
 //public
 bool RacingState::handleEvent(const sf::Event& evt)
-{
-    
-    
+{   
     return true;
 }
 
@@ -82,6 +89,9 @@ void RacingState::draw()
 
     rw.setView(getContext().defaultView);
     rw.draw(m_meshRenderer);
+
+    rw.setView(m_scene.getView());
+    rw.draw(m_physWorld);
 }
 
 //private
@@ -133,4 +143,75 @@ void RacingState::init()
 
     trackSection = m_trackSection.create(m_messageBus, -TrackSection::getSectionSize());
     m_scene.addEntity(trackSection, xy::Scene::Layer::FrontRear);
+
+    xy::CubeBuilder cb(28.f);
+    //m_meshRenderer.loadModel(ModelID::)
+}
+
+void RacingState::addBodies()
+{
+    auto anchorBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
+    xy::Physics::CollisionRectangleShape cr({ xy::DefaultSceneSize.x, 10.f }, { 0.f, 1080.f });
+    xy::Physics::CollisionFilter cf;
+    cf.categoryFlags |= PhysCat::Trap;
+    cf.maskFlags |= PhysCat::SmallBody;
+    cr.setFilter(cf);
+    anchorBody->addCollisionShape(cr);
+
+    cr.setRect({ xy::DefaultSceneSize.x, 60.f }, { 0.f, -80.f });
+    cr.setIsSensor(true);
+    cf.categoryFlags = PhysCat::Destroyer;
+    cr.setFilter(cf);
+    anchorBody->addCollisionShape(cr);
+
+    std::function<void(xy::Physics::Contact&)> cb = 
+        [this](xy::Physics::Contact& contact)
+    {
+        if (contact.getCollisionShapeA()->getFilter().categoryFlags & PhysCat::Destroyer)
+        {
+            xy::Command cmd;
+            cmd.entityID = contact.getCollisionShapeB()->getRigidBody()->getParentUID();
+            cmd.action = [](xy::Entity& ent, float) { ent.destroy(); };
+            m_scene.sendCommand(cmd);
+            LOG("Destroyed ball!", xy::Logger::Type::Info);
+        }
+        else if (contact.getCollisionShapeB()->getFilter().categoryFlags & PhysCat::Destroyer)
+        {
+            xy::Command cmd;
+            cmd.entityID = contact.getCollisionShapeA()->getRigidBody()->getParentUID();
+            cmd.action = [](xy::Entity& ent, float) { ent.destroy(); };
+            m_scene.sendCommand(cmd);
+            contact.getCollisionShapeA()->getRigidBody()->destroy();
+            LOG("Destroyed ball!", xy::Logger::Type::Info);
+        }
+    };
+    m_physWorld.addContactBeginCallback(cb);
+
+    std::function<void()> addBody = [this, &anchorBody]()
+    {
+        auto smallBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
+        smallBody->fixedRotation(true);
+
+        xy::Physics::CollisionCircleShape cs(14.f);
+        cs.setDensity(0.4f);
+        cs.setRestitution(0.6f);
+        
+        xy::Physics::CollisionFilter cf;
+        cf.categoryFlags |= PhysCat::SmallBody;
+        cf.maskFlags = 0xffff;// PhysCat::Trap | PhysCat::Wall;
+        cs.setFilter(cf);
+
+        smallBody->addCollisionShape(cs);
+
+        auto entity = xy::Entity::create(m_messageBus);
+        entity->setPosition(xy::Util::Random::value(200.f, 1600.f), 1020.f);
+        auto b = entity->addComponent(smallBody);
+        m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+        b->applyForceToCentre({ 0.f, xy::Util::Random::value(1500.f, 2500.f) });
+    };
+    for (auto i = 0u; i < 20u; ++i) addBody();
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(anchorBody);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 }

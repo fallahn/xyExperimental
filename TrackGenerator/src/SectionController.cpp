@@ -44,7 +44,7 @@ SectionController::SectionController(xy::MessageBus& mb, TrackSection& ts)
 //public
 void SectionController::entityUpdate(xy::Entity& entity, float dt)
 {
-    if (entity.getPosition().y >= TrackSection::getSectionSize())
+    if (entity.getPosition().y > xy::DefaultSceneSize.y)
     {
         entity.destroy();
         auto newSection = m_trackSection.create(getMessageBus(), entity.getPosition().y - (2.f * TrackSection::getSectionSize()));

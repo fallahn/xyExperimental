@@ -123,7 +123,6 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\RacingState.cpp" />
-    <ClCompile Include="src\Sandbox.cpp" />
     <ClCompile Include="src\SectionController.cpp" />
     <ClCompile Include="src\TrackMeshBuilder.cpp" />
     <ClCompile Include="src\TrackSection.cpp" />
@@ -133,7 +132,6 @@
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\GameIDs.hpp" />
     <ClInclude Include="include\RacingState.hpp" />
-    <ClInclude Include="include\Sandbox.hpp" />
     <ClInclude Include="include\SectionController.hpp" />
     <ClInclude Include="include\TrackMeshBuilder.hpp" />
     <ClInclude Include="include\TrackSection.hpp" />
