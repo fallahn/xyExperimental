@@ -27,63 +27,15 @@ source distribution.
 
 ******************************************************************/
 
-#include <Game.hpp>
-#include <RacingState.hpp>
+#ifndef XYR_TRACK_CONSTS_INL_
+#define XYR_TRACK_CONSTS_INL_
 
-#include <SFML/Window/Event.hpp>
-
-Game::Game()
-    : m_userInterface   (*this),
-    m_stateStack({ getRenderWindow(), *this })
+namespace
 {
-    setMouseCursorVisible(true);
+    const float sectionSize = 1650.f;// xy::DefaultSceneSize.y;
+    const float connectionWidth = 520.f;
+    const float connectionHeight = sectionSize / 4.f;
+    const float connectionBend = 300.f;
+    const float connectionGap = (sectionSize - (connectionWidth * 3.f)) / 2.f;
 }
-
-//private
-void Game::handleEvent(const sf::Event& evt)
-{
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        switch (evt.key.code)
-        {
-        default: break;
-        case sf::Keyboard::Escape:
-            xy::App::quit();
-            break;
-        }
-    }
-
-    m_stateStack.handleEvent(evt);
-}
-
-void Game::handleMessage(const xy::Message& msg)
-{
-    m_stateStack.handleMessage(msg);
-}
-
-void Game::updateApp(float dt)
-{
-    m_stateStack.update(dt);
-}
-
-void Game::draw()
-{
-    m_stateStack.draw();
-}
-
-void Game::registerStates()
-{
-    m_stateStack.registerState<RacingState>(StateID::Racing);
-}
-
-void Game::initialise()
-{
-    registerStates();
-    m_stateStack.pushState(StateID::Racing);
-}
-
-void Game::finalise()
-{
-    m_stateStack.clearStates();
-    m_stateStack.applyPendingChanges();
-}
+#endif //XYR_TRACK_CONSTS_INL_

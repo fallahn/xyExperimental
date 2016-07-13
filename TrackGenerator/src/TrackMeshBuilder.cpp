@@ -37,17 +37,12 @@ source distribution.
 
 #include <array>
 
+#include <TrackConsts.inl>
+
 namespace
 {
     const float trackFarZ = -1.f;
     const float trackNearZ = 480.f;
-
-    const float sectionSize = 1650.f;// xy::DefaultSceneSize.y; //ugh, duplicate, at least it's based on a const value....
-    const float connectionWidth = 520.f;
-    const float connectionHeight = sectionSize / 4.f;
-    const float connectionBend = 200.f;
-    const float connectionGap = (sectionSize - (connectionWidth * 3.f)) / 2.f;
-
     const std::size_t reservedIndexArrays = 26u;
 }
 

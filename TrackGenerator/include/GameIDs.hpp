@@ -27,63 +27,26 @@ source distribution.
 
 ******************************************************************/
 
-#include <Game.hpp>
-#include <RacingState.hpp>
+#ifndef XYR_GAME_IDS_HPP_
+#define XYR_GAME_IDS_HPP_
 
-#include <SFML/Window/Event.hpp>
-
-Game::Game()
-    : m_userInterface   (*this),
-    m_stateStack({ getRenderWindow(), *this })
+enum StateID
 {
-    setMouseCursorVisible(true);
-}
+    Racing = 0
+};
 
-//private
-void Game::handleEvent(const sf::Event& evt)
+enum ShaderID
 {
-    if (evt.type == sf::Event::KeyReleased)
-    {
-        switch (evt.key.code)
-        {
-        default: break;
-        case sf::Keyboard::Escape:
-            xy::App::quit();
-            break;
-        }
-    }
+    ColouredSmooth = 0,
+    ColouredBumped,
+    TexturedBumped,
+    ShadowCaster
+};
 
-    m_stateStack.handleEvent(evt);
-}
-
-void Game::handleMessage(const xy::Message& msg)
+enum MaterialID
 {
-    m_stateStack.handleMessage(msg);
-}
+    Track = 0,
+    Barrier
+};
 
-void Game::updateApp(float dt)
-{
-    m_stateStack.update(dt);
-}
-
-void Game::draw()
-{
-    m_stateStack.draw();
-}
-
-void Game::registerStates()
-{
-    m_stateStack.registerState<RacingState>(StateID::Racing);
-}
-
-void Game::initialise()
-{
-    registerStates();
-    m_stateStack.pushState(StateID::Racing);
-}
-
-void Game::finalise()
-{
-    m_stateStack.clearStates();
-    m_stateStack.applyPendingChanges();
-}
+#endif //XYR_GAME_IDS_HPP_

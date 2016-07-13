@@ -27,36 +27,46 @@ source distribution.
 
 ******************************************************************/
 
-#ifndef TG_GAME_HPP_
-#define TG_GAME_HPP_
+#ifndef XYR_RACING_STATE_HPP_
+#define XYR_RACING_STATE_HPP_
 
-#include <UserInterface.hpp>
+#include <GameIDs.hpp>
+#include <TrackSection.hpp>
 
-#include <xygine/App.hpp>
-#include <xygine/StateStack.hpp>
+#include <xygine/State.hpp>
+#include <xygine/Scene.hpp>
+#include <xygine/Resource.hpp>
+#include <xygine/ShaderResource.hpp>
+#include <xygine/physics/World.hpp>
+#include <xygine/mesh/MeshRenderer.hpp>
+#include <xygine/mesh/MaterialResource.hpp>
 
-class Game final : public xy::App
+class RacingState final : public xy::State
 {
 public:
-    Game();
-    ~Game() = default;
-    Game(const Game&) = delete;
-    Game& operator = (const Game&) = delete;
+    RacingState(xy::StateStack&, Context);
+    ~RacingState() = default;
 
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
+
+    xy::StateID stateID() const override { return StateID::Racing; }
 private:
 
-    UserInterface m_userInterface;
-    xy::StateStack m_stateStack;
+    xy::MessageBus& m_messageBus;
+    xy::Scene m_scene;
+    xy::Physics::World m_physWorld;
+    xy::MeshRenderer m_meshRenderer;
 
-    void handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override;
+    TrackSection m_trackSection;
 
-    void registerStates() override;
-    void initialise() override;
-    void finalise() override;
+    xy::TextureResource m_textureResource;
+    xy::ShaderResource m_shaderResource;
+    xy::MaterialResource m_materialResource;
 
-    void updateApp(float dt) override;
-    void draw() override;
+    void init();
 };
 
-#endif //TG_GAME_HPP_
+#endif //XYR_RACING_STATE_HPP_

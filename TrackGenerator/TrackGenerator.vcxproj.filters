@@ -36,6 +36,9 @@
     <ClCompile Include="src\TrackMeshBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\RacingState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Sandbox.hpp">
@@ -56,5 +59,16 @@
     <ClInclude Include="include\TrackMeshBuilder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\RacingState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\TrackConsts.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
