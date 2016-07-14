@@ -46,7 +46,8 @@ enum ShaderID
 enum MaterialID
 {
     Track = 0,
-    Barrier
+    Barrier,
+    Thing
 };
 
 enum ModelID
