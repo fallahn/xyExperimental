@@ -1,0 +1,72 @@
+/*********************************************************************
+Matt Marchant 2014 - 2016
+http://trederia.blogspot.com
+
+xygine - Zlib license.
+
+This software is provided 'as-is', without any express or
+implied warranty. In no event will the authors be held
+liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute
+it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented;
+you must not claim that you wrote the original software.
+If you use this software in a product, an acknowledgment
+in the product documentation would be appreciated but
+is not required.
+
+2. Altered source versions must be plainly marked as such,
+and must not be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any
+source distribution.
+*********************************************************************/
+
+#ifndef XY_TMX_IMAGELAYER_HPP_
+#define XY_TMX_IMAGELAYER_HPP_
+
+#include <xygine/tilemap/Layer.hpp>
+
+#include <SFML/Graphics/Texture.hpp>
+
+namespace xy
+{
+    class TextureResource;
+    namespace tmx
+    {
+        /*!
+        \brief Image layers contain a single image which make up that
+        layer. The parser contains the fully reolved path to the image
+        relative to the working directory.
+        */
+        class XY_EXPORT_API ImageLayer final : public Layer
+        {
+        public:
+            explicit ImageLayer(const std::string&);
+            ~ImageLayer() = default;
+
+            Type getType() const override { return Layer::Type::Image; }
+            void parse(const pugi::xml_node&) override;
+
+            /*!
+            \brief Returns the path, relative to the working directory,
+            of the image used by the image layer.
+            */
+            const std::string& getImagePath() const { return m_filePath; }
+            /*!
+            \brief Returns the colour userd by the image to represent transparent
+            pixels. By default this is (0, 0, 0, 0)
+            */
+            const sf::Color getTransparencyColour() const { return m_transparencyColour; }
+
+        private:
+            std::string m_filePath;
+            sf::Color m_transparencyColour;
+            std::string m_workingDir;
+        };
+    }
+}
+#endif //XY_TMX_IMAGELAYER_HPP_
