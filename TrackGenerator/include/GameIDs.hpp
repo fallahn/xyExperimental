@@ -39,6 +39,7 @@ enum ShaderID
 {
     ColouredSmooth = 0,
     ColouredBumped,
+    TexturedSmooth,
     TexturedBumped,
     ShadowCaster
 };
@@ -52,7 +53,8 @@ enum MaterialID
 
 enum ModelID
 {
-    Cube
+    Cube,
+    Quad
 };
 
 enum PhysCat

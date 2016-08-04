@@ -41,6 +41,8 @@ source distribution.
 #include <xygine/mesh/MeshRenderer.hpp>
 #include <xygine/mesh/MaterialResource.hpp>
 
+#include <xygine/tilemap/Map.hpp>
+
 class RacingState final : public xy::State
 {
 public:
@@ -60,14 +62,20 @@ private:
     xy::Physics::World m_physWorld;
     xy::MeshRenderer m_meshRenderer;
 
-    TrackSection m_trackSection;
+    //TrackSection m_trackSection;
+
+    xy::tmx::Map m_map;
 
     xy::TextureResource m_textureResource;
     xy::ShaderResource m_shaderResource;
     xy::MaterialResource m_materialResource;
 
-    void init();
-    void addBodies();
+    void loadMap();
+    void loadTiles();
+    void addCar();
+
+    //void init();
+    //void addBodies();
 };
 
 #endif //XYR_RACING_STATE_HPP_

@@ -5,4 +5,5 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/SectionController.cpp
   ${PROJECT_DIR}/TrackMeshBuilder.cpp
   ${PROJECT_DIR}/TrackSection.cpp
-  ${PROJECT_DIR}/UserInterface.cpp)
+  ${PROJECT_DIR}/UserInterface.cpp
+  ${PROJECT_DIR}/VehicleControllerB2D.cpp)
