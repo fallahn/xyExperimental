@@ -28,6 +28,8 @@ source distribution.
 #ifndef XY_UTIL_POSITION_HPP_
 #define XY_UTIL_POSITION_HPP_
 
+#include <SFML/Graphics/Text.hpp>
+
 #include <cmath>
 
 namespace xy
@@ -45,6 +47,14 @@ namespace xy
                 static_assert(std::is_base_of<sf::Transformable, T>::value, "only transformable type allowed");
                 sf::FloatRect bounds = transformable.getLocalBounds();
                 transformable.setOrigin(std::floor(bounds.width / 2.f), std::floor(bounds.height / 2.f));
+
+                //sf::text is, unfortunately, a special case
+                if (typeid(T) == typeid(sf::Text))
+                {
+                    auto origin = transformable.getOrigin();
+                    origin.y += bounds.top;
+                    transformable.setOrigin(origin);
+                }
             }
         }
     }

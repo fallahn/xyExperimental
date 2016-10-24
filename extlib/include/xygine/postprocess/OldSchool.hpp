@@ -25,51 +25,34 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-//creates a 'bloom' effect via post process
+#ifndef XY_POST_OS_HPP_
+#define XY_POST_OS_HPP_
 
-#ifndef XY_POST_BLOOM_HPP_
-#define XY_POST_BLOOM_HPP_
+#include <xygine/postprocess/PostProcess.hpp>
 
-#include <xygine/PostProcess.hpp>
-#include <xygine/ShaderResource.hpp>
-
-#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Shader.hpp>
-
-#include <array>
+#include <SFML/Graphics/RenderTexture.hpp>
 
 namespace xy
 {
     /*!
-    \brief Bloom post process effect
-
-    Creates a glowing 'bloom' effect on brighter objects
-    within a scene
+    \brief Applies a colour dithering / degredation effect to 
+    emulate the appearance of older 16 or 8 bit graphics modes
     */
-    class XY_EXPORT_API PostBloom final : public PostProcess
+    class XY_EXPORT_API PostOldSchool final : public PostProcess
     {
-
     public:
-        PostBloom();
-        /*!
-        \see PostProcess
-        */
+        PostOldSchool();
+        ~PostOldSchool() = default;
+
         void apply(const sf::RenderTexture&, sf::RenderTarget&) override;
 
     private:
-        using RenderTextureArray = std::array<sf::RenderTexture, 2>;
+        sf::Shader m_fxShader;
+        sf::Shader m_passThroughShader;
 
-        ShaderResource m_shaderResource;
-        sf::RenderTexture m_brightnessTexture;
-        RenderTextureArray m_firstPassTextures;
-        RenderTextureArray m_secondPassTextures;
-
-        void initTextures(const sf::Vector2u&);
-        void filterBright(const sf::RenderTexture&, sf::RenderTexture&);
-        void blurMultipass(RenderTextureArray&);
-        void blur(const sf::RenderTexture&, sf::RenderTexture&, const sf::Vector2f&);
-        void downSample(const sf::RenderTexture&, sf::RenderTexture&);
-        void add(const sf::RenderTexture&, const sf::RenderTexture&, sf::RenderTarget&);
+        sf::RenderTexture m_buffer;
     };
 }
-#endif //XY_POST_BLOOM_HPP_
+
+#endif //XY_POST_OS_HPP_

@@ -138,8 +138,9 @@ namespace xy
 
     protected:
         /*!
-        \brief Request a new istance of a state with the given ID
-        be pushed on top of the state stack to which this state belongs
+        \brief Request a new instance of a state with the given ID
+        be pushed on top of the state stack to which this state belongs.
+        \param id StateID of state to be pushed on to the stack
         */
         void requestStackPush(StateID id);
         /*!
@@ -171,6 +172,11 @@ namespace xy
         As this runs in its own thread SYNCHRONISATION IS UP TO YOU.
         */
         virtual void updateLoadingScreen(float dt, sf::RenderWindow&);
+
+        /*!
+        \brief Returns the number of active states on this state's stack
+        */
+        std::size_t getStateCount() const;
 
     private:
         StateStack& m_stateStack;

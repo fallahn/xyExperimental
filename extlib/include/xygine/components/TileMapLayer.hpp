@@ -30,12 +30,24 @@ source distribution.
 
 #include <xygine/components/Component.hpp>
 #include <xygine/tilemap/Map.hpp>
-#include <xygine/tilemap/TileLayer.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+
+#include <functional>
 
 namespace xy
 {
+    namespace tmx
+    {
+        class ImageLayer;
+        class TileLayer;
+    }
+
+    class TextureResource;
+    class ShaderResource;
+
     /*
     \brief Drawable tile map layer.
     This component represents a single layer loaded via xy::tmx::Map.
@@ -48,25 +60,48 @@ namespace xy
     class TileMapLayer final : public xy::Component, public sf::Drawable
     {
     public:
-        friend class tmx::Map;
 
-        TileMapLayer(xy::MessageBus&, const tmx::Map::Key&);
+        TileMapLayer(xy::MessageBus&, const tmx::Map::Key&, const sf::Vector2u&);
         ~TileMapLayer() = default;
 
         xy::Component::Type type() const override { return Component::Type::Drawable; }
         void entityUpdate(Entity&, float) override;
+        sf::FloatRect globalBounds() const override { return m_globalBounds; }
 
-        void setTileData(const tmx::TileLayer*, const std::vector<tmx::Tileset>&);
+        void setTileData(const tmx::TileLayer*, const std::vector<tmx::Tileset>&, const tmx::Map&, TextureResource&, ShaderResource&);
+        void setImageData(const tmx::ImageLayer*, const tmx::Map&, TextureResource&);
 
     private:
 
-        struct TileData
+        struct TileData final
         {
             std::unique_ptr<sf::Texture> lookupTexture;
             sf::Texture* tileTexture = nullptr;
+            sf::Vector2u tileCount;
+            sf::Vector2f tileScale; //this tile set's scale relative to map
         };
-        std::vector<TileData> m_tileData;
+        
+        struct Chunk final : public sf::Drawable
+        {
+            std::vector<TileData> tileData;
+            sf::FloatRect bounds;
+            std::array<sf::Vertex, 4u> vertices;
+        private:
+            void draw(sf::RenderTarget&, sf::RenderStates) const override;
+        };
 
+        std::vector<Chunk> m_chunks;
+        std::vector<const Chunk*> m_drawList;
+        sf::Vector2u m_chunkResolution;
+
+        float m_opacity;
+        sf::FloatRect m_globalBounds;
+        sf::Vector2u m_tileSize;
+        sf::Shader* m_shader;
+        
+        sf::Sprite m_imageSprite;
+
+        std::function<void(sf::RenderTarget&, sf::RenderStates)> m_renderFunc;
         void draw(sf::RenderTarget&, sf::RenderStates) const override;
     };
 }

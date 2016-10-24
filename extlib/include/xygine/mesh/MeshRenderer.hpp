@@ -42,6 +42,7 @@ source distribution.
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/System/Clock.hpp>
 
 #include <glm/mat4x4.hpp>
 
@@ -53,6 +54,7 @@ namespace xy
     class MessageBus;
     class Message;
     class Mesh;
+    class MeshDrawable;
     class Model;
     class Scene;
     class ModelBuilder;
@@ -63,11 +65,13 @@ namespace xy
     into 3D space and aligns it with the 2D world so that 3D models will
     fit, creating a 2.5D like effect. The mesh renderer itself is an
     SFML drawable, so can be drawn on top of a scene like any other
-    drawable class.
+    drawable class, but can also return a drawable component, allowing
+    the 3D view to be drawn on any layer in a Scene.
     */
     class XY_EXPORT_API MeshRenderer final : public sf::Drawable
     {
         friend class Model;
+        friend class MeshDrawable;
     public:
         /*!
         \brief Constructor.
@@ -109,6 +113,15 @@ namespace xy
         std::unique_ptr<Model> createModel(const Mesh&, MessageBus&);
 
         /*!
+        \brief Factory function to create drawable components of the MeshRenderer.
+        MeshSrawable components allow drawing the MeshRenderer directly within a 
+        Scene, and therefore enables layer ordering. It is recommended for performance
+        reasons that there usually be no more than one of these per MeshRenderer.
+        \see MeshDrawable
+        */
+        std::unique_ptr<MeshDrawable> createDrawable(MessageBus&);
+
+        /*!
         \brief Updates the MeshRenderer with the current scene status.
         Should be called once per frame after updating the scene to which
         the MeshRenderer is associated.
@@ -148,12 +161,43 @@ namespace xy
         */
         void enableGlowPass(bool);
 
+        /*!
+        \brief Sets the view to be used  when rendering the 3D scene.
+        This view will override any active view when the MeshRenderer is drawn, before
+        restoring the original view. This is generally the default view of the Stack context
+        but can be set multiple times, for example when drawing split screen views.
+        This is also useful for setting the view to that of render buffers other than the
+        default window, such as sf::RenderTexture or xy::MultiRenderTexture
+        */
+        void setView(const sf::View& v) { m_view = v; }
+
+        /*
+        \brief Sets the multipliers used to calculate the near and far plane.
+        The near and far planes ar calculated as a ratio of the virtual camera depth and
+        must be between 0-1 for the near plane and greater than 1 for the far plane.
+        The default is set to the optimal 0.8 and 1.2 respectively, these values should
+        generally only be changed when loading models which appear in the far background.
+        */
+        void setNearFarRatios(float n, float f);
+
+        /*!
+        \brief Sets the field of view used by the 3D camera.
+        \param float Field of view of the camera in degrees.
+        The FOV is 10 degrees to 180 degrees
+        */
+        void setFOV(float);
+
+        /*!
+        \brief Returns the current scen FOV
+        */
+        float getFOV() const { return m_fov; }
+
     private:
         struct Lock final {};
 
         MeshResource m_meshResource;
         MaterialResource m_materialResource;
-        ShaderResource m_shaderResource;
+        //ShaderResource m_shaderResource;
 
         struct AnimationData
         {
@@ -168,6 +212,7 @@ namespace xy
         glm::mat4 m_viewMatrix;
         glm::mat4 m_projectionMatrix;
         float m_cameraZ;
+        sf::View m_view;
 
         enum MaterialChannel
         {
@@ -240,15 +285,23 @@ namespace xy
         sf::Shader m_depthShader;
         void drawDepth() const;
 
+        sf::Shader m_waterShader;
+        sf::Texture m_surfaceTexture;
+        sf::Clock m_shaderClock;
+
         mutable std::vector<Model*> m_models;
         mutable xy::MultiRenderTexture m_gBuffer;
         void drawScene() const;
 
         sf::Shader m_debugShader;
-        sf::Texture m_dummyTetxure;
+        sf::Texture m_dummyTexture;
         sf::Sprite m_dummySprite;
         std::unique_ptr<RenderQuad> m_outputQuad;
         void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+        float m_nearRatio;
+        float m_farRatio;
+        float m_fov;
 
         void updateView();
         void updateLights(const glm::vec3&);     

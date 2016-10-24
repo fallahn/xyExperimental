@@ -76,7 +76,21 @@ namespace xy
         errors to the console.
         */
         static bool directoryExists(const std::string&);
-
+        /*!
+        \brief Returns a vector of strings containing the names of directories
+        found in the given path.
+        */
+        static std::vector<std::string> listDirectories(const std::string&);
+        /*!
+        \brief Returns the absolute path of the current working directory
+        */
+        static std::string getCurrentDirectory();
+        /*! 
+        \brief Attempts to convert the given absolute path to a path relative to the given root directory
+        \param path Absolute path to convert
+        \param root Absolute path to root directory to which the result should be relative
+        */
+        static std::string getRelativePath(std::string path, const std::string& root);
     private:
 
     };

@@ -35,6 +35,7 @@ source distribution.
 
 namespace xy
 {
+    class App;    
     /*!
     \brief Console class
     The console is used to display messages and xygine specific information
@@ -52,8 +53,7 @@ namespace xy
         static void print(const std::string&);
 
         /*!
-        \brief Draws ths console.
-        This must be called every frame you wish the console to be visible
+        \brief Toggles console visibility
         */
         static void show();
 
@@ -93,9 +93,9 @@ namespace xy
         static void doCommand(const std::string&);
 
     private:
-        static void draw();
-        static void registerDefaultCommands();
-        
+        static void draw(App*);
+        static void registerDefaultCommands(App*);
+        static void kill();
     };
 }
 

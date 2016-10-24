@@ -25,44 +25,27 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-//simulates chromatic aberration
+#ifndef XY_POST_ANTIQUE_HPP_
+#define XY_POST_ANTIQUE_HPP_
 
-#ifndef XY_POST_CHROMEAB_HPP_
-#define XY_POST_CHROMEAB_HPP_
+#include <xygine/postprocess/PostProcess.hpp>
 
-#include <xygine/PostProcess.hpp>
-#include <xygine/ShaderResource.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
 namespace xy
 {
-    /*!
-    \brief Creates a Chromatic Abberation effect
-
-    Chromatic abberation is the apparent split in colours often
-    noticed near the edges of powerful lenses. The effect also adds
-    noise and scanlines to try and recreate the overall effect of
-    and old CRT type monitor
-    */
-    class XY_EXPORT_API PostChromeAb final : public PostProcess
+    class XY_EXPORT_API PostAntique final : public xy::PostProcess
     {
     public:
-        /*!
-        \brief Constructor.
-        \param distort If set to true the post effect will apply a
-        CRT style bowed distortion around the edge of the screen
-        */
-        PostChromeAb(bool distort = false);
-        /*!
-        \see PostProcess
-        */
+        PostAntique();
+        ~PostAntique();
+
         void apply(const sf::RenderTexture&, sf::RenderTarget&) override;
-        /*!
-        \see PostProcess
-        */
         void update(float) override;
 
     private:
-        ShaderResource m_shaderResource;
+        sf::Shader m_shader;
     };
 }
-#endif //XY_POST_CHROMEAB_HPP_
+
+#endif //XY_POST_ANTIQUE_HPP_

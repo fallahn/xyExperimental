@@ -136,6 +136,7 @@ namespace xy
         void handleMessage(const Message&);
         /*!
         \brief Push a new instance of a state with the given ID to the stack
+        \param id Integer representing the ID of t he state to push on the stack
         */
         void pushState(StateID id);
         /*!
@@ -162,6 +163,10 @@ namespace xy
         \brief Applies any changes requested by states active on the stack.
         */
         void applyPendingChanges();
+        /*!
+        \brief Returns the number of actives states on the stack
+        */
+        std::size_t getStackSize() const { return m_stack.size(); }
 
     private:
         static const StateID bufferID = -100;
@@ -182,13 +187,16 @@ namespace xy
 
         struct Pendingchange
         {
-            explicit Pendingchange(Action, StateID id = 0);
+            explicit Pendingchange(Action, StateID id = 0, bool = false);
             Action action;
-            StateID id;
+            StateID id = 0;
+            bool suspendPrevious = false;
         };
 
         std::vector<State::Ptr> m_stack;
+        std::vector<std::pair<StateID, State::Ptr>> m_suspended;
         std::vector<Pendingchange> m_pendingChanges;
+        std::vector<Pendingchange> m_activeChanges;
         State::Context m_context;
         std::map<StateID, std::function<State::Ptr()>> m_factories;
         State::Ptr createState(StateID id);
