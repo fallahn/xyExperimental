@@ -1,8 +1,9 @@
 xyRacer
 -------
 
-An experiment in 2D vehicle physics and procedural track generation
-with the aim of eventually (re)making Space Racers using xygine.
+An experiment, originally, in 2D vehicle physics and procedural track
+generation with the aim of eventually (re)making Space Racers using
+xygine., this repo now holds a variety of xygine based gameplay experiments.
 
 
 -----------------------------------------------------------------------

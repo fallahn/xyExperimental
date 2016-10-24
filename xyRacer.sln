@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhysicsSandbox", "PhysicsSandbox\PhysicsSandbox.vcxproj", "{F5944F8A-F242-4628-9630-6722A91824F9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackGenerator", "TrackGenerator\TrackGenerator.vcxproj", "{9937A715-6360-49BF-AABB-4196F92FD476}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SuperTerrain", "SuperTerrain\SuperTerrain.vcxproj", "{F04A4D1E-9C17-4D32-931C-09760062566D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,19 +20,23 @@ Global
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Debug|x64.ActiveCfg = Debug|x64
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Debug|x64.Build.0 = Debug|x64
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Debug|x86.ActiveCfg = Debug|Win32
-		{F5944F8A-F242-4628-9630-6722A91824F9}.Debug|x86.Build.0 = Debug|Win32
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Release|x64.ActiveCfg = Release|x64
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Release|x64.Build.0 = Release|x64
 		{F5944F8A-F242-4628-9630-6722A91824F9}.Release|x86.ActiveCfg = Release|Win32
-		{F5944F8A-F242-4628-9630-6722A91824F9}.Release|x86.Build.0 = Release|Win32
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Debug|x64.ActiveCfg = Debug|x64
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Debug|x64.Build.0 = Debug|x64
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Debug|x86.ActiveCfg = Debug|Win32
-		{9937A715-6360-49BF-AABB-4196F92FD476}.Debug|x86.Build.0 = Debug|Win32
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Release|x64.ActiveCfg = Release|x64
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Release|x64.Build.0 = Release|x64
 		{9937A715-6360-49BF-AABB-4196F92FD476}.Release|x86.ActiveCfg = Release|Win32
-		{9937A715-6360-49BF-AABB-4196F92FD476}.Release|x86.Build.0 = Release|Win32
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Debug|x64.ActiveCfg = Debug|x64
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Debug|x64.Build.0 = Debug|x64
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Debug|x86.ActiveCfg = Debug|Win32
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Debug|x86.Build.0 = Debug|Win32
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Release|x64.ActiveCfg = Release|x64
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Release|x64.Build.0 = Release|x64
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Release|x86.ActiveCfg = Release|Win32
+		{F04A4D1E-9C17-4D32-931C-09760062566D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
