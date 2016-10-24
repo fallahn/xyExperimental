@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2016
 http://trederia.blogspot.com
 
 SuperTerrain - Zlib license.
@@ -26,6 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <Game.hpp>
+#include <WorldClientState.hpp>
 
 #include <xygine/KeyBinds.hpp>
 
@@ -79,7 +80,7 @@ void Game::draw()
 void Game::initialise()
 {
     registerStates();
-    //m_stateStack.pushState(MyFirstState);
+    m_stateStack.pushState(States::WorldClient);
 
     getRenderWindow().setKeyRepeatEnabled(false);
 
@@ -94,5 +95,5 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-
+    m_stateStack.registerState<WorldClientState>(States::WorldClient);
 }

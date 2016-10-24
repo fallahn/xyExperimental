@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2016
 http://trederia.blogspot.com
 
 SuperTerrain - Zlib license.

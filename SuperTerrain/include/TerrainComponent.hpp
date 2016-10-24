@@ -25,20 +25,25 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#ifndef ST_TERRAIN_CONPONENT_HPP_
+#define ST_TERRAIN_COMPONENT_HPP_
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <xygine/components/Component.hpp>
 
-int main()
+#include <SFML/Graphics/Drawable.hpp>
+
+class TerrainComponent final : public xy::Component, public sf::Drawable 
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
+public:
+    explicit TerrainComponent(xy::MessageBus&);
+    ~TerrainComponent() = default;
 
-    Game game;
-    game.run();
+    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
+    void entityUpdate(xy::Entity&, float) override;
 
-    return 0;
-}
+private:
+
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
+};
+
+#endif //ST_TERRAIN_COMPONENT_HPP_

@@ -25,20 +25,43 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#include <WorldClientState.hpp>
+#include <TerrainComponent.hpp>
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <xygine/App.hpp>
 
-int main()
+WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
+    : State     (stateStack, context),
+    m_messageBus(context.appInstance.getMessageBus()),
+    m_scene     (m_messageBus)
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
-
-    Game game;
-    game.run();
-
-    return 0;
+    auto tc = xy::Component::create<TerrainComponent>(m_messageBus);
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(tc);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 }
+
+//public
+bool WorldClientState::update(float dt)
+{
+    m_scene.update(dt);
+    return false;
+}
+
+bool WorldClientState::handleEvent(const sf::Event& evt)
+{
+    return false;
+}
+
+void WorldClientState::handleMessage(const xy::Message& msg)
+{
+    m_scene.handleMessage(msg);
+}
+
+void WorldClientState::draw()
+{
+    auto& rw = getContext().renderWindow;
+    rw.draw(m_scene);
+}
+
+//private

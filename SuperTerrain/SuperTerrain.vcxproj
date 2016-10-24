@@ -134,11 +134,23 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Chunk.hpp" />
+    <ClInclude Include="include\FastNoiseSIMD.h" />
     <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\TerrainComponent.hpp" />
+    <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse2.cpp" />
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse41.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\TerrainComponent.cpp" />
+    <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -25,20 +25,26 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#ifndef ST_CHUNK_HPP_
+#define ST_CHUNK_HPP_
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
-int main()
+#include <array>
+
+class Chunk final : public sf::Drawable
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
+public:
 
-    Game game;
-    game.run();
+    std::uint64_t getID() const
+    {
+        //precalc this:
+        //pos.x * pos.y + std::hash(pos.x > y ? "buns" : "dicketry") + std::hash(quadrant);
+    }
 
-    return 0;
-}
+private:
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
+};
+
+#endif //ST_CHUNK_HPP_

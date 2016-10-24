@@ -25,20 +25,30 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#ifndef ST_WORLDCLIENT_STATE_HPP_
+#define ST_WORLDCLIENT_STATE_HPP_
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <StateIDs.hpp>
 
-int main()
+#include <xygine/State.hpp>
+#include <xygine/Scene.hpp>
+
+class WorldClientState final : public xy::State
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
+public:
+    WorldClientState(xy::StateStack&, Context);
+    ~WorldClientState() = default;
 
-    Game game;
-    game.run();
+    bool update(float) override;
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    void draw() override;
 
-    return 0;
-}
+    xy::StateID stateID() const override { return States::WorldClient; }
+
+private:
+    xy::MessageBus& m_messageBus;
+    xy::Scene m_scene;
+};
+
+#endif //ST_WORLD_CLIENT_STATE_HPP_

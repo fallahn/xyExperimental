@@ -25,20 +25,28 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#include <TerrainComponent.hpp>
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
+#include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
 
-int main()
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+
+TerrainComponent::TerrainComponent(xy::MessageBus& mb)
+    :xy::Component(mb, this)
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
 
-    Game game;
-    game.run();
+}
 
-    return 0;
+//public
+void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
+{
+
+}
+
+//private
+void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+{
+
 }

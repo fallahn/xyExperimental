@@ -25,20 +25,15 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <Game.hpp>
+#ifndef ST_STATES_HPP_
+#define ST_STATES_HPP_
 
-#ifdef __linux
-#include <X11/Xlib.h>
-#endif // __linux
-
-int main()
+namespace States
 {
-#ifdef __linux
-    XInitThreads();
-#endif //__linux
-
-    Game game;
-    game.run();
-
-    return 0;
+    enum ID
+    {
+        WorldClient
+    };
 }
+
+#endif //ST_STATES_HPP_

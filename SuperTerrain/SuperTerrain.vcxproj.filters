@@ -13,10 +13,37 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\fastnoise">
+      <UniqueIdentifier>{08279617-e06b-4c5c-ac8e-c5143703001e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\states">
+      <UniqueIdentifier>{6a6170f5-9691-44a8-b289-2959e719e3d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\states">
+      <UniqueIdentifier>{7a5ef29c-fded-40ee-90ba-a22c9ec6b244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\terrain">
+      <UniqueIdentifier>{1d21a9af-a891-4b87-aeda-d4aff8f4f980}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StateIDs.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\WorldClientState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TerrainComponent.hpp">
+      <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FastNoiseSIMD.h">
+      <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Chunk.hpp">
+      <Filter>Header Files\terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +51,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse2.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fastnoise\FastNoiseSIMD_sse41.cpp">
+      <Filter>Source Files\fastnoise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WorldClientState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TerrainComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
