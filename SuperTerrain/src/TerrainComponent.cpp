@@ -73,6 +73,7 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
             std::floor(playerPosition.x / Chunk::chunkSize().x) * Chunk::chunkSize().x,
             std::floor(playerPosition.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
         };
+        chunkPos += (Chunk::chunkSize() / 2.f);
         m_activeChunks.emplace_back(std::make_unique<Chunk>(chunkPos));
 
         //set current chunk to new chunk
@@ -112,13 +113,12 @@ void TerrainComponent::updateChunks()
 
     //TODO this could be optimised - so many loops!
     for (auto& point : m_radialPoints) point.second = false;
-
+    auto currentChunkPos = m_currentChunk->getPosition();
     for (const auto& chunk : m_activeChunks)
-    {
-        auto chunkPos = m_currentChunk->getPosition();
+    {        
         for (auto& point : m_radialPoints)
         {
-            if (!point.second && chunk->getGlobalBounds().contains(point.first + chunkPos))
+            if (!point.second && chunk->getGlobalBounds().contains(point.first + currentChunkPos))
             {
                 point.second = true;
                 break;
@@ -130,12 +130,13 @@ void TerrainComponent::updateChunks()
     {
         if (!point.second)
         {
-            auto currentPos = point.first + m_currentChunk->getPosition();
+            auto currentPos = point.first + currentChunkPos;
             sf::Vector2f chunkPos =
             {
                 std::floor(currentPos.x / Chunk::chunkSize().x) * Chunk::chunkSize().x,
                 std::floor(currentPos.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
             };
+            chunkPos += (Chunk::chunkSize() / 2.f); //account for positioning being in centre
             m_activeChunks.emplace_back(std::make_unique<Chunk>(chunkPos));
         }
     }

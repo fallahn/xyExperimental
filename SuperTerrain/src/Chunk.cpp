@@ -27,12 +27,16 @@ source distribution.
 
 #include <Chunk.hpp>
 
+#include <xygine/util/Vector.hpp>
+
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
 namespace
 {
     const sf::Vector2f chunkWorldSize(256.f, 256.f);
+
+    const float maxDist = 10000.f;
 }
 
 Chunk::Chunk(sf::Vector2f position)
@@ -51,7 +55,11 @@ Chunk::Chunk(sf::Vector2f position)
     m_vertices[2].position = position + chunkWorldSize;
     m_vertices[3].position = { position.x , position.y + chunkWorldSize.y };
 
-    for (auto& v : m_vertices) v.color = sf::Color(127, 127, 127);
+
+    float colourRatio = xy::Util::Vector::length(position) / maxDist;
+    sf::Uint8 colour = static_cast<sf::Uint8>(colourRatio * 255.f);
+
+    for (auto& v : m_vertices) v.color = sf::Color(colour, colour,colour);
 }
 
 //public

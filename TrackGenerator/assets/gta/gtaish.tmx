@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="left-down" width="12" height="8" tilewidth="256" tileheight="256" nextobjectid="12">
+ <tileset firstgid="1" name="Roads" tilewidth="256" tileheight="256" tilecount="12" columns="4">
+  <image source="tileset.png" width="1024" height="768"/>
+ </tileset>
+ <layer name="Roads" width="12" height="8">
+  <data encoding="base64" compression="zlib">
+   eJx1j4EKgDAIRK9as1n//71NpnAcNXhMTrlTA7AJ94cWXJOG9XoC0kBaTz0w8Xlo3kQfk1P8Bs0cuUflNsrk3E71Lv56q6enZc37sH/5/WVzVuH0u/TizhcJvwFy
+  </data>
+ </layer>
+ <objectgroup color="#00ff00" name="Collision">
+  <object id="1" x="1536" y="256" width="512" height="512"/>
+  <object id="2" x="2560" y="768" width="256" height="256"/>
+  <object id="3" x="2304" y="1536" width="512" height="256"/>
+  <object id="4" x="2304" y="256" width="256" height="256"/>
+  <object id="5" x="1280" y="1536" width="256" height="256"/>
+  <object id="6" x="512" y="1536" width="256" height="256"/>
+  <object id="7" x="512" y="768" width="512" height="512"/>
+  <object id="8" x="256" y="256" width="256" height="256"/>
+  <object id="9" x="1024" y="256" width="256" height="256"/>
+  <object id="11" x="0" y="0">
+   <polyline points="0,0 3072,0 3072,2048 0,2048 0,0"/>
+  </object>
+ </objectgroup>
+</map>
