@@ -27,6 +27,7 @@
 //
 
 #include "FastNoiseSIMD.h"
+#include <stdlib.h>
 #include <assert.h>
 
 #ifdef FN_COMPILE_NO_SIMD_FALLBACK
