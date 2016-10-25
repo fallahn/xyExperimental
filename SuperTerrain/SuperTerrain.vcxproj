@@ -142,6 +142,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp" />

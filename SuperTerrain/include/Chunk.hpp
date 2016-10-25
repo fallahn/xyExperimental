@@ -36,6 +36,8 @@ source distribution.
 class Chunk final : public sf::Drawable
 {
 public:
+    Chunk(sf::Vector2f position);
+    ~Chunk() = default;
 
     std::uint64_t getID() const
     {
@@ -43,7 +45,22 @@ public:
         //pos.x * pos.y + std::hash(pos.x > y ? "buns" : "dicketry") + std::hash(quadrant);
     }
 
+    const sf::FloatRect& getGlobalBounds() const { return m_globalBounds; }
+    const sf::Vector2f& getPosition() { return m_position; }
+
+    static const sf::Vector2f& chunkSize();
+
+    void destroy() { m_destroyed = true; } //TODO only mark true when thread not pending
+    bool destroyed() const { return m_destroyed; }
+
 private:
+    
+    bool m_destroyed;
+    sf::Vector2f m_position;
+
+    std::array<sf::Vertex, 4u> m_vertices;
+    sf::FloatRect m_globalBounds;
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 

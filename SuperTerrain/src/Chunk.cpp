@@ -25,40 +25,43 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef ST_TERRAIN_CONPONENT_HPP_
-#define ST_TERRAIN_COMPONENT_HPP_
-
 #include <Chunk.hpp>
 
-#include <xygine/components/Component.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 
-#include <SFML/Graphics/Drawable.hpp>
-
-#include <vector>
-#include <memory>
-
-class TerrainComponent final : public xy::Component, public sf::Drawable 
+namespace
 {
-public:
-    explicit TerrainComponent(xy::MessageBus&);
-    ~TerrainComponent() = default;
+    const sf::Vector2f chunkWorldSize(256.f, 256.f);
+}
 
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float) override;
+Chunk::Chunk(sf::Vector2f position)
+    : m_destroyed   (false),
+    m_position      (position)
+{
+    position -= (chunkWorldSize / 2.f);
 
-    sf::FloatRect globalBounds() const override { return (m_currentChunk) ? m_currentChunk->getGlobalBounds() : sf::FloatRect(); }
+    m_globalBounds.left = position.x;
+    m_globalBounds.top = position.y;
+    m_globalBounds.width = chunkWorldSize.x;
+    m_globalBounds.height = chunkWorldSize.y;
 
-private:
-    std::array<std::pair<sf::Vector2f, bool>, 8> m_radialPoints;
+    m_vertices[0].position = position;
+    m_vertices[1].position = { position.x + chunkWorldSize.x, position.y };
+    m_vertices[2].position = position + chunkWorldSize;
+    m_vertices[3].position = { position.x , position.y + chunkWorldSize.y };
 
-    float m_maxDistance;
+    for (auto& v : m_vertices) v.color = sf::Color(127, 127, 127);
+}
 
-    Chunk* m_currentChunk;
-    std::vector<std::unique_ptr<Chunk>> m_activeChunks;
+//public
+const sf::Vector2f& Chunk::chunkSize()
+{
+    return chunkWorldSize;
+}
 
-    void updateChunks();
-
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
-};
-
-#endif //ST_TERRAIN_COMPONENT_HPP_
+//private
+void Chunk::draw(sf::RenderTarget& rt, sf::RenderStates states) const
+{
+    rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
+}

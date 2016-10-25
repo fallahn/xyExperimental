@@ -25,6 +25,9 @@
     <Filter Include="Header Files\terrain">
       <UniqueIdentifier>{1d21a9af-a891-4b87-aeda-d4aff8f4f980}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\terrain">
+      <UniqueIdentifier>{9a3046d5-104f-42f2-95cf-3d6e6b518caa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -72,7 +75,10 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\TerrainComponent.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chunk.cpp">
+      <Filter>Source Files\terrain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
