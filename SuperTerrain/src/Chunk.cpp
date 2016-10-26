@@ -36,6 +36,7 @@ source distribution.
 #include <SFML/Graphics/Shader.hpp>
 
 #include <algorithm>
+#include <cstring>
 
 namespace
 {
