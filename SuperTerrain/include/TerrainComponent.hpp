@@ -57,13 +57,13 @@ private:
     sf::Vector2f m_playerPosition;
 
     sf::Shader m_shader;
-    std::vector<std::pair<sf::Texture, bool>> m_texturePool;
+    std::vector<ChunkTexture> m_texturePool;
+    ChunkTexture& getTexture();
 
     Chunk* m_currentChunk;
     using ChunkPtr = xy::Detail::ObjectPool<Chunk>::Ptr;
+    xy::Detail::ObjectPool<Chunk> m_chunkPool; //pool must live longer!
     std::vector<ChunkPtr> m_activeChunks;
-
-    xy::Detail::ObjectPool<Chunk> m_chunkPool;
 
     void updateChunks();
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

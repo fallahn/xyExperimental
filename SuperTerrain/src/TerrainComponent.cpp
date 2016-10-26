@@ -138,7 +138,7 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
             std::floor(m_playerPosition.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
         };
         chunkPos += (Chunk::chunkSize() / 2.f);
-        m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader));
+        m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader, getTexture()));
 
         //set current chunk to new chunk
         m_currentChunk = m_activeChunks.back().get();
@@ -155,6 +155,15 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
 }
 
 //private
+ChunkTexture& TerrainComponent::getTexture()
+{
+    return *std::find_if(std::begin(m_texturePool), std::end(m_texturePool), 
+        [](const ChunkTexture& ct)
+    {
+        return !ct.second;
+    });
+}
+
 void TerrainComponent::updateChunks()
 {
     //move around current chunk and delete as necessary
@@ -201,7 +210,7 @@ void TerrainComponent::updateChunks()
                 std::floor(currentPos.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
             };
             chunkPos += (Chunk::chunkSize() / 2.f); //account for positioning being in centre
-            m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader));
+            m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader, getTexture()));
         }
     }
 }

@@ -39,11 +39,13 @@ namespace sf
     class Shader;
 }
 
+using ChunkTexture = std::pair<sf::Texture, bool>;
+
 class Chunk final : public sf::Drawable
 {
 public:
-    Chunk(sf::Vector2f position, sf::Shader&);
-    ~Chunk() = default;
+    Chunk(sf::Vector2f position, sf::Shader&, ChunkTexture&);
+    ~Chunk();
 
     std::uint64_t getID() const { return m_ID; }
 
@@ -65,7 +67,7 @@ private:
 
     std::array<sf::Vertex, 4u> m_vertices;
     sf::FloatRect m_globalBounds;
-    sf::Texture m_texture;
+    ChunkTexture& m_texture;
 
     std::array<std::uint16_t, 4096> m_terrainData;
 

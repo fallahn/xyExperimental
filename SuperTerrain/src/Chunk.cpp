@@ -54,11 +54,12 @@ namespace
     };
 }
 
-Chunk::Chunk(sf::Vector2f position, sf::Shader& shader)
+Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
     : m_ID          (0),
     m_modified      (false),
     m_destroyed     (false),
     m_position      (position),
+    m_texture       (ct),
     m_shader        (shader)
 {
     position -= (chunkWorldSize / 2.f);
@@ -79,12 +80,7 @@ Chunk::Chunk(sf::Vector2f position, sf::Shader& shader)
 
     for (auto& v : m_vertices) v.color = sf::Color(colour, colour,colour);
 
-    //create a texture up front - we'll update this later as necessary
-    //TODO probably needs to be an int-texture
-    if (!m_texture.create(chunkTileCount, chunkTileCount))
-    {
-        xy::Logger::log("Failed creating empty texture for chunk", xy::Logger::Type::Error);
-    }
+    m_texture.second = true;
     std::memset(m_terrainData.data(), 65535, m_terrainData.size());
 
     //generate a UID for chunk based on world position
@@ -96,6 +92,11 @@ Chunk::Chunk(sf::Vector2f position, sf::Shader& shader)
     m_ID = std::uint64_t(position.x * position.y) + hasher(quadrants[quadID]);
 
     load();
+}
+
+Chunk::~Chunk()
+{
+    m_texture.second = false;
 }
 
 //public
@@ -121,8 +122,8 @@ void Chunk::destroy()
 //private
 void Chunk::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    m_shader.setUniform("u_texture", m_texture);
-    states.texture = &m_texture;
+    m_shader.setUniform("u_texture", m_texture.first);
+    states.texture = &m_texture.first;
     states.shader = &m_shader;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 }
@@ -156,9 +157,9 @@ void Chunk::generate()
 
 void Chunk::updateTexture()
 {
-    glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.getNativeHandle()));
+    glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.first.getNativeHandle()));
     //TODO we only need to call this next line once when converting type
-    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, m_texture.getSize().x, m_texture.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
+    //glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, m_texture.getSize().x, m_texture.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
     glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
     glCheck(glBindTexture(GL_TEXTURE_2D, 0));
 
