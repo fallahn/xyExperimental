@@ -218,6 +218,8 @@ void RacingState::loadMap()
 
 void RacingState::loadTiles()
 {
+    m_textureResource.setFallbackColour({ 200, 200, 255 });
+    
     auto& quadMaterial = m_materialResource.add(MaterialID::Track, m_shaderResource.get(ShaderID::TexturedSmooth));
     quadMaterial.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
     quadMaterial.addProperty({ "u_diffuseMap", m_textureResource.get("assets/gta/gtaish.png") });

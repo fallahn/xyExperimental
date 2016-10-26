@@ -9,6 +9,7 @@ set(PROJECT_SRC
 
   ${PROJECT_DIR}/Chunk.cpp
   ${PROJECT_DIR}/Game.cpp
+  ${PROJECT_DIR}/GLExtensions.cpp
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/TerrainComponent.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

@@ -27,16 +27,59 @@ source distribution.
 
 #include <TerrainComponent.hpp>
 
+#include <xygine/detail/GLExtensions.hpp>
+#include <xygine/detail/GLCheck.hpp>
+
 #include <xygine/Entity.hpp>
 #include <xygine/Scene.hpp>
+#include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
+
+#include <xygine/imgui/imgui.h>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
+namespace
+{
+    const std::string vertex =
+        "#version 120\n"
+
+        "varying vec2 v_texCoord;\n"
+        "varying vec4 v_colour;\n"
+
+        "void main()\n"
+        "{\n"
+        "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
+        "    v_texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;"
+        "    v_colour = gl_Color;\n"
+        "}";
+
+    const std::string tileShader =
+        "#version 130\n"
+
+        "uniform usampler2D u_texture;\n"
+
+        "in vec2 v_texCoord;\n"
+        "in vec4 v_colour;\n"
+
+        "out vec4 colour;\n"
+
+        "void main()\n"
+        "{\n"
+        "    uint value = texture(u_texture, v_texCoord).r;\n"
+        "    colour = vec4(vec3(value / 65535u) * v_colour.rgb, 1.0);\n"
+        "}";
+
+    std::size_t maxActiveChunks = 18;
+}
+
 TerrainComponent::TerrainComponent(xy::MessageBus& mb)
     :xy::Component  (mb, this),
-    m_maxDistance   (xy::Util::Vector::lengthSquared(Chunk::chunkSize()) * 1.1f)
+    m_maxDistance   (xy::Util::Vector::lengthSquared(Chunk::chunkSize() * 1.7f)),
+    m_texturePool   (maxActiveChunks),
+    m_currentChunk  (nullptr),
+    m_chunkPool     (maxActiveChunks)
 {
     //radial points used for testing surrounding chunks
     auto length = xy::Util::Vector::length(Chunk::chunkSize());
@@ -51,17 +94,38 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
         std::make_pair(sf::Vector2f(1.f, 0.f) * length, false),
         std::make_pair(xy::Util::Vector::normalise({ 1.f, 1.f }) * length, false)
     };
+
+    m_shader.loadFromMemory(vertex, tileShader);
+
+    //set up the texture pool
+    for (auto& tp : m_texturePool)
+    {
+        tp.first.create(Chunk::chunkTilesSide(), Chunk::chunkTilesSide());
+        glCheck(glBindTexture(GL_TEXTURE_2D, tp.first.getNativeHandle()));
+        glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
+        glCheck(glBindTexture(GL_TEXTURE_2D, 0));
+        tp.second = false; //texture not yet used
+    }
+
+#ifdef _DEBUG_
+    registerWindow();
+#endif //_DEBUG_
+}
+
+TerrainComponent::~TerrainComponent()
+{
+    xy::App::removeUserWindows(this);
 }
 
 //public
 void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
 {
-    auto playerPosition = entity.getScene()->getView().getCenter();
+    m_playerPosition = entity.getScene()->getView().getCenter();
 
     auto result = std::find_if(std::begin(m_activeChunks), std::end(m_activeChunks),
-        [playerPosition](const std::unique_ptr<Chunk>& chunk)
+        [this](const ChunkPtr& chunk)
     {
-        return chunk->getGlobalBounds().contains(playerPosition);
+        return chunk->getGlobalBounds().contains(m_playerPosition);
     });
 
     bool update = false;
@@ -70,11 +134,11 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
         //generate or load new chunk at position
         sf::Vector2f chunkPos = 
         {
-            std::floor(playerPosition.x / Chunk::chunkSize().x) * Chunk::chunkSize().x,
-            std::floor(playerPosition.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
+            std::floor(m_playerPosition.x / Chunk::chunkSize().x) * Chunk::chunkSize().x,
+            std::floor(m_playerPosition.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
         };
         chunkPos += (Chunk::chunkSize() / 2.f);
-        m_activeChunks.emplace_back(std::make_unique<Chunk>(chunkPos));
+        m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader));
 
         //set current chunk to new chunk
         m_currentChunk = m_activeChunks.back().get();
@@ -104,8 +168,8 @@ void TerrainComponent::updateChunks()
     }
 
     //tidy up dead chunks
-    m_activeChunks.erase( std::remove_if(std::begin(m_activeChunks), std::end(m_activeChunks), 
-        [](const std::unique_ptr<Chunk>& chunk)
+    m_activeChunks.erase(std::remove_if(std::begin(m_activeChunks), std::end(m_activeChunks), 
+        [](const ChunkPtr& chunk)
     {
         return chunk->destroyed();
     }), std::end(m_activeChunks));
@@ -137,15 +201,37 @@ void TerrainComponent::updateChunks()
                 std::floor(currentPos.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
             };
             chunkPos += (Chunk::chunkSize() / 2.f); //account for positioning being in centre
-            m_activeChunks.emplace_back(std::make_unique<Chunk>(chunkPos));
+            m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_shader));
         }
     }
 }
 
 void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    states.shader = &m_shader;
     for (const auto& chunk : m_activeChunks)
     {
         rt.draw(*chunk, states);
     }
+}
+
+void TerrainComponent::registerWindow()
+{
+    xy::App::addUserWindow(
+        [this]()
+    {
+        nim::Begin("Info");
+        std::string pp("Player Position: " + std::to_string(m_playerPosition.x) + ", " + std::to_string(m_playerPosition.y));
+        nim::Text(pp.c_str());
+        if (m_currentChunk)
+        {
+            pp = "ChunkID: " + std::to_string(m_currentChunk->getID());
+            nim::Text(pp.c_str());
+            pp = "Chunk Position: " + std::to_string(m_currentChunk->getPosition().x) + ", " + std::to_string(m_currentChunk->getPosition().y);
+            nim::Text(pp.c_str());
+        }
+        pp = "Active chunk count: " + std::to_string(m_activeChunks.size());
+        nim::Text(pp.c_str());
+        nim::End();
+    }, this);
 }

@@ -29,6 +29,7 @@ source distribution.
 #include <WorldClientState.hpp>
 
 #include <xygine/KeyBinds.hpp>
+#include <xygine/detail/GLExtensions.hpp>
 
 #include <SFML/Window/Event.hpp>
 
@@ -79,6 +80,11 @@ void Game::draw()
 
 void Game::initialise()
 {
+    if (ogl_LoadFunctions() == ogl_LOAD_FAILED)
+    {
+       xy::Logger::log("Failed loading OpenGL extensions, things are probably about to crash and burn...", xy::Logger::Type::Error, xy::Logger::Output::All);
+    }
+    
     registerStates();
     m_stateStack.pushState(States::WorldClient);
 

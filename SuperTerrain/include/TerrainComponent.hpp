@@ -31,8 +31,10 @@ source distribution.
 #include <Chunk.hpp>
 
 #include <xygine/components/Component.hpp>
+#include <xygine/detail/ObjectPool.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
 #include <vector>
 #include <memory>
@@ -41,7 +43,7 @@ class TerrainComponent final : public xy::Component, public sf::Drawable
 {
 public:
     explicit TerrainComponent(xy::MessageBus&);
-    ~TerrainComponent() = default;
+    ~TerrainComponent();
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
@@ -52,13 +54,21 @@ private:
     std::array<std::pair<sf::Vector2f, bool>, 8> m_radialPoints;
 
     float m_maxDistance;
+    sf::Vector2f m_playerPosition;
+
+    sf::Shader m_shader;
+    std::vector<std::pair<sf::Texture, bool>> m_texturePool;
 
     Chunk* m_currentChunk;
-    std::vector<std::unique_ptr<Chunk>> m_activeChunks;
+    using ChunkPtr = xy::Detail::ObjectPool<Chunk>::Ptr;
+    std::vector<ChunkPtr> m_activeChunks;
+
+    xy::Detail::ObjectPool<Chunk> m_chunkPool;
 
     void updateChunks();
-
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+    void registerWindow();
 };
 
 #endif //ST_TERRAIN_COMPONENT_HPP_

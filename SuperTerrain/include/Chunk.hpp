@@ -30,38 +30,54 @@ source distribution.
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #include <array>
+
+namespace sf
+{
+    class Shader;
+}
 
 class Chunk final : public sf::Drawable
 {
 public:
-    Chunk(sf::Vector2f position);
+    Chunk(sf::Vector2f position, sf::Shader&);
     ~Chunk() = default;
 
-    std::uint64_t getID() const
-    {
-        //precalc this:
-        //pos.x * pos.y + std::hash(pos.x > y ? "buns" : "dicketry") + std::hash(quadrant);
-    }
+    std::uint64_t getID() const { return m_ID; }
 
     const sf::FloatRect& getGlobalBounds() const { return m_globalBounds; }
     const sf::Vector2f& getPosition() { return m_position; }
 
     static const sf::Vector2f& chunkSize();
+    static sf::Uint32 chunkTilesSide();
 
-    void destroy() { m_destroyed = true; } //TODO only mark true when thread not pending
+    void destroy();
     bool destroyed() const { return m_destroyed; }
 
 private:
     
+    std::uint64_t m_ID;
+    bool m_modified;
     bool m_destroyed;
     sf::Vector2f m_position;
 
     std::array<sf::Vertex, 4u> m_vertices;
     sf::FloatRect m_globalBounds;
+    sf::Texture m_texture;
 
+    std::array<std::uint16_t, 4096> m_terrainData;
+
+    sf::Shader& m_shader;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+    void load();
+    void save();
+
+    bool loadFromDisk();
+    void generate();
+    void updateTexture();
 };
 
 #endif //ST_CHUNK_HPP_
