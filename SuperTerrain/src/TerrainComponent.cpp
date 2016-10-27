@@ -66,10 +66,13 @@ namespace
 
         "out vec4 colour;\n"
 
+        "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
+
         "void main()\n"
         "{\n"
         "    uint value = texture(u_texture, v_texCoord).r;\n"
-        "    colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
+        "    //colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
+        "    colour = vec4(colours[value], 1.0);\n"
         "}";
 
     std::size_t maxActiveChunks = 18;

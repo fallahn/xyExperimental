@@ -44,7 +44,7 @@ using fn = FastNoiseSIMD;
 
 namespace
 {
-    const sf::Vector2f chunkWorldSize(512.f, 512.f);
+    const sf::Vector2f chunkWorldSize(4096.f, 4096.f);
     const sf::Uint32 chunkTileCount = 64u;
 }
 
@@ -179,7 +179,10 @@ void Chunk::generate()
     {
         for (auto z = 0; z < chunkTileCount; ++z)
         {
-            m_terrainData[i] = static_cast<std::uint16_t>((noiseData[i++] + 1.f * 0.5f) * 65535.f);
+            m_terrainData[i] = static_cast<std::uint16_t>((noiseData[i] + 1.f * 0.5f) * 3.f);
+            m_terrainData[i] = std::min(std::max(std::uint16_t(0), m_terrainData[i]), std::uint16_t(3));
+
+            i++; //we keep this seperate just because it's easier to spot bugs
         }
     }
 
