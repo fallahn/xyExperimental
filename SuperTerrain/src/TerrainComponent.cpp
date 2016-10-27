@@ -33,6 +33,7 @@ source distribution.
 #include <xygine/Entity.hpp>
 #include <xygine/Scene.hpp>
 #include <xygine/App.hpp>
+#include <xygine/FileSystem.hpp>
 #include <xygine/util/Vector.hpp>
 
 #include <xygine/imgui/imgui.h>
@@ -68,7 +69,7 @@ namespace
         "void main()\n"
         "{\n"
         "    uint value = texture(u_texture, v_texCoord).r;\n"
-        "    colour = vec4(vec3(value / 65535u) * v_colour.rgb, 1.0);\n"
+        "    colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
         "}";
 
     std::size_t maxActiveChunks = 18;
@@ -105,6 +106,12 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
         glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
         glCheck(glBindTexture(GL_TEXTURE_2D, 0));
         tp.second = false; //texture not yet used
+    }
+
+    //check we have a directory to write chunk data to
+    if (!xy::FileSystem::directoryExists("map"))
+    {
+        xy::FileSystem::createDirectory("map");
     }
 
 #ifdef _DEBUG_
@@ -152,6 +159,9 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
         update = true;
     }
     if (update) updateChunks();
+
+    //this updates any pending texture changes
+    for (auto& c : m_activeChunks) c->update();
 }
 
 //private

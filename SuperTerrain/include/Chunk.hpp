@@ -31,8 +31,10 @@ source distribution.
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/Thread.hpp>
 
 #include <array>
+#include <atomic>
 
 namespace sf
 {
@@ -55,6 +57,8 @@ public:
     static const sf::Vector2f& chunkSize();
     static sf::Uint32 chunkTilesSide();
 
+    void update();
+
     void destroy();
     bool destroyed() const { return m_destroyed; }
 
@@ -70,6 +74,8 @@ private:
     ChunkTexture& m_texture;
 
     std::array<std::uint16_t, 4096> m_terrainData;
+    std::atomic_bool m_updatePending;
+    sf::Thread m_generationThread;
 
     sf::Shader& m_shader;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

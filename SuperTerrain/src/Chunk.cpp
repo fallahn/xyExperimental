@@ -31,36 +31,32 @@ source distribution.
 #include <xygine/detail/GLExtensions.hpp>
 #include <xygine/detail/GLCheck.hpp>
 
+#include <FastNoiseSIMD.h>
+
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Shader.hpp>
 
+#include <iostream>
 #include <algorithm>
-#include <cstring>
+
+using fn = FastNoiseSIMD;
 
 namespace
 {
-    const sf::Vector2f chunkWorldSize(256.f, 256.f);
+    const sf::Vector2f chunkWorldSize(512.f, 512.f);
     const sf::Uint32 chunkTileCount = 64u;
-
-    const float maxDist = 10000.f; //just for colouring chunks temporarilililily
-
-    std::array<std::string, 4> quadrants =
-    {
-        "NorthEast",
-        "SouthEast",
-        "SouthWest",
-        "NorthWest"
-    };
 }
 
 Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
-    : m_ID          (0),
-    m_modified      (false),
-    m_destroyed     (false),
-    m_position      (position),
-    m_texture       (ct),
-    m_shader        (shader)
+    : m_ID              (0),
+    m_modified          (false),
+    m_destroyed         (false),
+    m_position          (position),
+    m_texture           (ct),
+    m_updatePending     (false),
+    m_generationThread  (&Chunk::generate, this),
+    m_shader            (shader)
 {
     position -= (chunkWorldSize / 2.f);
 
@@ -74,22 +70,15 @@ Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
     m_vertices[2].position = position + chunkWorldSize;
     m_vertices[3].position = { position.x , position.y + chunkWorldSize.y };
 
-
-    float colourRatio = xy::Util::Vector::length(position) / maxDist;
-    sf::Uint8 colour = static_cast<sf::Uint8>(colourRatio * 255.f);
-
-    for (auto& v : m_vertices) v.color = sf::Color(colour, colour,colour);
+    m_vertices[1].texCoords = { float(chunkTileCount), 0.f };
+    m_vertices[2].texCoords = { float(chunkTileCount), float(chunkTileCount) };
+    m_vertices[3].texCoords = { 0.f, float(chunkTileCount) };
 
     m_texture.second = true;
-    std::memset(m_terrainData.data(), 65535, m_terrainData.size());
 
     //generate a UID for chunk based on world position
-    std::hash<std::string> hasher;
-    std::size_t quadID = (position.x > 0) ?
-        (position.y > 0) ? 1 : 0 :
-        (position.y > 0) ? 2 : 3;
-
-    m_ID = std::uint64_t(position.x * position.y) + hasher(quadrants[quadID]);
+    std::hash<float> floatHash;
+    m_ID = (53 + floatHash(position.x)) * 53 + floatHash(position.y);
 
     load();
 }
@@ -108,6 +97,14 @@ const sf::Vector2f& Chunk::chunkSize()
 sf::Uint32 Chunk::chunkTilesSide()
 {
     return chunkTileCount;
+}
+
+void Chunk::update()
+{
+    if (m_updatePending)
+    {
+        updateTexture();
+    }
 }
 
 void Chunk::destroy()
@@ -134,34 +131,71 @@ void Chunk::load()
     if (!loadFromDisk())
     {
         //if failed, generate and mark as modified
-        generate();
+        m_generationThread.launch();
+        for (auto& v : m_vertices) v.color = sf::Color::Green;
     }
-    updateTexture();
 }
 
 void Chunk::save()
-{
+{    
     //write chunk to disk
+    std::ofstream file("map/" + std::to_string(m_ID), std::ios::binary | std::ios::out);
+    if (/*file.is_open() && */file.good())
+    {
+        file.write(reinterpret_cast<const char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint16_t)));
+        //LOG(std::to_string(m_ID), xy::Logger::Type::Info);
+    }
+    file.close();
 }
 
 bool Chunk::loadFromDisk()
 {
+    std::ifstream file("map/" + std::to_string(m_ID), std::ios::binary | std::ios::in);
+    
+    if (file.is_open() && file.good())
+    {
+        file.read(reinterpret_cast<char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint16_t)));
+        file.close();
+        updateTexture();
+        //LOG(std::to_string(m_ID), xy::Logger::Type::Info);
+        for (auto& v : m_vertices) v.color = sf::Color::Blue;
+        return true;
+    }
+    
     return false;
 }
 
 void Chunk::generate()
 {
-
+    //wait for any previous updates to be completed
+    while (m_updatePending) {}
     
+    auto noise = fn::NewFastNoiseSIMD();
+    float* noiseData = noise->GetValueFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
+        chunkTileCount, chunkTileCount, chunkTileCount);
+    
+    int i = 0;
+    for (auto y = 0; y < chunkTileCount; ++y)
+    {
+        for (auto z = 0; z < chunkTileCount; ++z)
+        {
+            m_terrainData[i] = static_cast<std::uint16_t>((noiseData[i++] + 1.f * 0.5f) * 65535.f);
+        }
+    }
+
+    fn::FreeNoiseSet(noiseData);
+
+    save();
+    m_updatePending = true;
+
+    //LOG("Thread Quit", xy::Logger::Type::Info);
 }
 
 void Chunk::updateTexture()
 {
     glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.first.getNativeHandle()));
-    //TODO we only need to call this next line once when converting type
-    //glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, m_texture.getSize().x, m_texture.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
     glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
     glCheck(glBindTexture(GL_TEXTURE_2D, 0));
-
-    m_modified = true;
+    m_updatePending = false;
+    //m_modified = true;
 }

@@ -41,6 +41,8 @@ source distribution.
 namespace
 {
     const int playerID = 300;
+
+    xy::Camera* playerCamera = nullptr;
 }
 
 WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
@@ -63,7 +65,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     dwb->getDrawable().setFillColor(sf::Color::Red);
 
     entity = xy::Entity::create(m_messageBus);
-    m_scene.setActiveCamera(entity->addComponent(cam));
+    playerCamera = entity->addComponent(cam);
+    m_scene.setActiveCamera(playerCamera);
     entity->addComponent(dwb);
     entity->addCommandCategories(playerID);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
@@ -105,6 +108,22 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
 void WorldClientState::handleMessage(const xy::Message& msg)
 {
     m_scene.handleMessage(msg);
+
+    if (msg.id == xy::Message::UIMessage)
+    {
+        const auto& msgData = msg.getData<xy::Message::UIEvent>();
+        switch (msgData.type)
+        {
+        default: break;
+        case xy::Message::UIEvent::ResizedWindow:
+        {
+            auto v = playerCamera->getView();
+            v.setViewport(getContext().defaultView.getViewport());
+            playerCamera->setView(v);
+        }
+        break;
+        }
+    }
 }
 
 void WorldClientState::draw()
