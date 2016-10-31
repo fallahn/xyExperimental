@@ -181,8 +181,10 @@ void Chunk::generate()
         {
             m_terrainData[i] = static_cast<std::uint16_t>((noiseData[i] + 1.f * 0.5f) * 3.f);
             m_terrainData[i] = std::min(std::max(std::uint16_t(0), m_terrainData[i]), std::uint16_t(3));
-
-            i++; //we keep this seperate just because it's easier to spot bugs
+            m_terrainData[i] &= 0xFF;
+            m_terrainData[i] |= 0x800; //for now this is the other noise output - we'll store biome ID here eventually
+            m_terrainData[i] |= 0x9000;
+            i++;
         }
     }
 
@@ -198,6 +200,7 @@ void Chunk::updateTexture()
 {
     glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.first.getNativeHandle()));
     glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
+    //glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
     glCheck(glBindTexture(GL_TEXTURE_2D, 0));
     m_updatePending = false;
     //m_modified = true;

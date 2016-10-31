@@ -56,7 +56,7 @@ private:
     float m_maxDistance;
     sf::Vector2f m_playerPosition;
 
-    sf::Shader m_shader;
+    mutable sf::Shader m_shader;
     std::vector<ChunkTexture> m_texturePool;
     ChunkTexture& getTexture();
 

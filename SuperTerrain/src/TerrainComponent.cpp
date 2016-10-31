@@ -60,22 +60,45 @@ namespace
         "#version 130\n"
 
         "uniform usampler2D u_texture;\n"
+        "uniform int u_biome = 0;\n"
+        "uniform int u_output = 0;"
 
         "in vec2 v_texCoord;\n"
         "in vec4 v_colour;\n"
 
         "out vec4 colour;\n"
 
-        "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
+        "vec3[10] colours = vec3[10](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05),"
+        "                          vec3(0.0, 0.1, 0.7), vec3(1.0, 0.9, 0.0), vec3(0.65, 0.9, 0.0), vec3(0.0, 0.7, 0.05),"
+        "                          vec3(1.0, 0.0, 0.0), vec3(1.0));\n"
 
         "void main()\n"
         "{\n"
         "    uint value = texture(u_texture, v_texCoord).r;\n"
         "    //colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
-        "    colour = vec4(colours[value], 1.0);\n"
+        "    if(u_output == 0)\n"
+        "    {\n"
+        "        colour = vec4(colours[(value & 0xFFu) + uint(u_biome * 4)], 1.0);\n"
+        "    }\n"
+        "    else if(u_output == 1)\n"
+        "    {\n"
+        "        colour = vec4(colours[(value & 0x0F00u) >> 8], 1.0);\n"
+        "    }\n"
+        "    else if(u_output == 2)\n"
+        "    {\n"
+        "        colour = vec4(colours[(value & 0xF000u) >> 12], 1.0);\n"
+        "    }\n"
         "}";
 
-    std::size_t maxActiveChunks = 18;
+    const std::size_t maxActiveChunks = 18;
+
+    const std::array<sf::FloatRect, 3u> viewPorts =
+    {
+        sf::FloatRect(0.7f, 0.1f, 0.36f, 0.2f),
+        sf::FloatRect(0.7f, 0.32f, 0.36f, 0.2f),
+        sf::FloatRect(0.7f, 0.53f, 0.36f, 0.2f)
+    };
+    sf::View miniView(sf::Vector2f(), xy::DefaultSceneSize * 16.f);
 }
 
 TerrainComponent::TerrainComponent(xy::MessageBus& mb)
@@ -107,6 +130,7 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
         tp.first.create(Chunk::chunkTilesSide(), Chunk::chunkTilesSide());
         glCheck(glBindTexture(GL_TEXTURE_2D, tp.first.getNativeHandle()));
         glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
+        //glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, 0));
         glCheck(glBindTexture(GL_TEXTURE_2D, 0));
         tp.second = false; //texture not yet used
     }
@@ -230,11 +254,46 @@ void TerrainComponent::updateChunks()
 
 void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    m_shader.setUniform("u_biome", 0);
+    m_shader.setUniform("u_output", 0);
     states.shader = &m_shader;
     for (const auto& chunk : m_activeChunks)
     {
         rt.draw(*chunk, states);
     }
+
+#ifdef _DEBUG_
+
+    //draw the mini views
+    auto oldView = rt.getView();
+    miniView.setCenter(oldView.getCenter());
+    
+    m_shader.setUniform("u_biome", 1); //we could just sey an output which darkens existing colours
+    miniView.setViewport(viewPorts[0]);
+    rt.setView(miniView);
+    for (const auto& chunk : m_activeChunks)
+    {
+        rt.draw(*chunk, states);
+    }
+
+    m_shader.setUniform("u_output", 1);
+    miniView.setViewport(viewPorts[1]);
+    rt.setView(miniView);
+    for (const auto& chunk : m_activeChunks)
+    {
+        rt.draw(*chunk, states);
+    }
+
+    m_shader.setUniform("u_output", 2);
+    miniView.setViewport(viewPorts[2]);
+    rt.setView(miniView);
+    for (const auto& chunk : m_activeChunks)
+    {
+        rt.draw(*chunk, states);
+    }
+
+    rt.setView(oldView);
+#endif //_DEBUG_
 }
 
 void TerrainComponent::registerWindow()
