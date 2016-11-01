@@ -32,6 +32,7 @@ source distribution.
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Thread.hpp>
+#include <SFML/System/Mutex.hpp>
 
 #include <array>
 #include <atomic>
@@ -76,6 +77,7 @@ private:
     std::array<std::uint16_t, 4096> m_terrainData;
     std::atomic_bool m_updatePending;
     sf::Thread m_generationThread;
+    sf::Mutex m_mutex;
 
     sf::Shader& m_shader;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

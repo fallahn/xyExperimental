@@ -60,7 +60,6 @@ namespace
         "#version 130\n"
 
         "uniform usampler2D u_texture;\n"
-        "uniform int u_biome = 0;\n"
         "uniform int u_output = 0;"
 
         "in vec2 v_texCoord;\n"
@@ -68,9 +67,7 @@ namespace
 
         "out vec4 colour;\n"
 
-        "vec3[10] colours = vec3[10](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05),"
-        "                          vec3(0.0, 0.1, 0.7), vec3(1.0, 0.9, 0.0), vec3(0.65, 0.9, 0.0), vec3(0.0, 0.7, 0.05),"
-        "                          vec3(1.0, 0.0, 0.0), vec3(1.0));\n"
+        "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
 
         "void main()\n"
         "{\n"
@@ -78,15 +75,19 @@ namespace
         "    //colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
         "    if(u_output == 0)\n"
         "    {\n"
-        "        colour = vec4(colours[(value & 0xFFu) + uint(u_biome * 4)], 1.0);\n"
+        "        colour = vec4(colours[(value & 0xFFu)], 1.0);\n"
         "    }\n"
-        "    else if(u_output == 1)\n"
+        "    if(u_output == 1)\n"
         "    {\n"
-        "        colour = vec4(colours[(value & 0x0F00u) >> 8], 1.0);\n"
+        "        colour = vec4(colours[(value & 0xFFu)] * 0.8, 1.0);\n"
         "    }\n"
         "    else if(u_output == 2)\n"
         "    {\n"
-        "        colour = vec4(colours[(value & 0xF000u) >> 12], 1.0);\n"
+        "        colour = vec4(vec3(float((value & 0x0F00u) >> 8) / 15.0), 1.0);\n"
+        "    }\n"
+        "    else if(u_output == 3)\n"
+        "    {\n"
+        "        colour = vec4((float((value & 0xF000u) >> 12) / 15.0), (float((value & 0x0F00u) >> 8) / 15.0), 0.0, 1.0);\n"
         "    }\n"
         "}";
 
@@ -94,11 +95,13 @@ namespace
 
     const std::array<sf::FloatRect, 3u> viewPorts =
     {
-        sf::FloatRect(0.7f, 0.1f, 0.36f, 0.2f),
-        sf::FloatRect(0.7f, 0.32f, 0.36f, 0.2f),
-        sf::FloatRect(0.7f, 0.53f, 0.36f, 0.2f)
+        sf::FloatRect(0.56f, 0.05f, 0.54f, 0.3f),
+        sf::FloatRect(0.56f, 0.37f, 0.54f, 0.3f),
+        sf::FloatRect(0.56f, 0.68f, 0.54f, 0.3f)
     };
     sf::View miniView(sf::Vector2f(), xy::DefaultSceneSize * 16.f);
+
+    int seed = 12345;
 }
 
 TerrainComponent::TerrainComponent(xy::MessageBus& mb)
@@ -191,6 +194,9 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
     for (auto& c : m_activeChunks) c->update();
 }
 
+int TerrainComponent::getSeed() { return seed; }
+void TerrainComponent::setSeed(int s) { seed = s; }
+
 //private
 ChunkTexture& TerrainComponent::getTexture()
 {
@@ -254,7 +260,6 @@ void TerrainComponent::updateChunks()
 
 void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    m_shader.setUniform("u_biome", 0);
     m_shader.setUniform("u_output", 0);
     states.shader = &m_shader;
     for (const auto& chunk : m_activeChunks)
@@ -268,7 +273,7 @@ void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     auto oldView = rt.getView();
     miniView.setCenter(oldView.getCenter());
     
-    m_shader.setUniform("u_biome", 1); //we could just sey an output which darkens existing colours
+    m_shader.setUniform("u_output", 1);
     miniView.setViewport(viewPorts[0]);
     rt.setView(miniView);
     for (const auto& chunk : m_activeChunks)
@@ -276,7 +281,7 @@ void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
         rt.draw(*chunk, states);
     }
 
-    m_shader.setUniform("u_output", 1);
+    m_shader.setUniform("u_output", 2);
     miniView.setViewport(viewPorts[1]);
     rt.setView(miniView);
     for (const auto& chunk : m_activeChunks)
@@ -284,7 +289,7 @@ void TerrainComponent::draw(sf::RenderTarget& rt, sf::RenderStates states) const
         rt.draw(*chunk, states);
     }
 
-    m_shader.setUniform("u_output", 2);
+    m_shader.setUniform("u_output", 3);
     miniView.setViewport(viewPorts[2]);
     rt.setView(miniView);
     for (const auto& chunk : m_activeChunks)

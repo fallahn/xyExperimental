@@ -50,6 +50,9 @@ public:
 
     sf::FloatRect globalBounds() const override { return (m_currentChunk) ? m_currentChunk->getGlobalBounds() : sf::FloatRect(); }
 
+    static int getSeed();
+    static void setSeed(int);
+
 private:
     std::array<std::pair<sf::Vector2f, bool>, 8> m_radialPoints;
 
