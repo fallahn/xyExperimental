@@ -50,7 +50,9 @@ namespace
     const sf::Vector2f chunkWorldSize(4096.f, 4096.f);
     const sf::Uint32 chunkTileCount = 64u;
 
-    const std::array<std::int8_t, 40 * 40> biomeTable = 
+    const std::uint8_t biomeWidth = 40;
+    constexpr std::size_t biomeTableSize = biomeWidth * biomeWidth;
+    const std::array<std::int8_t, biomeTableSize> biomeTable =
     {
         -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
         -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -95,15 +97,17 @@ namespace
     };
 }
 
-Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
+Chunk::Chunk(sf::Vector2f position, sf::Shader& tshader, ChunkTexture& ct, sf::Shader& wshader, sf::Texture& wft)
     : m_ID              (0),
     m_modified          (false),
     m_destroyed         (false),
     m_position          (position),
-    m_texture           (ct),
     m_updatePending     (false),
     m_generationThread  (&Chunk::generate, this),
-    m_shader            (shader)
+    m_chunkTexture      (ct),
+    m_terrainShader     (tshader),
+    m_waterFloorTexture (wft),
+    m_waterShader       (wshader)
 {
     position -= (chunkWorldSize / 2.f);
 
@@ -121,7 +125,7 @@ Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
     m_vertices[2].texCoords = { float(chunkTileCount), float(chunkTileCount) };
     m_vertices[3].texCoords = { 0.f, float(chunkTileCount) };
 
-    m_texture.second = true;
+    m_chunkTexture.second = true;
 
     //generate a UID for chunk based on world position
     std::hash<float> floatHash;
@@ -132,7 +136,7 @@ Chunk::Chunk(sf::Vector2f position, sf::Shader& shader, ChunkTexture& ct)
 
 Chunk::~Chunk()
 {
-    m_texture.second = false;
+    m_chunkTexture.second = false;
 }
 
 //public
@@ -166,9 +170,14 @@ void Chunk::destroy()
 //private
 void Chunk::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    m_shader.setUniform("u_texture", m_texture.first);
-    states.texture = &m_texture.first;
-    states.shader = &m_shader;
+    m_waterShader.setUniform("u_depthTexture", m_chunkTexture.first);
+    states.texture = &m_chunkTexture.first;
+    states.shader = &m_waterShader;
+    rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
+
+    m_terrainShader.setUniform("u_texture", m_chunkTexture.first);
+    //states.texture = &m_chunkTexture.first;
+    states.shader = &m_terrainShader;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 }
 
@@ -227,30 +236,52 @@ void Chunk::generate()
     float* terrainData = noise->GetValueFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount);
     
+    noise->SetFrequency(0.002f);
     float* rainData = noise->GetSimplexSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount, 0.25f);
+        chunkTileCount, chunkTileCount, chunkTileCount, 0.59f);
 
     float* tempData = noise->GetGradientSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount, 0.3f);
+        chunkTileCount, chunkTileCount, chunkTileCount, 0.26f);
 
-    int i = 0;
+    std::size_t i = 0;
     for (auto y = 0; y < chunkTileCount; ++y)
     {
         for (auto z = 0; z < chunkTileCount; ++z)
         {
-            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[i] + 1.f * 0.5f), 0.f, 1.f) * 3.f);
+            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.f);
             m_terrainData[i] &= 0xFF;
 
-            std::uint8_t rain = static_cast<std::uint8_t>(xy::Util::Math::clamp((rainData[i] + 1.f * 0.5f), 0.f, 1.f) * 15.f);
-            m_terrainData[i] |= ((rain & 0x0f) << 8); //for now this is the other noise output - we'll store biome ID here eventually
+            //std::uint8_t rain = static_cast<std::uint8_t>(xy::Util::Math::clamp((rainData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
+            //m_terrainData[i] |= ((rain & 0x0f) << 8); //for now this is the other noise output - we'll store biome ID here eventually
 
-            std::uint8_t temp = static_cast<std::uint8_t>(1.f - xy::Util::Math::clamp((tempData[i] + 1.f * 0.5f), 0.f, 1.f) * 15.f);
-            m_terrainData[i] |= (temp << 12);
+            //std::uint8_t temp = static_cast<std::uint8_t>(1.f - xy::Util::Math::clamp((tempData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
+            //m_terrainData[i] |= (temp << 12);
+
+            //biome ID is stored in byte 3
+            std::uint8_t rain = static_cast<std::uint8_t>((xy::Util::Math::clamp((rainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 399.f) / 10.f);
+            std::uint8_t temp = static_cast<std::uint8_t>(xy::Util::Math::clamp((tempData[i] * 0.5f + 0.5f), 0.f, 1.f) * 39.f);
+            std::int8_t biome = -1;
+            std::size_t index = 0;
+
+            while (biome < 0 && rain < biomeWidth - 2)
+            {
+                index = rain++ * biomeWidth + temp++;
+                biome = biomeTable[index];
+            }
+            biome = xy::Util::Math::clamp(biome, std::int8_t(0), std::int8_t(8));
+            m_terrainData[i] |= ((biome & 0x0f) << 8);
+
+            //depth in byte 4
+            float depth = xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f) / 0.25f, 0.f, 1.f);
+            std::uint8_t d = static_cast<std::uint8_t>(depth * 15.f);
+            m_terrainData[i] |= (d << 12);
+
             i++;
         }
     }
 
+    fn::FreeNoiseSet(tempData);
     fn::FreeNoiseSet(rainData);
     fn::FreeNoiseSet(terrainData);
 
@@ -262,7 +293,7 @@ void Chunk::generate()
 
 void Chunk::updateTexture()
 {
-    glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.first.getNativeHandle()));
+    glCheck(glBindTexture(GL_TEXTURE_2D, m_chunkTexture.first.getNativeHandle()));
     glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
     //glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
     glCheck(glBindTexture(GL_TEXTURE_2D, 0));

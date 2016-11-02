@@ -47,7 +47,7 @@ using ChunkTexture = std::pair<sf::Texture, bool>;
 class Chunk final : public sf::Drawable
 {
 public:
-    Chunk(sf::Vector2f position, sf::Shader&, ChunkTexture&);
+    Chunk(sf::Vector2f position, sf::Shader&, ChunkTexture&, sf::Shader&, sf::Texture&);
     ~Chunk();
 
     std::uint64_t getID() const { return m_ID; }
@@ -72,14 +72,18 @@ private:
 
     std::array<sf::Vertex, 4u> m_vertices;
     sf::FloatRect m_globalBounds;
-    ChunkTexture& m_texture;
+
 
     std::array<std::uint16_t, 4096> m_terrainData;
     std::atomic_bool m_updatePending;
     sf::Thread m_generationThread;
     sf::Mutex m_mutex;
 
-    sf::Shader& m_shader;
+    ChunkTexture& m_chunkTexture;
+    sf::Shader& m_terrainShader;
+
+    sf::Texture& m_waterFloorTexture;
+    sf::Shader& m_waterShader;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 
     void load();

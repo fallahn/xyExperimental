@@ -59,7 +59,12 @@ private:
     float m_maxDistance;
     sf::Vector2f m_playerPosition;
 
-    mutable sf::Shader m_shader;
+    sf::Shader m_waterShader;
+    sf::Texture m_waterFloorTexture;
+    sf::Texture m_waterReflectionTexture;
+    void updateReflectionTexture();
+
+    mutable sf::Shader m_terrainShader;
     std::vector<ChunkTexture> m_texturePool;
     ChunkTexture& getTexture();
 
