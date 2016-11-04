@@ -95,13 +95,19 @@ namespace
     const std::string tileShader =
         "#version 130\n"
 
-        "uniform usampler2D u_texture;\n"
+        "uniform usampler2D u_lookupTexture;\n"
+        "uniform sampler2D u_tileTexture;\n"
         "uniform int u_output = 0;"
+
+        "uniform vec2 u_tileSize = vec2(24.0, 24.0);\n"
+        "uniform vec2 u_tilesetCount = vec2(15.0, 8.0);"
 
         "in vec2 v_texCoord;\n"
         "in vec4 v_colour;\n"
 
         "out vec4 colour;\n"
+        /*fixes rounding imprecision on AMD cards*/
+        "const float epsilon = 0.05;\n"
 
         "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
 
@@ -109,20 +115,31 @@ namespace
 
         "void main()\n"
         "{\n"
-        "    uint value = texture(u_texture, v_texCoord).r;\n"
-        "    //colour = vec4(vec3(float(value) / 65535.0) * v_colour.rgb, 1.0);\n"
-        "    if(u_output == 0)\n"
+        "    uint value = texture(u_lookupTexture, v_texCoord).r;\n"
+
+        "    if(u_output == 0 || u_output == 1)\n"
         "    {\n"
-        "        float alpha = clamp(float(value & 0xFFu), 0.0, 1.0);"
-        "        //float depth = float((value & 0xF000u) >> 12) / 15.0;\n"
-        "        colour = vec4(colours[(value & 0xFFu)], alpha);\n"
+        //"        float alpha = clamp(float(value & 0xFFu), 0.0, 1.0);"
+        //"        colour = vec4(colours[(value & 0xFFu)], alpha);\n"
+
+        "        float index = float(value & 0xFFu);\n"
+        "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / u_tilesetCount;\n"
+        //"        vec2 offsetCoord = (v_texCoord * (textureSize(u_lookupTexture, 0))) / u_tileSize;\n"
+        //"        vec2 offset = mod(offsetCoord, 1.0) / u_tilesetCount;\n"
+        "vec2 offset = mod(v_texCoord, vec2(1.0 / 64.0));\n"
+        "vec2 ratio = offset / vec2(1.0 / 64.0);\n"
+        "offset = ratio * (1.0 / u_tileSize);\n"
+        "offset.x *= 1.6;\n"
+        "offset.y *= 2.66;\n"
+
+        "        colour = texture(u_tileTexture, position + offset);\n"
         "        return;\n"
         "    }\n"
-        "    if(u_output == 1)\n"
+        "    if(u_output == 2)\n"
         "    {\n"
         "        colour = vec4(colours[(value & 0xFFu)] * 0.8, 1.0);\n"
         "    }\n"
-        "    else if(u_output == 2)\n"
+        /*"    else if(u_output == 2)\n"
         "    {\n"
         "        if((value & 0xFFu) == 0u)\n"
         "        {\n"
@@ -132,7 +149,7 @@ namespace
         "        {\n"
         "            colour = vec4(biomes[(value & 0x0F00u) >> 8], 1.0);\n"
         "        }\n"
-        "    }\n"
+        "    }\n"*/
         "    else if(u_output == 3)\n"
         "    {\n"
         "        colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu)], 1.0);\n"
@@ -192,6 +209,8 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
     addMessageHandler(mh);
 
     m_terrainShader.loadFromMemory(vertex, tileShader);
+    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set02.png");
+    m_terrainShader.setUniform("u_tileTexture", m_tilesetTexture);
 
     //set up the texture pool
     for (auto& tp : m_texturePool)

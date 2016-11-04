@@ -64,6 +64,7 @@ private:
     sf::Texture m_waterReflectionTexture;
     void updateReflectionTexture();
 
+    sf::Texture m_tilesetTexture;
     mutable sf::Shader m_terrainShader;
     std::vector<ChunkTexture> m_texturePool;
     ChunkTexture& getTexture();

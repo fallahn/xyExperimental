@@ -196,8 +196,8 @@ void Chunk::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     states.shader = &m_waterShader;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 
-    m_terrainShader.setUniform("u_texture", m_chunkTexture.first);
-    //states.texture = &m_chunkTexture.first;
+    m_terrainShader.setUniform("u_lookupTexture", m_chunkTexture.first);
+    //states.texture = &m_tileTexture;
     states.shader = &m_terrainShader;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 }
