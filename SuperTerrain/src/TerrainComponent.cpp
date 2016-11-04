@@ -117,29 +117,28 @@ namespace
         "{\n"
         "    uint value = texture(u_lookupTexture, v_texCoord).r;\n"
 
-        "    if(u_output == 0 || u_output == 1)\n"
+        "    if(u_output == 0)\n"
         "    {\n"
         //"        float alpha = clamp(float(value & 0xFFu), 0.0, 1.0);"
         //"        colour = vec4(colours[(value & 0xFFu)], alpha);\n"
 
         "        float index = float(value & 0xFFu);\n"
         "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / u_tilesetCount;\n"
-        //"        vec2 offsetCoord = (v_texCoord * (textureSize(u_lookupTexture, 0))) / u_tileSize;\n"
-        //"        vec2 offset = mod(offsetCoord, 1.0) / u_tilesetCount;\n"
-        "vec2 offset = mod(v_texCoord, vec2(1.0 / 64.0));\n"
-        "vec2 ratio = offset / vec2(1.0 / 64.0);\n"
-        "offset = ratio * (1.0 / u_tileSize);\n"
-        "offset.x *= 1.6;\n"
-        "offset.y *= 2.66;\n"
+
+        "        vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);\n"
+        "        vec2 offset = mod(v_texCoord, texelSize);\n"
+        "        vec2 ratio = offset / texelSize;\n"
+        "        offset = ratio * (1.0 / u_tileSize);\n"
+        "        offset *= u_tileSize / u_tilesetCount;"
 
         "        colour = texture(u_tileTexture, position + offset);\n"
         "        return;\n"
         "    }\n"
-        "    if(u_output == 2)\n"
+        "    if(u_output == 1)\n"
         "    {\n"
         "        colour = vec4(colours[(value & 0xFFu)] * 0.8, 1.0);\n"
         "    }\n"
-        /*"    else if(u_output == 2)\n"
+        "    else if(u_output == 2)\n"
         "    {\n"
         "        if((value & 0xFFu) == 0u)\n"
         "        {\n"
@@ -149,7 +148,7 @@ namespace
         "        {\n"
         "            colour = vec4(biomes[(value & 0x0F00u) >> 8], 1.0);\n"
         "        }\n"
-        "    }\n"*/
+        "    }\n"
         "    else if(u_output == 3)\n"
         "    {\n"
         "        colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu)], 1.0);\n"
@@ -209,7 +208,7 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
     addMessageHandler(mh);
 
     m_terrainShader.loadFromMemory(vertex, tileShader);
-    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set02.png");
+    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set.png");
     m_terrainShader.setUniform("u_tileTexture", m_tilesetTexture);
 
     //set up the texture pool
