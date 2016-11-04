@@ -63,6 +63,9 @@ public:
     void destroy();
     bool destroyed() const { return m_destroyed; }
 
+    bool isWater(const sf::Vector2f&) const;
+    std::uint8_t getBiomeID(const sf::Vector2f&) const;
+
 private:
     
     std::uint64_t m_ID;

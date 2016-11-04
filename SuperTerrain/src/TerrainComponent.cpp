@@ -424,6 +424,10 @@ void TerrainComponent::registerWindow()
             nim::Text(pp.c_str());
             pp = "Chunk Position: " + std::to_string(m_currentChunk->getPosition().x) + ", " + std::to_string(m_currentChunk->getPosition().y);
             nim::Text(pp.c_str());
+            pp = (m_currentChunk->isWater(m_playerPosition)) ? "In water: true" : "In water: false";
+            nim::Text(pp.c_str());
+            pp = "current biome: " + std::to_string(m_currentChunk->getBiomeID(m_playerPosition));
+            nim::Text(pp.c_str());
         }
         pp = "Active chunk count: " + std::to_string(m_activeChunks.size());
         nim::Text(pp.c_str());

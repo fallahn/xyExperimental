@@ -95,6 +95,13 @@ namespace
         -1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
          0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
     };
+
+    std::size_t indexFromPosition(const sf::Vector2f& position)
+    {
+        auto x = static_cast<std::size_t>(position.x / chunkTileCount);
+        auto y = static_cast<std::size_t>(position.y / chunkTileCount);
+        return y * chunkTileCount + x;
+    }
 }
 
 Chunk::Chunk(sf::Vector2f position, sf::Shader& tshader, ChunkTexture& ct, sf::Shader& wshader, sf::Texture& wft)
@@ -167,6 +174,20 @@ void Chunk::destroy()
     }
 }
 
+bool Chunk::isWater(const sf::Vector2f& position) const
+{
+    auto idx = indexFromPosition(position - sf::Vector2f(m_globalBounds.left, m_globalBounds.top));
+    auto id = (m_terrainData[idx] & 0xFF);
+    return (id == 0 || id == 15);
+}
+
+std::uint8_t Chunk::getBiomeID(const sf::Vector2f& position) const
+{
+    auto idx = indexFromPosition(position - sf::Vector2f(m_globalBounds.left, m_globalBounds.top));
+    auto id = ((m_terrainData[idx] & 0xF00) >> 8);
+    return id;
+}
+
 //private
 void Chunk::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
@@ -233,23 +254,25 @@ void Chunk::generate()
     }
 
     auto noise = fn::NewFastNoiseSIMD(seed);
-    float* terrainData = noise->GetValueFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
+    float* terrainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount);
     
-    noise->SetFrequency(0.002f);
-    float* rainData = noise->GetSimplexSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount, 0.59f);
+    noise->SetFrequency(0.005f);
+    float* rainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
+        chunkTileCount, chunkTileCount, chunkTileCount/*, 0.59f*/);
 
-    float* tempData = noise->GetGradientSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
+    //noise->SetFrequency(0.002f);
+    noise->SetFractalType(FastNoiseSIMD::RigidMulti);
+    float* tempData = noise->GetGradientFractalSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount, 0.26f);
+        chunkTileCount, chunkTileCount, chunkTileCount/*, 0.26f*/);
 
     std::size_t i = 0;
     for (auto y = 0; y < chunkTileCount; ++y)
     {
         for (auto z = 0; z < chunkTileCount; ++z)
         {
-            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.f);
+            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
             m_terrainData[i] &= 0xFF;
 
             //std::uint8_t rain = static_cast<std::uint8_t>(xy::Util::Math::clamp((rainData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
@@ -258,9 +281,9 @@ void Chunk::generate()
             //std::uint8_t temp = static_cast<std::uint8_t>(1.f - xy::Util::Math::clamp((tempData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
             //m_terrainData[i] |= (temp << 12);
 
-            //biome ID is stored in byte 3
-            std::uint8_t rain = static_cast<std::uint8_t>((xy::Util::Math::clamp((rainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 399.f) / 10.f);
-            std::uint8_t temp = static_cast<std::uint8_t>(xy::Util::Math::clamp((tempData[i] * 0.5f + 0.5f), 0.f, 1.f) * 39.f);
+            //biome ID is stored in byte 2
+            std::uint8_t rain = static_cast<std::uint8_t>((xy::Util::Math::clamp((rainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 399.99f) / 10.f);
+            std::uint8_t temp = static_cast<std::uint8_t>(xy::Util::Math::clamp((tempData[i] * 0.5f + 0.5f), 0.f, 1.f) * 39.99f);
             std::int8_t biome = -1;
             std::size_t index = 0;
 
@@ -272,7 +295,7 @@ void Chunk::generate()
             biome = xy::Util::Math::clamp(biome, std::int8_t(0), std::int8_t(8));
             m_terrainData[i] |= ((biome & 0x0f) << 8);
 
-            //depth in byte 4
+            //depth in top half of byte 2
             float depth = xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f) / 0.25f, 0.f, 1.f);
             std::uint8_t d = static_cast<std::uint8_t>(depth * 15.f);
             m_terrainData[i] |= (d << 12);
