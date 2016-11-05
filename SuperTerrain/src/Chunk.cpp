@@ -30,6 +30,7 @@ source distribution.
 
 #include <xygine/util/Vector.hpp>
 #include <xygine/util/Math.hpp>
+#include <xygine/util/Random.hpp>
 #include <xygine/detail/GLExtensions.hpp>
 #include <xygine/detail/GLCheck.hpp>
 
@@ -255,8 +256,10 @@ void Chunk::generate()
 
     auto noise = fn::NewFastNoiseSIMD(seed);
     float* terrainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount);
+        chunkTileCount, chunkTileCount + 1, chunkTileCount + 1);
     
+    processTerrain(terrainData);
+
     noise->SetFrequency(0.005f);
     float* rainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount/*, 0.59f*/);
@@ -272,7 +275,8 @@ void Chunk::generate()
     {
         for (auto z = 0; z < chunkTileCount; ++z)
         {
-            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
+            /*std::size_t j = y * (chunkTileCount + 1) + z;
+            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[j] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);*/
             m_terrainData[i] &= 0xFF;
 
             //std::uint8_t rain = static_cast<std::uint8_t>(xy::Util::Math::clamp((rainData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
@@ -296,7 +300,7 @@ void Chunk::generate()
             m_terrainData[i] |= ((biome & 0x0f) << 8);
 
             //depth in top half of byte 2
-            float depth = xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f) / 0.25f, 0.f, 1.f);
+            float depth = xy::Util::Math::clamp((terrainData[y * (chunkTileCount + 1) + z] * 0.5f + 0.5f) / 0.25f, 0.f, 1.f);
             std::uint8_t d = static_cast<std::uint8_t>(depth * 15.f);
             m_terrainData[i] |= (d << 12);
 
@@ -308,10 +312,70 @@ void Chunk::generate()
     fn::FreeNoiseSet(rainData);
     fn::FreeNoiseSet(terrainData);
 
-    save();
+    //save();
     m_updatePending = true;
 
     //LOG("Thread Quit", xy::Logger::Type::Info);
+}
+
+void Chunk::processTerrain(float* terrainData)
+{
+    //pre-pass into slightly larger set
+    std::vector<int> preSet((chunkTileCount + 1) * (chunkTileCount + 1));
+    for (auto x = 0; x < chunkTileCount + 1; ++x)
+    {
+        for (auto y = 0; y < chunkTileCount + 1; ++y)
+        {
+            std::size_t i = x * (chunkTileCount + 1) + y;
+            preSet[i] = static_cast<int>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
+            preSet[i] *= 2;
+            preSet[i] += xy::Util::Random::value(0, 1);
+        }
+    }
+
+    //then run through marching squares
+    std::function<int(std::size_t, std::size_t)> offsetVal = 
+        [&preSet](std::size_t x, std::size_t y)
+    {
+        return preSet[y * (chunkTileCount + 1) + x];
+    };
+
+    for (auto y = 0; y < chunkTileCount; ++y)
+    {
+        for (auto x = 0; x < chunkTileCount; ++x)
+        {
+            std::size_t i = y * chunkTileCount + x;
+            std::size_t j = y * (chunkTileCount + 1) + x;
+            //m_terrainData[i] = preSet[j];
+
+            auto TL = offsetVal(x, y);
+            auto TR = offsetVal(x + 1, y);
+            auto BL = offsetVal(x, y + 1);
+            auto BR = offsetVal(x + 1, y + 1);
+
+            auto hTL = TL >> 1;
+            auto hTR = TR >> 1;
+            auto hBL = BL >> 1;
+            auto hBR = BR >> 1;
+
+            auto saddle = ((TL & 1) + (TR & 1) + (BL & 1) + (BR & 1) + 1) >> 2;
+            auto shape = (hTL & 1) | (hTR & 1) << 1 | (hBL & 1) << 2 | (hBR & 1) << 3;
+            auto ring = (hTL + hTR + hBL + hBR) >> 2;
+
+            auto row = (ring << 1) | saddle;
+            auto col = shape - (ring & 1);
+            auto index = row * 15 + col;
+
+            //if (index == 60) index++;
+
+            m_terrainData[i] = index;
+
+            /*if (TL == 4)
+            {
+                std::cout << index << ", " << m_terrainData[i] << std::endl;
+            }*/
+        }
+    }
 }
 
 void Chunk::updateTexture()

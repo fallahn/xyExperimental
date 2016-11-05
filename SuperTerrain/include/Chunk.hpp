@@ -94,6 +94,7 @@ private:
 
     bool loadFromDisk();
     void generate();
+    void processTerrain(float*);
     void updateTexture();
 };
 

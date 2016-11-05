@@ -48,49 +48,51 @@ source distribution.
 namespace
 {
     const std::string vertex =
-        "#version 120\n"
+        R"(
+        #version 120
 
-        "varying vec2 v_texCoord;\n"
-        "varying vec4 v_colour;\n"
+        varying vec2 v_texCoord;
+        varying vec4 v_colour;
 
-        "void main()\n"
-        "{\n"
-        "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
-        "    v_texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;"
-        "    v_colour = gl_Color;\n"
-        "}";
+        void main()
+        {
+            gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+            v_texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+            v_colour = gl_Color;
+        })";
 
     const std::string waterShader =
-        "#version 130\n"
-        "uniform sampler2D u_floorTexture;\n"
-        "uniform usampler2D u_depthTexture;\n"
-        "uniform sampler2D u_reflectionTexture;\n"
-        "uniform float u_time = 0.0;\n"
-        "uniform vec2 u_screenSize = vec2(800, 600);\n"
+        R"(
+        #version 130
+        uniform sampler2D u_floorTexture;
+        uniform usampler2D u_depthTexture;
+        uniform sampler2D u_reflectionTexture;
+        uniform float u_time = 0.0;
+        uniform vec2 u_screenSize = vec2(800, 600);
 
-        "in vec2 v_texCoord;\n"
-        "out vec4 colour;\n"
+        in vec2 v_texCoord;
+        out vec4 colour;
 
-        "const float TAU = 6.28318;\n"
-        "const float tileFrequency = 0.35;"
+        const float TAU = 6.28318;
+        const float tileFrequency = 0.35;
 
-        "void main()\n"
-        "{\n"
-        "    vec2 texSize = vec2(textureSize(u_floorTexture, 0));\n"
-        "    vec2 texCoord = v_texCoord * texSize * 2.0;\n"
-        "    float valueX = sin(v_texCoord.x * TAU * tileFrequency * texSize.x) * 0.5 + 0.5;\n"
-        "    valueX = sin((u_time * 10.0) + (valueX * TAU)) * 0.5 + 0.5;\n"
+        void main()
+        {
+            vec2 texSize = vec2(textureSize(u_floorTexture, 0));
+            vec2 texCoord = v_texCoord * texSize * 2.0;
+            float valueX = sin(v_texCoord.x * TAU * tileFrequency * texSize.x) * 0.5 + 0.5;
+            valueX = sin((u_time * 10.0) + (valueX * TAU)) * 0.5 + 0.5;
 
-        "    float valueY = sin(v_texCoord.y * TAU * tileFrequency * texSize.y) * 0.5 + 0.5;\n"
-        "    valueY = sin((u_time * 12.0) + (valueY * TAU)) * 0.5 + 0.5;\n"
-        "    vec2 offset = vec2(valueX, valueY);\n"
+            float valueY = sin(v_texCoord.y * TAU * tileFrequency * texSize.y) * 0.5 + 0.5;
+            valueY = sin((u_time * 12.0) + (valueY * TAU)) * 0.5 + 0.5;
+            vec2 offset = vec2(valueX, valueY);
 
-        "    vec4 reflection = texture(u_reflectionTexture, (gl_FragCoord.xy / u_screenSize) + offset / 100.0);\n"
+            vec4 reflection = texture(u_reflectionTexture, (gl_FragCoord.xy / u_screenSize) + offset / 100.0);
 
-        "    float depth = float((texture(u_depthTexture, v_texCoord).r & 0xF000u) >> 12) / 15.0;\n"
-        "    colour = vec4(texture(u_floorTexture, texCoord + (offset / 12.0)).rgb * depth, 1.0);\n"
-        "    colour += reflection * 0.15;\n"
-        "}";
+            float depth = float(((texture(u_depthTexture, v_texCoord).r & 0xF000u) >> 12)) / 15.0;
+            colour = vec4(texture(u_floorTexture, texCoord + (offset / 12.0)).rgb * (depth - 0.5 * 0.5), 1.0);
+            colour += reflection * 0.15;
+        })";
 
     const std::string tileShader =
         "#version 130\n"
@@ -107,7 +109,7 @@ namespace
 
         "out vec4 colour;\n"
         /*fixes rounding imprecision on AMD cards*/
-        "const float epsilon = 0.05;\n"
+        "const float epsilon = 0.01;\n"
 
         "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
 
@@ -209,6 +211,7 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
 
     m_terrainShader.loadFromMemory(vertex, tileShader);
     m_tilesetTexture.loadFromFile("assets/images/tiles/test_set.png");
+    m_tilesetTexture.setRepeated(true);
     m_terrainShader.setUniform("u_tileTexture", m_tilesetTexture);
 
     //set up the texture pool
