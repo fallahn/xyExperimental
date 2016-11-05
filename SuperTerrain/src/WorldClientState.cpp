@@ -52,7 +52,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 {
     m_scene.setView(context.defaultView);
     
-    auto tc = xy::Component::create<TerrainComponent>(m_messageBus);
+    auto tc = xy::Component::create<TerrainComponent>(m_messageBus, context.appInstance);
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(tc);
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
@@ -92,7 +92,7 @@ bool WorldClientState::update(float dt)
         }
 
         entity.move(velocity * speed * dt);
-        REPORT("Position", std::to_string(entity.getWorldPosition().x) + ", " + std::to_string(entity.getWorldPosition().y));
+        //REPORT("Position", std::to_string(entity.getWorldPosition().x) + ", " + std::to_string(entity.getWorldPosition().y));
     };
     m_scene.sendCommand(cmd);
     

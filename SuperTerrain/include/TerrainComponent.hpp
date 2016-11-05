@@ -42,7 +42,7 @@ source distribution.
 class TerrainComponent final : public xy::Component, public sf::Drawable 
 {
 public:
-    explicit TerrainComponent(xy::MessageBus&);
+    TerrainComponent(xy::MessageBus&, xy::App&);
     ~TerrainComponent();
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
@@ -54,6 +54,8 @@ public:
     static void setSeed(int);
 
 private:
+    xy::App& m_appInstance;
+    
     std::array<std::pair<sf::Vector2f, bool>, 8> m_radialPoints;
 
     float m_maxDistance;

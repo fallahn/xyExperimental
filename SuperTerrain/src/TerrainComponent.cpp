@@ -121,9 +121,6 @@ namespace
 
         "    if(u_output == 0)\n"
         "    {\n"
-        //"        float alpha = clamp(float(value & 0xFFu), 0.0, 1.0);"
-        //"        colour = vec4(colours[(value & 0xFFu)], alpha);\n"
-
         "        float index = float(value & 0xFFu);\n"
         "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / u_tilesetCount;\n"
 
@@ -134,15 +131,17 @@ namespace
         "        offset *= u_tileSize / u_tilesetCount;"
 
         "        colour = texture(u_tileTexture, position + offset);\n"
+        "        //colour.rgb *= biomes[(value & 0x0F00u) >> 8] * 2.2;\n"
         "        return;\n"
         "    }\n"
         "    if(u_output == 1)\n"
         "    {\n"
-        "        colour = vec4(colours[(value & 0xFFu)] * 0.8, 1.0);\n"
+        "        colour = vec4(colours[((value & 0xFFu) / 2u / 15u)] * 0.8, 1.0);\n"
         "    }\n"
         "    else if(u_output == 2)\n"
         "    {\n"
-        "        if((value & 0xFFu) == 0u)\n"
+        "        uint idx = (value & 0xFFu);\n"
+        "        if(idx == 0u || idx == 15u)\n"
         "        {\n"
         "            colour = vec4(colours[0], 1.0)\n;"
         "        }\n"
@@ -153,7 +152,7 @@ namespace
         "    }\n"
         "    else if(u_output == 3)\n"
         "    {\n"
-        "        colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu)], 1.0);\n"
+        "        colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu) / 2u / 15u], 1.0);\n"
         "    }\n"
         "}";
 
@@ -170,8 +169,9 @@ namespace
     int seed = 12345;
 }
 
-TerrainComponent::TerrainComponent(xy::MessageBus& mb)
+TerrainComponent::TerrainComponent(xy::MessageBus& mb, xy::App& app)
     :xy::Component  (mb, this),
+    m_appInstance   (app),
     m_maxDistance   (xy::Util::Vector::lengthSquared(Chunk::chunkSize() * 1.7f)),
     m_texturePool   (maxActiveChunks),
     m_currentChunk  (nullptr),
@@ -195,6 +195,8 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
     m_waterFloorTexture.loadFromFile("assets/images/tiles/water_tile.png");
     m_waterFloorTexture.setRepeated(true);
     m_waterShader.setUniform("u_floorTexture", m_waterFloorTexture);
+    auto vMode = m_appInstance.getVideoSettings().VideoMode;
+    m_waterShader.setUniform("u_screenSize", sf::Glsl::Vec2(static_cast<float>(vMode.width), static_cast<float>(vMode.height)));
     updateReflectionTexture();
 
     xy::Component::MessageHandler mh;
@@ -204,13 +206,14 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb)
         auto msgData = msg.getData<xy::Message::UIEvent>();
         if (msgData.type == xy::Message::UIEvent::ResizedWindow)
         {
-            m_waterShader.setUniform("u_screenSize", sf::Glsl::Vec2(1920.f, 1080.f)); //TODO get the proper value
+            auto vMode = m_appInstance.getVideoSettings().VideoMode;
+            m_waterShader.setUniform("u_screenSize", sf::Glsl::Vec2(static_cast<float>(vMode.width), static_cast<float>(vMode.height)));
         }
     };
     addMessageHandler(mh);
 
     m_terrainShader.loadFromMemory(vertex, tileShader);
-    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set.png");
+    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set03.png");
     m_tilesetTexture.setRepeated(true);
     m_terrainShader.setUniform("u_tileTexture", m_tilesetTexture);
 
