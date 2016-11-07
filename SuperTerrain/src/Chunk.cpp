@@ -257,10 +257,16 @@ void Chunk::generate()
     auto noise = fn::NewFastNoiseSIMD(seed);
     float* terrainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount + 1, chunkTileCount + 1);
-    
-    processTerrain(terrainData);
+ 
+    noise->SetFrequency(0.0005f);
+    float* waterData = noise->GetSimplexSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
+        (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
+        chunkTileCount, chunkTileCount + 1, chunkTileCount + 1);
+
+    processTerrain(terrainData, waterData);
 
     noise->SetFrequency(0.005f);
+    noise->SetFractalOctaves(3);
     float* rainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount/*, 0.59f*/);
    
@@ -274,6 +280,7 @@ void Chunk::generate()
     float* heightData = noise->GetValueFractalSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount);
+
 
     //update the array with biome calc
     std::size_t i = 0;
@@ -291,12 +298,12 @@ void Chunk::generate()
             float rainfall = rainData[i];
             rainfall = xy::Util::Math::clamp(rainfall + (variance * 0.2f), -1.f, 1.f);
             rainfall = xy::Util::Math::clamp((rainfall * 0.5f + 0.5f), 0.f, 1.f);
-            if (heightData[i] > 0.85f) rainfall *= 0.1f;
+            if (terrainData[i] > 0.85f) rainfall *= 0.1f;
             std::uint8_t rain = static_cast<std::uint8_t>((rainfall * 399.99f) / 10.f);
             
             //drop temperature with height
-            float temperature = tempData[i] - heightData[i];
-            temperature /= 2.f;
+            float temperature = xy::Util::Math::clamp(tempData[i] - heightData[i], -1.f, 1.f);
+            //temperature /= 2.f;
 
             //and again with latitude
             temperature = xy::Util::Math::clamp((temperature + variance), -1.f, 1.f);
@@ -326,6 +333,7 @@ void Chunk::generate()
     fn::FreeNoiseSet(heightData);
     fn::FreeNoiseSet(tempData);
     fn::FreeNoiseSet(rainData);
+    fn::FreeNoiseSet(waterData);
     fn::FreeNoiseSet(terrainData);
 
     //save();
@@ -334,7 +342,7 @@ void Chunk::generate()
     //LOG("Thread Quit", xy::Logger::Type::Info);
 }
 
-void Chunk::processTerrain(float* terrainData)
+void Chunk::processTerrain(float* terrainData, float* oceanData)
 {
     //pre-pass into slightly larger set
     std::vector<int> preSet((chunkTileCount + 1) * (chunkTileCount + 1));
@@ -343,7 +351,10 @@ void Chunk::processTerrain(float* terrainData)
         for (auto y = 0; y < chunkTileCount + 1; ++y)
         {
             std::size_t i = x * (chunkTileCount + 1) + y;
-            preSet[i] = static_cast<int>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
+
+            float data = xy::Util::Math::clamp(terrainData[i] + (xy::Util::Math::clamp(oceanData[i], -1.f, 0.f) * 5.f), -1.f, 1.f);
+
+            preSet[i] = static_cast<int>(xy::Util::Math::clamp((data * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
             preSet[i] *= 2;
             preSet[i] += xy::Util::Random::value(0, 1);
         }
