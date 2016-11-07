@@ -99,7 +99,6 @@ namespace
 
         "uniform usampler2D u_lookupTexture;\n"
         "uniform sampler2D u_tileTexture;\n"
-        "uniform sampler2DArray u_tileArray;\n"
         "uniform int u_output = 0;"
 
         "uniform vec2 u_tileSize = vec2(24.0, 24.0);\n"
@@ -351,11 +350,12 @@ namespace
     GLsizei width = 360;
     GLsizei height = 192;
     std::size_t biomeCount = 9;
+    std::size_t texturesPerSide = 3;
 }
 
 void TerrainComponent::loadTerrainTexture()
 {
-    m_terrainTexture.create(width * 3, height * 3);
+    m_terrainTexture.create(width * texturesPerSide, height * texturesPerSide);
     for (auto i = 0u; i < biomeCount; ++i)
     {
         sf::Image img;
@@ -369,8 +369,8 @@ void TerrainComponent::loadTerrainTexture()
             xy::Logger::log("Image " + std::to_string(i) + " was not correct size.", xy::Logger::Type::Warning);
         }
 
-        auto xPos = i % 3;
-        auto yPos = i / 3;
+        auto xPos = i % texturesPerSide;
+        auto yPos = i / texturesPerSide;
         m_terrainTexture.update(img, xPos * width, yPos * height);
     }
     //m_tilesetTexture.setRepeated(true);

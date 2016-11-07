@@ -263,12 +263,17 @@ void Chunk::generate()
     noise->SetFrequency(0.005f);
     float* rainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount/*, 0.59f*/);
-
-    //noise->SetFrequency(0.002f);
+   
     noise->SetFractalType(FastNoiseSIMD::RigidMulti);
     float* tempData = noise->GetGradientFractalSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount/*, 0.26f*/);
+
+    noise->SetFrequency(0.002f);
+    noise->SetFractalOctaves(2);
+    float* heightData = noise->GetValueFractalSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
+        (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
+        chunkTileCount, chunkTileCount, chunkTileCount);
 
     //update the array with biome calc
     std::size_t i = 0;
@@ -278,9 +283,26 @@ void Chunk::generate()
         {
             m_terrainData[i] &= 0xFF;
 
+            //latitude variance
+            static const float maxLatitude = 550000.f;
+            float variance = (2.f * (1.f - std::abs(m_position.y) / maxLatitude)) - 1.f;
+
             //biome ID is stored in byte 2
-            std::uint8_t rain = static_cast<std::uint8_t>((xy::Util::Math::clamp((rainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 399.99f) / 10.f);
-            std::uint8_t temp = static_cast<std::uint8_t>(xy::Util::Math::clamp((tempData[i] * 0.5f + 0.5f), 0.f, 1.f) * 39.99f);
+            float rainfall = rainData[i];
+            rainfall = xy::Util::Math::clamp(rainfall + (variance * 0.2f), -1.f, 1.f);
+            rainfall = xy::Util::Math::clamp((rainfall * 0.5f + 0.5f), 0.f, 1.f);
+            if (heightData[i] > 0.85f) rainfall *= 0.1f;
+            std::uint8_t rain = static_cast<std::uint8_t>((rainfall * 399.99f) / 10.f);
+            
+            //drop temperature with height
+            float temperature = tempData[i] - heightData[i];
+            temperature /= 2.f;
+
+            //and again with latitude
+            temperature = xy::Util::Math::clamp((temperature + variance), -1.f, 1.f);
+            temperature = xy::Util::Math::clamp((temperature * 0.5f + 0.5f), 0.f, 1.f);
+            
+            std::uint8_t temp = static_cast<std::uint8_t>(temperature * 39.99f);
             std::int8_t biome = -1;
             std::size_t index = 0;
 
@@ -301,6 +323,7 @@ void Chunk::generate()
         }
     }
 
+    fn::FreeNoiseSet(heightData);
     fn::FreeNoiseSet(tempData);
     fn::FreeNoiseSet(rainData);
     fn::FreeNoiseSet(terrainData);
