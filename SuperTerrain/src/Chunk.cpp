@@ -270,20 +270,13 @@ void Chunk::generate()
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
         chunkTileCount, chunkTileCount, chunkTileCount/*, 0.26f*/);
 
+    //update the array with biome calc
     std::size_t i = 0;
     for (auto y = 0; y < chunkTileCount; ++y)
     {
         for (auto z = 0; z < chunkTileCount; ++z)
         {
-            /*std::size_t j = y * (chunkTileCount + 1) + z;
-            m_terrainData[i] = static_cast<std::uint16_t>(xy::Util::Math::clamp((terrainData[j] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);*/
             m_terrainData[i] &= 0xFF;
-
-            //std::uint8_t rain = static_cast<std::uint8_t>(xy::Util::Math::clamp((rainData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
-            //m_terrainData[i] |= ((rain & 0x0f) << 8); //for now this is the other noise output - we'll store biome ID here eventually
-
-            //std::uint8_t temp = static_cast<std::uint8_t>(1.f - xy::Util::Math::clamp((tempData[i] * 0.5 + 0.5f), 0.f, 1.f) * 15.f);
-            //m_terrainData[i] |= (temp << 12);
 
             //biome ID is stored in byte 2
             std::uint8_t rain = static_cast<std::uint8_t>((xy::Util::Math::clamp((rainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 399.99f) / 10.f);

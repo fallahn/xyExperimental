@@ -66,10 +66,11 @@ private:
     sf::Texture m_waterReflectionTexture;
     void updateReflectionTexture();
 
-    sf::Texture m_tilesetTexture;
+    sf::Texture m_terrainTexture;
     mutable sf::Shader m_terrainShader;
     std::vector<ChunkTexture> m_texturePool;
-    ChunkTexture& getTexture();
+    ChunkTexture& getChunkTexture();
+    void loadTerrainTexture();
 
     Chunk* m_currentChunk;
     using ChunkPtr = xy::Detail::ObjectPool<Chunk>::Ptr;

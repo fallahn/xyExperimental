@@ -99,6 +99,7 @@ namespace
 
         "uniform usampler2D u_lookupTexture;\n"
         "uniform sampler2D u_tileTexture;\n"
+        "uniform sampler2DArray u_tileArray;\n"
         "uniform int u_output = 0;"
 
         "uniform vec2 u_tileSize = vec2(24.0, 24.0);\n"
@@ -110,6 +111,7 @@ namespace
         "out vec4 colour;\n"
         /*fixes rounding imprecision on AMD cards*/
         "const float epsilon = 0.01;\n"
+        "const vec2 biomeCount = vec2(3.0);"
 
         "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
 
@@ -122,15 +124,19 @@ namespace
         "    if(u_output == 0)\n"
         "    {\n"
         "        float index = float(value & 0xFFu);\n"
-        "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / u_tilesetCount;\n"
+        "        vec2 tilesetCount = u_tilesetCount * biomeCount;\n"
+        "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;\n"
+
+        "        float biomeID = float((value & 0xf00u) >> 8u);\n"
+        "        vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor(biomeID / biomeCount.x)) / biomeCount;\n"
 
         "        vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);\n"
         "        vec2 offset = mod(v_texCoord, texelSize);\n"
         "        vec2 ratio = offset / texelSize;\n"
         "        offset = ratio * (1.0 / u_tileSize);\n"
-        "        offset *= u_tileSize / u_tilesetCount;"
+        "        offset *= u_tileSize / tilesetCount;"
 
-        "        colour = texture(u_tileTexture, position + offset);\n"
+        "        colour = texture(u_tileTexture, biomePosition + position + offset);\n"
         "        //colour.rgb *= biomes[(value & 0x0F00u) >> 8] * 2.2;\n"
         "        return;\n"
         "    }\n"
@@ -213,9 +219,7 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb, xy::App& app)
     addMessageHandler(mh);
 
     m_terrainShader.loadFromMemory(vertex, tileShader);
-    m_tilesetTexture.loadFromFile("assets/images/tiles/test_set03.png");
-    m_tilesetTexture.setRepeated(true);
-    m_terrainShader.setUniform("u_tileTexture", m_tilesetTexture);
+    loadTerrainTexture();
 
     //set up the texture pool
     for (auto& tp : m_texturePool)
@@ -265,7 +269,7 @@ void TerrainComponent::entityUpdate(xy::Entity& entity, float dt)
             std::floor(m_playerPosition.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
         };
         chunkPos += (Chunk::chunkSize() / 2.f);
-        m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_terrainShader, getTexture(), m_waterShader, m_waterFloorTexture));
+        m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_terrainShader, getChunkTexture(), m_waterShader, m_waterFloorTexture));
 
         //set current chunk to new chunk
         m_currentChunk = m_activeChunks.back().get();
@@ -331,13 +335,46 @@ void TerrainComponent::updateReflectionTexture()
     m_waterShader.setUniform("u_reflectionTexture", m_waterReflectionTexture);
 }
 
-ChunkTexture& TerrainComponent::getTexture()
+ChunkTexture& TerrainComponent::getChunkTexture()
 {
     return *std::find_if(std::begin(m_texturePool), std::end(m_texturePool), 
         [](const ChunkTexture& ct)
     {
         return !ct.second;
     });
+}
+
+namespace
+{
+    //this is more to enforce all textures are the same size
+    //rather than any particular size
+    GLsizei width = 360;
+    GLsizei height = 192;
+    std::size_t biomeCount = 9;
+}
+
+void TerrainComponent::loadTerrainTexture()
+{
+    m_terrainTexture.create(width * 3, height * 3);
+    for (auto i = 0u; i < biomeCount; ++i)
+    {
+        sf::Image img;
+        if (!img.loadFromFile("assets/images/tiles/" + std::to_string(i) + ".png"))
+        {
+            img.create(width, height, sf::Color::Magenta);
+        }
+        if (img.getSize().x != width || img.getSize().y != height)
+        {
+            img.create(width, height, sf::Color::Magenta);
+            xy::Logger::log("Image " + std::to_string(i) + " was not correct size.", xy::Logger::Type::Warning);
+        }
+
+        auto xPos = i % 3;
+        auto yPos = i / 3;
+        m_terrainTexture.update(img, xPos * width, yPos * height);
+    }
+    //m_tilesetTexture.setRepeated(true);
+    m_terrainShader.setUniform("u_tileTexture", m_terrainTexture);
 }
 
 void TerrainComponent::updateChunks()
@@ -386,7 +423,7 @@ void TerrainComponent::updateChunks()
                 std::floor(currentPos.y / Chunk::chunkSize().y) * Chunk::chunkSize().y
             };
             chunkPos += (Chunk::chunkSize() / 2.f); //account for positioning being in centre
-            m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_terrainShader, getTexture(), m_waterShader, m_waterFloorTexture));
+            m_activeChunks.emplace_back(m_chunkPool.get(chunkPos, m_terrainShader, getChunkTexture(), m_waterShader, m_waterFloorTexture));
         }
     }
 }
