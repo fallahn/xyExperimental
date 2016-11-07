@@ -89,77 +89,80 @@ namespace
 
             vec4 reflection = texture(u_reflectionTexture, (gl_FragCoord.xy / u_screenSize) + offset / 100.0);
 
-            float depth = float(((texture(u_depthTexture, v_texCoord).r & 0xF000u) >> 12)) / 15.0;
-            colour = vec4(texture(u_floorTexture, texCoord + (offset / 12.0)).rgb * (depth - 0.5 * 0.5), 1.0);
+            float depth = float(((texture(u_depthTexture, v_texCoord).r & 0xF000u) >> 12) + 1u) / 16.0;
+            colour = vec4(texture(u_floorTexture, texCoord + (offset / 12.0)).rgb * (depth /*- 0.5 * 0.5*/), 1.0);
             colour += reflection * 0.15;
         })";
 
     const std::string tileShader =
-        "#version 130\n"
+        R"(
+        #version 130
 
-        "uniform usampler2D u_lookupTexture;\n"
-        "uniform sampler2D u_tileTexture;\n"
-        "uniform int u_output = 0;"
+        uniform usampler2D u_lookupTexture;
+        uniform sampler2D u_tileTexture;
+        uniform int u_output = 0;
 
-        "uniform vec2 u_tileSize = vec2(24.0, 24.0);\n"
-        "uniform vec2 u_tilesetCount = vec2(15.0, 8.0);"
+        uniform vec2 u_tileSize = vec2(24.0, 24.0);
+        uniform vec2 u_tilesetCount = vec2(15.0, 8.0);
 
-        "in vec2 v_texCoord;\n"
-        "in vec4 v_colour;\n"
+        in vec2 v_texCoord;
+        in vec4 v_colour;
 
-        "out vec4 colour;\n"
+        out vec4 colour;
         /*fixes rounding imprecision on AMD cards*/
-        "const float epsilon = 0.01;\n"
-        "const vec2 biomeCount = vec2(3.0);"
+        const float epsilon = 0.000005;
+        const vec2 biomeCount = vec2(3.0);
 
-        "vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));\n"
+        vec3[4] colours = vec3[4](vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.8, 1.0, 0.0), vec3(0.0, 0.9, 0.05));
 
-        "vec3[9] biomes = vec3[9](vec3(0.7,0.87,0.93), vec3(0.93,0.85,0.7), vec3(0.58,0.41,0.12), vec3(0.89,0.35,0.23), vec3(0.63,0.81,0.1), vec3(0.22,0.72,0.55), vec3(0.22, 0.5, 0.72), vec3(0.14,0.33,0.66), vec3(0.04,0.32,0.06));\n"
+        vec3[9] biomes = vec3[9](vec3(0.7,0.87,0.93), vec3(0.93,0.85,0.7), vec3(0.58,0.41,0.12),
+                         vec3(0.89,0.35,0.23), vec3(0.63,0.81,0.1), vec3(0.22,0.72,0.55),
+                         vec3(0.22, 0.5, 0.72), vec3(0.14,0.33,0.66), vec3(0.04,0.32,0.06));
 
-        "void main()\n"
-        "{\n"
-        "    uint value = texture(u_lookupTexture, v_texCoord).r;\n"
+        void main()
+        {
+            uint value = texture(u_lookupTexture, v_texCoord).r;
 
-        "    if(u_output == 0)\n"
-        "    {\n"
-        "        float index = float(value & 0xFFu);\n"
-        "        vec2 tilesetCount = u_tilesetCount * biomeCount;\n"
-        "        vec2 position = vec2(mod(index, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;\n"
+            if(u_output == 0)
+            {
+                float index = float(value & 0xFFu);
+                vec2 tilesetCount = u_tilesetCount * biomeCount;
+                vec2 position = vec2(mod(index + epsilon, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;
 
-        "        float biomeID = float((value & 0xf00u) >> 8u);\n"
-        "        vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor(biomeID / biomeCount.x)) / biomeCount;\n"
+                float biomeID = float((value & 0xf00u) >> 8u);
+                vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor((biomeID / biomeCount.x))) / biomeCount;
 
-        "        vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);\n"
-        "        vec2 offset = mod(v_texCoord, texelSize);\n"
-        "        vec2 ratio = offset / texelSize;\n"
-        "        offset = ratio * (1.0 / u_tileSize);\n"
-        "        offset *= u_tileSize / tilesetCount;"
+                vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);
+                vec2 offset = mod(v_texCoord, texelSize);
+                vec2 ratio = offset / texelSize;
+                offset = ratio * (1.0 / u_tileSize);
+                offset *= u_tileSize / tilesetCount;
 
-        "        colour = texture(u_tileTexture, biomePosition + position + offset);\n"
-        "        //colour.rgb *= biomes[(value & 0x0F00u) >> 8] * 2.2;\n"
-        "        return;\n"
-        "    }\n"
-        "    if(u_output == 1)\n"
-        "    {\n"
-        "        colour = vec4(colours[((value & 0xFFu) / 2u / 15u)] * 0.8, 1.0);\n"
-        "    }\n"
-        "    else if(u_output == 2)\n"
-        "    {\n"
-        "        uint idx = (value & 0xFFu);\n"
-        "        if(idx == 0u || idx == 15u)\n"
-        "        {\n"
-        "            colour = vec4(colours[0], 1.0)\n;"
-        "        }\n"
-        "        else\n"
-        "        {\n"
-        "            colour = vec4(biomes[(value & 0x0F00u) >> 8], 1.0);\n"
-        "        }\n"
-        "    }\n"
-        "    else if(u_output == 3)\n"
-        "    {\n"
-        "        colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu) / 2u / 15u], 1.0);\n"
-        "    }\n"
-        "}";
+                colour = texture(u_tileTexture, biomePosition + position + offset);
+                //colour.rgb *= biomes[(value & 0x0F00u) >> 8] * 2.2;
+                return;
+            }
+            if(u_output == 1)
+            {
+                colour = vec4(colours[((value & 0xFFu) / 2u / 15u)] * 0.8, 1.0);
+            }
+            else if(u_output == 2)
+            {
+                uint idx = (value & 0xFFu);
+                if(idx == 0u || idx == 15u)
+                {
+                    colour = vec4(colours[0], 1.0);
+                }
+                else
+                {
+                    colour = vec4(biomes[(value & 0x0F00u) >> 8], 1.0);
+                }
+            }
+            else if(u_output == 3)
+            {
+                colour = vec4(biomes[(value & 0x0F00u) >> 8] * colours[(value & 0xFFu) / 2u / 15u], 1.0);
+            }
+        })";
 
     const std::size_t maxActiveChunks = 18;
 

@@ -258,7 +258,7 @@ void Chunk::generate()
     float* terrainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
         chunkTileCount, chunkTileCount + 1, chunkTileCount + 1);
  
-    noise->SetFrequency(0.0005f);
+    noise->SetFrequency(0.003f);
     float* waterData = noise->GetSimplexSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
         chunkTileCount, chunkTileCount + 1, chunkTileCount + 1);
@@ -284,9 +284,9 @@ void Chunk::generate()
 
     //update the array with biome calc
     std::size_t i = 0;
-    for (auto y = 0; y < chunkTileCount; ++y)
+    for (auto y = 0u; y < chunkTileCount; ++y)
     {
-        for (auto z = 0; z < chunkTileCount; ++z)
+        for (auto z = 0u; z < chunkTileCount; ++z)
         {
             m_terrainData[i] &= 0xFF;
 
@@ -346,15 +346,15 @@ void Chunk::processTerrain(float* terrainData, float* oceanData)
 {
     //pre-pass into slightly larger set
     std::vector<int> preSet((chunkTileCount + 1) * (chunkTileCount + 1));
-    for (auto x = 0; x < chunkTileCount + 1; ++x)
+    for (auto x = 0u; x < chunkTileCount + 1; ++x)
     {
-        for (auto y = 0; y < chunkTileCount + 1; ++y)
+        for (auto y = 0u; y < chunkTileCount + 1; ++y)
         {
             std::size_t i = x * (chunkTileCount + 1) + y;
 
-            float data = xy::Util::Math::clamp(terrainData[i] + (xy::Util::Math::clamp(oceanData[i], -1.f, 0.f) * 5.f), -1.f, 1.f);
+            terrainData[i] = xy::Util::Math::clamp(terrainData[i] + (xy::Util::Math::clamp(oceanData[i], -1.f, 0.f) * 5.f), -1.f, 1.f);
 
-            preSet[i] = static_cast<int>(xy::Util::Math::clamp((data * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
+            preSet[i] = static_cast<int>(xy::Util::Math::clamp((terrainData[i] * 0.5f + 0.5f), 0.f, 1.f) * 3.99f);
             preSet[i] *= 2;
             preSet[i] += xy::Util::Random::value(0, 1);
         }
@@ -367,13 +367,11 @@ void Chunk::processTerrain(float* terrainData, float* oceanData)
         return preSet[y * (chunkTileCount + 1) + x];
     };
 
-    for (auto y = 0; y < chunkTileCount; ++y)
+    for (auto y = 0u; y < chunkTileCount; ++y)
     {
-        for (auto x = 0; x < chunkTileCount; ++x)
+        for (auto x = 0u; x < chunkTileCount; ++x)
         {
             std::size_t i = y * chunkTileCount + x;
-            std::size_t j = y * (chunkTileCount + 1) + x;
-            //m_terrainData[i] = preSet[j];
 
             auto TL = offsetVal(x, y);
             auto TR = offsetVal(x + 1, y);
