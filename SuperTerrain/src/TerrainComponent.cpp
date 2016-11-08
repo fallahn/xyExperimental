@@ -89,7 +89,7 @@ namespace
 
             vec4 reflection = texture(u_reflectionTexture, (gl_FragCoord.xy / u_screenSize) + offset / 100.0);
 
-            float depth = float(((texture(u_depthTexture, v_texCoord).r & 0xF000u) >> 12) + 1u) / 16.0;
+            float depth = float(((texture(u_depthTexture, v_texCoord + (offset / 800.0)).r & 0xF000u) >> 12) + 1u) / 16.0;
             colour = vec4(texture(u_floorTexture, texCoord + (offset / 12.0)).rgb * clamp(depth * 3.0, 0.0, 1.0), 1.0);
             colour += reflection * 0.15;
         })";
@@ -125,12 +125,13 @@ namespace
 
             if(u_output == 0)
             {
-                //float index = float(value & 0xFFu);
+                float index = float(value & 0xFFu);
                 vec2 tilesetCount = u_tilesetCount * biomeCount;
-                //vec2 position = vec2(mod(index + epsilon, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;
+                vec2 position = vec2(mod(index + epsilon, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;
 
-                uint index = value & 0xFFu;
-                vec2 position = vec2(float(mod(index, uint(u_tilesetCount.x))), float(index / uint(u_tilesetCount.x))) / tilesetCount;
+                //uint index = value & 0xFFu;
+                //uvec2 indices = uvec2(mod(index, uint(u_tilesetCount.x)), index / uint(u_tilesetCount.x));
+                //vec2 position = vec2(indices) / (tilesetCount - vec2(epsilon));
 
                 float biomeID = float((value & 0xf00u) >> 8u);
                 vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor((biomeID / biomeCount.x))) / biomeCount;
