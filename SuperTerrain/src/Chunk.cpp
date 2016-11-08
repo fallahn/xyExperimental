@@ -322,7 +322,7 @@ void Chunk::generate()
             m_terrainData[i] |= ((biome & 0x0f) << 8);
 
             //depth in top half of byte 2
-            float depth = xy::Util::Math::clamp((terrainData[y * (chunkTileCount + 1) + z] * 0.5f + 0.5f) / 0.25f, 0.f, 1.f);
+            float depth = xy::Util::Math::clamp((terrainData[y * (chunkTileCount + 1) + z] * 0.5f + 0.5f)/* / 0.25f*/, 0.f, 1.f);
             std::uint8_t d = static_cast<std::uint8_t>(depth * 15.f);
             m_terrainData[i] |= (d << 12);
 
