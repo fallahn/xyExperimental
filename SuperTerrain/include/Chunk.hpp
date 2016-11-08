@@ -77,7 +77,7 @@ private:
     sf::FloatRect m_globalBounds;
 
 
-    std::array<std::uint16_t, 4096> m_terrainData;
+    std::array<std::uint32_t, 4096> m_terrainData;
     std::atomic_bool m_updatePending;
     sf::Thread m_generationThread;
     sf::Mutex m_mutex;

@@ -235,8 +235,8 @@ TerrainComponent::TerrainComponent(xy::MessageBus& mb, xy::App& app)
     {
         tp.first.create(Chunk::chunkTilesSide(), Chunk::chunkTilesSide());
         glCheck(glBindTexture(GL_TEXTURE_2D, tp.first.getNativeHandle()));
-        glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
-        //glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, 0));
+        //glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 0));
+        glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, tp.first.getSize().x, tp.first.getSize().y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0));
         glCheck(glBindTexture(GL_TEXTURE_2D, 0));
         tp.second = false; //texture not yet used
     }

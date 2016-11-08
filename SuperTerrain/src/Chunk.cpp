@@ -220,7 +220,7 @@ void Chunk::save()
     std::ofstream file("map/" + std::to_string(m_ID), std::ios::binary | std::ios::out);
     if (/*file.is_open() && */file.good())
     {
-        file.write(reinterpret_cast<const char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint16_t)));
+        file.write(reinterpret_cast<const char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint32_t)));
         //LOG(std::to_string(m_ID), xy::Logger::Type::Info);
     }
     file.close();
@@ -232,7 +232,7 @@ bool Chunk::loadFromDisk()
     
     if (file.is_open() && file.good())
     {
-        file.read(reinterpret_cast<char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint16_t)));
+        file.read(reinterpret_cast<char*>(m_terrainData.data()), std::streamsize(m_terrainData.size() * sizeof(std::uint32_t)));
         file.close();
         updateTexture();
         //LOG(std::to_string(m_ID), xy::Logger::Type::Info);
@@ -268,12 +268,12 @@ void Chunk::generate()
     noise->SetFrequency(0.005f);
     noise->SetFractalOctaves(3);
     float* rainData = noise->GetSimplexFractalSet(0, int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount, int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount/*, 0.59f*/);
+        chunkTileCount, chunkTileCount, chunkTileCount);
    
     noise->SetFractalType(FastNoiseSIMD::RigidMulti);
     float* tempData = noise->GetGradientFractalSet(0, (int(m_globalBounds.top / chunkWorldSize.y) * chunkTileCount) + chunkTileCount,
         (int(m_globalBounds.left / chunkWorldSize.x) * chunkTileCount) - chunkTileCount,
-        chunkTileCount, chunkTileCount, chunkTileCount/*, 0.26f*/);
+        chunkTileCount, chunkTileCount, chunkTileCount);
 
     noise->SetFrequency(0.002f);
     noise->SetFractalOctaves(2);
@@ -324,7 +324,7 @@ void Chunk::generate()
             //depth in top half of byte 2
             float depth = xy::Util::Math::clamp((terrainData[y * (chunkTileCount + 1) + z] * 0.5f + 0.5f)/* / 0.25f*/, 0.f, 1.f);
             std::uint8_t d = static_cast<std::uint8_t>(depth * 15.f);
-            m_terrainData[i] |= (d << 12);
+            m_terrainData[i] |= ((d & 0x0f) << 12);
 
             i++;
         }
@@ -406,8 +406,8 @@ void Chunk::processTerrain(float* terrainData, float* oceanData)
 void Chunk::updateTexture()
 {
     glCheck(glBindTexture(GL_TEXTURE_2D, m_chunkTexture.first.getNativeHandle()));
-    glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
-    //glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
+    //glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_SHORT, (void*)m_terrainData.data()));
+    glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, chunkTileCount, chunkTileCount, GL_RED_INTEGER, GL_UNSIGNED_INT, (void*)m_terrainData.data()));
     glCheck(glBindTexture(GL_TEXTURE_2D, 0));
     m_updatePending = false;
     //m_modified = true;
