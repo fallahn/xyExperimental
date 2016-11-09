@@ -25,6 +25,15 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
+/*
+Chunk data is stored in a 64x64 array of uint32 values
+0x000000ff = tile id
+0x00000f00 = biome id
+0x0000f000 = height data used for shading
+0x00ff0000 = tile id of current detail
+
+*/
+
 #include <Chunk.hpp>
 #include <TerrainComponent.hpp>
 
@@ -178,6 +187,8 @@ void Chunk::destroy()
 bool Chunk::isWater(const sf::Vector2f& position) const
 {
     auto idx = indexFromPosition(position - sf::Vector2f(m_globalBounds.left, m_globalBounds.top));
+    if (idx >= m_terrainData.size()) return false;
+
     auto id = (m_terrainData[idx] & 0xFF);
     return (id == 0 || id == 15);
 }
@@ -185,6 +196,7 @@ bool Chunk::isWater(const sf::Vector2f& position) const
 std::uint8_t Chunk::getBiomeID(const sf::Vector2f& position) const
 {
     auto idx = indexFromPosition(position - sf::Vector2f(m_globalBounds.left, m_globalBounds.top));
+    if (idx >= m_terrainData.size()) return 255;
     auto id = ((m_terrainData[idx] & 0xF00) >> 8);
     return id;
 }
@@ -335,6 +347,30 @@ void Chunk::generate()
     fn::FreeNoiseSet(rainData);
     fn::FreeNoiseSet(waterData);
     fn::FreeNoiseSet(terrainData);
+
+    //use a poisson disc distribution to add details
+    auto points = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 64.f, 64.f }, 8.f, 3);
+
+    //TODO sometimes the size of points is rather.. extreme?
+    if (!points.empty() && points.size() < 2000)
+    {
+        for (const auto& p : points)
+        {
+            std::size_t idx = static_cast<std::size_t>(p.y * chunkTileCount + p.x);
+            if (idx >= m_terrainData.size()) continue;
+
+            auto depth = (m_terrainData[idx] & 0xf000) >> 12;
+            if (depth > 1)
+            {
+                //not in deep water
+                auto detailType = depth / 4;
+                detailType += xy::Util::Random::value(0, 3);
+                detailType += 90; //details start on tile 90
+
+                m_terrainData[idx] |= ((detailType & 0xFF) << 16);
+            }
+        }
+    }
 
     //save();
     m_updatePending = true;

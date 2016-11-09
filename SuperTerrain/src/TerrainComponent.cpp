@@ -119,35 +119,48 @@ namespace
                          vec3(0.89,0.35,0.23), vec3(0.63,0.81,0.1), vec3(0.22,0.72,0.55),
                          vec3(0.22, 0.5, 0.72), vec3(0.14,0.33,0.66), vec3(0.04,0.32,0.06));
 
+        vec4 colourAtIndex(float index, float biomeID)
+        {
+            vec2 tilesetCount = u_tilesetCount * biomeCount;
+            vec2 position = vec2(mod(index + epsilon, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;
+
+            //uint index = value & 0xFFu;
+            //uvec2 indices = uvec2(mod(index, uint(u_tilesetCount.x)), index / uint(u_tilesetCount.x));
+            //vec2 position = vec2(indices) / (tilesetCount - vec2(epsilon));
+            
+            vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor((biomeID / biomeCount.x))) / biomeCount;
+
+            vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);
+            vec2 offset = mod(v_texCoord, texelSize);
+            vec2 ratio = offset / texelSize;
+            offset = ratio * (1.0 / u_tileSize);
+            offset *= u_tileSize / tilesetCount;
+
+            return texture(u_tileTexture, biomePosition + position + offset);
+        }
+
         void main()
         {
             uint value = texture(u_lookupTexture, v_texCoord).r;
 
             if(u_output == 0)
             {
-                float index = float(value & 0xFFu);
-                vec2 tilesetCount = u_tilesetCount * biomeCount;
-                vec2 position = vec2(mod(index + epsilon, u_tilesetCount.x), floor((index / u_tilesetCount.x) + epsilon)) / tilesetCount;
-
-                //uint index = value & 0xFFu;
-                //uvec2 indices = uvec2(mod(index, uint(u_tilesetCount.x)), index / uint(u_tilesetCount.x));
-                //vec2 position = vec2(indices) / (tilesetCount - vec2(epsilon));
-
                 float biomeID = float((value & 0xf00u) >> 8u);
-                vec2 biomePosition = vec2(mod(biomeID, biomeCount.x), floor((biomeID / biomeCount.x))) / biomeCount;
 
-                vec2 texelSize = vec2(1.0) / textureSize(u_lookupTexture, 0);
-                vec2 offset = mod(v_texCoord, texelSize);
-                vec2 ratio = offset / texelSize;
-                offset = ratio * (1.0 / u_tileSize);
-                offset *= u_tileSize / tilesetCount;
+                float index = float(value & 0xFFu);
+                colour = colourAtIndex(index, biomeID);
+
+                uint detailIndex = (value & 0xff0000u) >> 16u;
+                if(detailIndex != 0u)
+                {
+                    vec4 detailColour = colourAtIndex(float(detailIndex), biomeID);
+                    colour = mix(colour, detailColour, detailColour.a);
+                }
 
                 float depth = float((value & 0xF000u) >> 12) / 60.0;
-                depth += 0.75;
-
-                colour = texture(u_tileTexture, biomePosition + position + offset);
-                //colour.rgb *= biomes[(value & 0x0F00u) >> 8] * 2.2;
+                depth += 0.75;                
                 colour.rgb *= depth;
+
                 return;
             }
             if(u_output == 1)
