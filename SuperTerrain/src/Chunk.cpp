@@ -349,7 +349,7 @@ void Chunk::generate()
     fn::FreeNoiseSet(terrainData);
 
     //use a poisson disc distribution to add details
-    auto points = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 64.f, 64.f }, 8.f, 3);
+    auto points = xy::Util::Random::poissonDiscDistribution({ 0.f, 0.f, 64.f, 64.f }, 10.f, 10);
 
     //TODO sometimes the size of points is rather.. extreme?
     if (!points.empty() && points.size() < 2000)
@@ -363,8 +363,8 @@ void Chunk::generate()
             if (depth > 1)
             {
                 //not in deep water
-                auto detailType = depth / 4;
-                detailType += xy::Util::Random::value(0, 3);
+                auto detailType = (depth / 4) * 3;
+                detailType += xy::Util::Random::value(0, 2);
                 detailType += 90; //details start on tile 90
 
                 m_terrainData[idx] |= ((detailType & 0xFF) << 16);
