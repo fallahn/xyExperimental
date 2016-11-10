@@ -137,6 +137,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\Chunk.hpp" />
     <ClInclude Include="include\FastNoiseSIMD.h" />
     <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\PlayerController.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\TerrainComponent.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
@@ -151,6 +152,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GLExtensions.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\PlayerController.cpp" />
     <ClCompile Include="src\TerrainComponent.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>

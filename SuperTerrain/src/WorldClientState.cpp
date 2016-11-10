@@ -27,6 +27,7 @@ source distribution.
 
 #include <WorldClientState.hpp>
 #include <TerrainComponent.hpp>
+#include <PlayerController.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/Command.hpp>
@@ -37,12 +38,13 @@ source distribution.
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 
 namespace
 {
     const int playerID = 300;
 
-    xy::Camera* playerCamera = nullptr;
+    //xy::Camera* playerCamera = nullptr;
 }
 
 WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
@@ -58,17 +60,24 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
 
-    auto cam = xy::Component::create<xy::Camera>(m_messageBus, context.defaultView);
+
+    //auto cam = xy::Component::create<xy::Camera>(m_messageBus, context.defaultView);
     auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
-    dwb->getDrawable().setRadius(10.f);
-    dwb->getDrawable().setOrigin(10.f, 10.f);
+    dwb->getDrawable().setRadius(20.f);
+    dwb->getDrawable().setOrigin(20.f, 20.f);
     dwb->getDrawable().setFillColor(sf::Color::Red);
+    dwb->getDrawable().setPointCount(3);
+    dwb->getDrawable().setRotation(-30.f);
+
+    auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
 
     entity = xy::Entity::create(m_messageBus);
-    playerCamera = entity->addComponent(cam);
-    m_scene.setActiveCamera(playerCamera);
+    //playerCamera = entity->addComponent(cam);
+    //m_scene.setActiveCamera(playerCamera);
     entity->addComponent(dwb);
+    entity->addComponent(playerController);
     entity->addCommandCategories(playerID);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 }
 
@@ -79,19 +88,19 @@ bool WorldClientState::update(float dt)
     cmd.category = playerID;
     cmd.action = [this](xy::Entity& entity, float dt)
     {
-        float speed = 500.f;
-        sf::Vector2f velocity;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) velocity.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) velocity.x += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) velocity.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) velocity.y += 1.f;
+        sf::Uint32 input = 0;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) input |= st::PlayerController::Left;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) input |= st::PlayerController::Right;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) input |= st::PlayerController::Forward;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) input |= st::PlayerController::Back;
 
-        if (xy::Util::Vector::lengthSquared(velocity) > 1.f)
-        {
-            velocity = xy::Util::Vector::normalise(velocity);
-        }
+        auto direction = xy::App::getMouseWorldPosition() - entity.getWorldPosition();
+        auto angle = xy::Util::Vector::rotation(direction);
+        input |= (static_cast<sf::Int16>(angle) << 16);
+        //REPORT("Input angle", std::to_string(angle));
+        //REPORT("Direction", std::to_string(direction.x) + ", " + std::to_string(direction.y));
 
-        entity.move(velocity * speed * dt);
+        entity.getComponent<st::PlayerController>()->setInput(input);
         //REPORT("Position", std::to_string(entity.getWorldPosition().x) + ", " + std::to_string(entity.getWorldPosition().y));
     };
     m_scene.sendCommand(cmd);
@@ -117,9 +126,10 @@ void WorldClientState::handleMessage(const xy::Message& msg)
         default: break;
         case xy::Message::UIEvent::ResizedWindow:
         {
-            auto v = playerCamera->getView();
+            /*auto v = playerCamera->getView();
             v.setViewport(getContext().defaultView.getViewport());
-            playerCamera->setView(v);
+            playerCamera->setView(v);*/
+            m_scene.setView(getContext().defaultView);
         }
         break;
         }
@@ -130,6 +140,7 @@ void WorldClientState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
+    rw.setView(getContext().defaultView);
 }
 
 //private

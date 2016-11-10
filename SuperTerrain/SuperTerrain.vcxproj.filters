@@ -28,6 +28,12 @@
     <Filter Include="Source Files\terrain">
       <UniqueIdentifier>{9a3046d5-104f-42f2-95cf-3d6e6b518caa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\player">
+      <UniqueIdentifier>{3e43f603-46e1-4c5c-a79b-d0651d2eaf86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\player">
+      <UniqueIdentifier>{212583b7-7e4c-4244-a73f-e4e5d0a9a87f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -47,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="include\Chunk.hpp">
       <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PlayerController.hpp">
+      <Filter>Header Files\player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="src\GLExtensions.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlayerController.cpp">
+      <Filter>Source Files\player</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
