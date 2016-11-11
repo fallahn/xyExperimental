@@ -25,7 +25,8 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef  ST_PLAYER_CONTROLLER_HPP_
+#ifndef ST_PLAYER_CONTROLLER_HPP_
+#define ST_PLAYER_CONTROLLER_HPP_
 
 #include <xygine/components/Component.hpp>
 

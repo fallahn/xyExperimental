@@ -7,6 +7,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/fastnoise/FastNoiseSIMD_sse2.cpp
   ${PROJECT_DIR}/fastnoise/FastNoiseSIMD_sse41.cpp
 
+  ${PROJECT_DIR}/CameraController.cpp
   ${PROJECT_DIR}/Chunk.cpp
   ${PROJECT_DIR}/Game.cpp
   ${PROJECT_DIR}/GLExtensions.cpp

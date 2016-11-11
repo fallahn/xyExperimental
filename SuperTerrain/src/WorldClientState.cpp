@@ -28,6 +28,7 @@ source distribution.
 #include <WorldClientState.hpp>
 #include <TerrainComponent.hpp>
 #include <PlayerController.hpp>
+#include <CameraController.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/Command.hpp>
@@ -60,25 +61,31 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
 
-
-    //auto cam = xy::Component::create<xy::Camera>(m_messageBus, context.defaultView);
     auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
     dwb->getDrawable().setRadius(20.f);
     dwb->getDrawable().setOrigin(20.f, 20.f);
     dwb->getDrawable().setFillColor(sf::Color::Red);
     dwb->getDrawable().setPointCount(3);
-    dwb->getDrawable().setRotation(-30.f);
+    dwb->getDrawable().setRotation(90.f);
+    dwb->getDrawable().setScale(1.f, 2.f);
 
     auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
 
     entity = xy::Entity::create(m_messageBus);
-    //playerCamera = entity->addComponent(cam);
-    //m_scene.setActiveCamera(playerCamera);
     entity->addComponent(dwb);
     entity->addComponent(playerController);
     entity->addCommandCategories(playerID);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+    auto playerEnt = m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+
+    auto cam = xy::Component::create<xy::Camera>(m_messageBus, context.defaultView);
+    auto camControl = xy::Component::create<st::CameraController>(m_messageBus, *playerEnt);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(camControl);
+    entity->setPosition(playerEnt->getPosition());
+    auto sceneCam = entity->addComponent(cam);
+    m_scene.setActiveCamera(sceneCam);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
 //public
@@ -129,7 +136,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             /*auto v = playerCamera->getView();
             v.setViewport(getContext().defaultView.getViewport());
             playerCamera->setView(v);*/
-            m_scene.setView(getContext().defaultView);
+            //m_scene.setView(getContext().defaultView);
         }
         break;
         }
@@ -140,7 +147,6 @@ void WorldClientState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
-    rw.setView(getContext().defaultView);
 }
 
 //private
