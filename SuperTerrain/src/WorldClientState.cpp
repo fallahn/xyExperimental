@@ -29,6 +29,7 @@ source distribution.
 #include <TerrainComponent.hpp>
 #include <PlayerController.hpp>
 #include <CameraController.hpp>
+#include <PacketIDs.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/Command.hpp>
@@ -40,6 +41,7 @@ source distribution.
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <SFML/System/Sleep.hpp>
 
 namespace
 {
@@ -48,37 +50,72 @@ namespace
     //xy::Camera* playerCamera = nullptr;
 }
 
+using namespace std::placeholders;
+
 WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
-    : State     (stateStack, context),
-    m_messageBus(context.appInstance.getMessageBus()),
-    m_scene     (m_messageBus)
+    : State                 (stateStack, context),
+    m_messageBus            (context.appInstance.getMessageBus()),
+    m_scene                 (m_messageBus),
+    m_broadcastAccumulator  (0.f)
 {
+    launchLoadingScreen();
     m_scene.setView(context.defaultView);
 
     init();
+
+    //TODO option to not start if connecting to remote server
+    m_server.start();
+    sf::sleep(sf::seconds(1.f));
+
+    m_packetHandler = std::bind(&WorldClientState::handlePacket, this, _1, _2, _3);
+    m_connection.setPacketHandler(m_packetHandler);
+    m_connection.setServerInfo({ "127.0.0.1" }, xy::Network::ServerPort);
+    m_connection.connect();
+
+    quitLoadingScreen();
 }
 
 //public
 bool WorldClientState::update(float dt)
 {
+    sf::Uint32 input = 0;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) input |= st::PlayerController::Left;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) input |= st::PlayerController::Right;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) input |= st::PlayerController::Forward;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) input |= st::PlayerController::Back;
+    //TODO we need entity rotation, or mouse position
+
+    const float sendRate = 1.f / m_connection.getSendRate();
+    m_broadcastAccumulator += m_broadcastClock.restart().asSeconds();
+    while (m_broadcastAccumulator >= sendRate)
+    {
+        m_playerInput.clientID = m_connection.getClientID();
+        m_playerInput.timestamp = m_connection.getTime().asMilliseconds();
+        m_playerInput.input = input;
+
+        m_broadcastAccumulator -= sendRate;
+        sf::Packet packet;
+        packet << xy::PacketID(PacketID::PlayerInput) << m_playerInput;
+        m_connection.send(packet);
+
+        m_playerInput.counter++;
+    }
+    
+    m_server.update(dt);
+    m_connection.update(dt);
+    
+
+    //do client side prediction
     xy::Command cmd;
     cmd.category = playerID;
-    cmd.action = [this](xy::Entity& entity, float dt)
+    cmd.action = [this, &input](xy::Entity& entity, float dt)
     {
-        sf::Uint32 input = 0;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) input |= st::PlayerController::Left;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) input |= st::PlayerController::Right;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) input |= st::PlayerController::Forward;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) input |= st::PlayerController::Back;
-
+        //TODO move this to player calc
         auto direction = xy::App::getMouseWorldPosition() - entity.getWorldPosition();
         auto angle = xy::Util::Vector::rotation(direction);
         input |= (static_cast<sf::Int16>(angle) << 16);
-        //REPORT("Input angle", std::to_string(angle));
-        //REPORT("Direction", std::to_string(direction.x) + ", " + std::to_string(direction.y));
 
         entity.getComponent<st::PlayerController>()->setInput(input);
-        //REPORT("Position", std::to_string(entity.getWorldPosition().x) + ", " + std::to_string(entity.getWorldPosition().y));
     };
     m_scene.sendCommand(cmd);
     
@@ -120,6 +157,22 @@ void WorldClientState::draw()
 }
 
 //private
+void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Packet& packet, xy::Network::ClientConnection* connection)
+{
+    switch (packetType)
+    {
+    default: break;
+    case xy::Network::Connect:
+    {
+        sf::Packet newPacket;
+        newPacket << xy::PacketID(PacketID::PlayerDetails) << m_connection.getClientID() << "Player";
+        connection->send(newPacket, true);
+    }
+    break;
+
+    }
+}
+
 void WorldClientState::init()
 {
     auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);

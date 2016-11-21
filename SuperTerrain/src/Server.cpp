@@ -1,0 +1,127 @@
+/*********************************************************************
+Matt Marchant 2016
+http://trederia.blogspot.com
+
+SuperTerrain - Zlib license.
+
+This software is provided 'as-is', without any express or
+implied warranty. In no event will the authors be held
+liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute
+it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented;
+you must not claim that you wrote the original software.
+If you use this software in a product, an acknowledgment
+in the product documentation would be appreciated but
+is not required.
+
+2. Altered source versions must be plainly marked as such,
+and must not be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any
+source distribution.
+*********************************************************************/
+
+#include <Server.hpp>
+#include <PacketIDs.hpp>
+
+using namespace std::placeholders;
+
+namespace
+{
+    const float snapshotInterval = 1.f / 20.f;
+}
+
+Server::Server()
+    : m_scene(m_messageBus),
+    m_connection(m_messageBus),
+    m_snapshotAccumulator(0.f)
+{
+    m_packetHandler = std::bind(&Server::handlePacket, this, _1, _2, _3, _4, _5);
+    m_connection.setPacketHandler(m_packetHandler);
+    m_connection.setMaxClients(4);
+}
+
+//public
+bool Server::start()
+{
+    m_snapshotAccumulator = 0.f;
+    LOG("Server starting...", xy::Logger::Type::Info);
+    return m_connection.start();
+}
+
+void Server::stop()
+{
+    m_connection.stop();
+}
+
+void Server::update(float dt)
+{
+    if (m_connection.running())
+    {
+        while (!m_messageBus.empty())
+        {
+            const auto& msg = m_messageBus.poll();
+            handleMessage(msg);
+            m_scene.handleMessage(msg);
+        }
+
+        {
+            sf::Lock lock(m_connection.getMutex());
+            m_scene.update(dt);
+        }
+        m_connection.update(dt);
+
+        m_snapshotAccumulator += m_snapshotClock.restart().asSeconds();
+        while (m_snapshotAccumulator >= snapshotInterval)
+        {
+            m_snapshotAccumulator -= snapshotInterval;
+            sendSnapshot();
+        }
+    }
+}
+
+//private
+void Server::spawnPlayer(Player& player)
+{
+    //TODO check if player has joined before and place at last position, else spawn at centre of world
+}
+
+void Server::handleMessage(const xy::Message& msg)
+{
+
+}
+
+void Server::sendSnapshot()
+{
+
+}
+
+void Server::handlePacket(const sf::IpAddress& ipAddress, xy::PortNumber portNumber,
+    xy::Network::PacketType packetType, sf::Packet& packet, xy::Network::ServerConnection* connection)
+{
+    switch (packetType)
+    {
+    default: break;
+    case PacketID::PlayerDetails:
+    {
+        Player player;
+        packet >> player.ID >> player.name;
+
+        //check existing active players and notify new client of their existence
+        for (const auto& pl : m_players)
+        {
+            if (pl.active)
+            {
+
+            }
+        }
+        sf::Lock(m_connection.getMutex());
+        spawnPlayer(player);
+    }
+    break;
+    }
+}

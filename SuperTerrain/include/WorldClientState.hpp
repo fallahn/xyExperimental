@@ -29,9 +29,12 @@ source distribution.
 #define ST_WORLDCLIENT_STATE_HPP_
 
 #include <StateIDs.hpp>
+#include <Server.hpp>
+#include <PlayerInput.hpp>
 
 #include <xygine/State.hpp>
 #include <xygine/Scene.hpp>
+#include <xygine/network/ClientConnection.hpp>
 
 class WorldClientState final : public xy::State
 {
@@ -49,6 +52,22 @@ public:
 private:
     xy::MessageBus& m_messageBus;
     xy::Scene m_scene;
+
+    Server m_server;
+    xy::Network::ClientConnection m_connection;
+    xy::Network::ClientConnection::PacketHandler m_packetHandler;
+    float m_broadcastAccumulator;
+    sf::Clock m_broadcastClock;
+
+    struct PlayerInfo final
+    {
+        sf::Uint64 entityID = 0;
+        xy::ClientID clientID = -1;
+        //std::string name;
+    };
+    std::vector<PlayerInfo> m_playerInfo;
+    PlayerInput m_playerInput;
+    void handlePacket(xy::Network::PacketType, sf::Packet&, xy::Network::ClientConnection*);
 
     void init();
 };

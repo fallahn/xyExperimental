@@ -34,6 +34,12 @@
     <Filter Include="Source Files\player">
       <UniqueIdentifier>{212583b7-7e4c-4244-a73f-e4e5d0a9a87f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\server">
+      <UniqueIdentifier>{fed55d0d-c782-4744-a056-da8a07c1d550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\server">
+      <UniqueIdentifier>{ffea1163-0372-4a4a-b1f1-68aa5c7c2646}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -59,6 +65,15 @@
     </ClInclude>
     <ClInclude Include="include\CameraController.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Server.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PlayerInput.hpp">
+      <Filter>Header Files\server</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PacketIDs.hpp">
+      <Filter>Header Files\server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +115,12 @@
     </ClCompile>
     <ClCompile Include="src\CameraController.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Server.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PacketOperators.cpp">
+      <Filter>Source Files\server</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
