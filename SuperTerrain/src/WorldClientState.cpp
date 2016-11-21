@@ -54,38 +54,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_scene     (m_messageBus)
 {
     m_scene.setView(context.defaultView);
-    
-    auto tc = xy::Component::create<TerrainComponent>(m_messageBus, context.appInstance);
-    auto entity = xy::Entity::create(m_messageBus);
-    entity->addComponent(tc);
-    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
-
-    auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
-    dwb->getDrawable().setRadius(20.f);
-    dwb->getDrawable().setOrigin(20.f, 20.f);
-    dwb->getDrawable().setFillColor(sf::Color::Red);
-    dwb->getDrawable().setPointCount(3);
-    dwb->getDrawable().setRotation(90.f);
-    dwb->getDrawable().setScale(1.f, 2.f);
-
-    auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
-
-    entity = xy::Entity::create(m_messageBus);
-    entity->addComponent(dwb);
-    entity->addComponent(playerController);
-    entity->addCommandCategories(playerID);
-    entity->setPosition(xy::DefaultSceneSize / 2.f);
-    auto playerEnt = m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
-
-    auto cam = xy::Component::create<xy::Camera>(m_messageBus, context.defaultView);
-    auto camControl = xy::Component::create<st::CameraController>(m_messageBus, *playerEnt);
-    entity = xy::Entity::create(m_messageBus);
-    entity->addComponent(camControl);
-    entity->setPosition(playerEnt->getPosition());
-    auto sceneCam = entity->addComponent(cam);
-    m_scene.setActiveCamera(sceneCam);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    init();
 }
 
 //public
@@ -150,3 +120,36 @@ void WorldClientState::draw()
 }
 
 //private
+void WorldClientState::init()
+{
+    auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(tc);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
+
+    auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
+    dwb->getDrawable().setRadius(20.f);
+    dwb->getDrawable().setOrigin(20.f, 20.f);
+    dwb->getDrawable().setFillColor(sf::Color::Red);
+    dwb->getDrawable().setPointCount(3);
+    dwb->getDrawable().setRotation(90.f);
+    dwb->getDrawable().setScale(1.f, 2.f);
+
+    auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
+
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(dwb);
+    entity->addComponent(playerController);
+    entity->addCommandCategories(playerID);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    auto playerEnt = m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+
+    auto cam = xy::Component::create<xy::Camera>(m_messageBus, getContext().defaultView);
+    auto camControl = xy::Component::create<st::CameraController>(m_messageBus, *playerEnt);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(camControl);
+    entity->setPosition(playerEnt->getPosition());
+    auto sceneCam = entity->addComponent(cam);
+    m_scene.setActiveCamera(sceneCam);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+}

@@ -53,16 +53,23 @@ void PlayerController::entityUpdate(xy::Entity& entity, float dt)
     entity.setRotation(static_cast<sf::Int16>((m_input & 0xffff0000) >> 16));
 
     sf::Vector2f velocity;
-    if (m_input & Forward) velocity.y -= 1.f;
-    if (m_input & Back) velocity.y += 1.f;
-    if (m_input & Left) velocity.x -= 1.f;
-    if (m_input & Right) velocity.x += 1.f;
+    //if (m_input & Forward) velocity.y -= 1.f;
+    //if (m_input & Back) velocity.y += 1.f;
+    //if (m_input & Left) velocity.x -= 1.f;
+    //if (m_input & Right) velocity.x += 1.f;
+
+    if (m_input & Forward) velocity.x += 1.f;
+    if (m_input & Back) velocity.x -= 1.f;
+    if (m_input & Left) velocity.y += 1.f;
+    if (m_input & Right) velocity.y -= 1.f;
+
+
     if (xy::Util::Vector::lengthSquared(velocity) > 1)
     {
         velocity = xy::Util::Vector::normalise(velocity);
     }
     
-    //velocity = xy::Util::Vector::rotate(velocity, entity.getRotation());
+    velocity = xy::Util::Vector::rotate(velocity, entity.getRotation());
     entity.move(velocity * moveSpeed * dt);
 }
 

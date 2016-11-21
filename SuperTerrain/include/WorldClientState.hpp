@@ -49,6 +49,8 @@ public:
 private:
     xy::MessageBus& m_messageBus;
     xy::Scene m_scene;
+
+    void init();
 };
 
 #endif //ST_WORLD_CLIENT_STATE_HPP_
