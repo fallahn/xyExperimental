@@ -79,7 +79,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../extlib/lib/box2d-2.3.2;../extlib/lib/sfml;../extlib/lib/xygine;../extlib/lib/tmxlite</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libtmxlite-s-d.lib;opengl32.lib;Box2D-d.lib;sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;xygine-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Box2D-d.lib;sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;xygine-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(SolutionDir)extlib\lib\sfml\*-d-2.dll" "$(SolutionDir)Debug\"
