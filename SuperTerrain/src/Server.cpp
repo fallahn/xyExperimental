@@ -28,6 +28,10 @@ source distribution.
 #include <Server.hpp>
 #include <PacketIDs.hpp>
 
+#include <PlayerController.hpp>
+
+#include <xygine/Entity.hpp>
+
 using namespace std::placeholders;
 
 namespace
@@ -87,7 +91,25 @@ void Server::update(float dt)
 //private
 void Server::spawnPlayer(Player& player)
 {
+    auto controller = xy::Component::create<st::PlayerController>(m_messageBus);
+    
     //TODO check if player has joined before and place at last position, else spawn at centre of world
+    sf::Vector2f playerPosition;
+    auto playerEntity = xy::Entity::create(m_messageBus);
+    playerEntity->setPosition(playerPosition);
+    playerEntity->addComponent(controller);
+    player.entID = playerEntity->getUID();    
+    player.active = true;
+    m_scene.addEntity(playerEntity, xy::Scene::Layer::BackRear);
+
+    //let all clients know a new player connected
+    sf::Packet packet;
+    packet << xy::PacketID(PacketID::PlayerSpawned);
+    packet << player.ID << player.entID;
+    packet << playerPosition.x << playerPosition.y << player.name;
+    m_connection.broadcast(packet, true);
+
+    m_players.push_back(player);
 }
 
 void Server::handleMessage(const xy::Message& msg)
@@ -97,7 +119,20 @@ void Server::handleMessage(const xy::Message& msg)
 
 void Server::sendSnapshot()
 {
+    const auto& ents = m_scene.getLayer(xy::Scene::Layer::BackRear).getChildren();
 
+    sf::Packet packet;
+    packet << xy::PacketID(PacketID::PositionUpdate);
+    packet << sf::Uint8(ents.size());
+
+    for (const auto& e : ents)
+    {
+        auto position = e->getPosition();
+        packet << e->getUID() << position.x << position.y;
+    }
+    m_connection.broadcast(packet);
+
+    //TODO send player specific info for reconciliation
 }
 
 void Server::handlePacket(const sf::IpAddress& ipAddress, xy::PortNumber portNumber,
@@ -109,19 +144,57 @@ void Server::handlePacket(const sf::IpAddress& ipAddress, xy::PortNumber portNum
     case PacketID::PlayerDetails:
     {
         Player player;
-        packet >> player.ID >> player.name;
-
-        //check existing active players and notify new client of their existence
-        for (const auto& pl : m_players)
-        {
-            if (pl.active)
-            {
-
-            }
-        }
+        packet >> player.ID >> player.name;        
+        
         sf::Lock(m_connection.getMutex());
-        spawnPlayer(player);
+        if (std::find_if(std::begin(m_players), std::end(m_players),
+            [&player](const Player& p) 
+        {
+            return (p.ID == player.ID);
+        }) == m_players.end())
+        {
+            //check existing active players and notify new client of their existence
+            for (const auto& pl : m_players)
+            {
+                if (pl.active)
+                {
+                    //create packet with player info and send to just new client
+                    sf::Packet pckt;
+                    pckt << xy::PacketID(PacketID::PlayerSpawned);
+                    pckt << pl.ID << pl.entID;
+                    pckt << pl.worldPosition.x << pl.worldPosition.y << pl.name;
+                    m_connection.send(player.ID, pckt, true);
+                }
+            }
+            spawnPlayer(player);
+        }
     }
     break;
+    case PacketID::PlayerInput:
+    {
+        PlayerInput input;
+        packet >> input;
+        //TODO best way to map client id to entity ID ?
+        auto result = std::find_if(std::begin(m_players), std::end(m_players), [&input](const Player& p)
+        {
+            return p.ID == input.clientID;
+        });
+        if (result != m_players.end())
+        {
+            xy::Command cmd;
+            cmd.entityID = result->entID;
+            cmd.action = [result, input](xy::Entity& entity, float)
+            {
+                auto controller = entity.getComponent<st::PlayerController>();
+                controller->setInput(input);
+
+                //result->lastInputID = controller->getLastInputID();
+                //result->worldPosition = controller->getLastPosition();
+            };
+            sf::Lock(m_connection.getMutex());
+            m_scene.sendCommand(cmd);
+        }
+    }
+        break;
     }
 }

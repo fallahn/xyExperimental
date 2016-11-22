@@ -33,13 +33,15 @@ source distribution.
 
 struct PlayerInput final
 {
-    sf::Uint32 input = 0;
+    sf::Uint16 flags = 0;
     sf::Uint64 counter = 0; //< input counter for ordering
     xy::ClientID clientID = -1;
     sf::Int32 timestamp = 0; //< server time as client knows it
+    float mousePosX = 0.f;
+    float mousePosY = 0.f;
 };
 
 sf::Packet& operator << (sf::Packet& packet, const PlayerInput& input);
-sf::Packet& operator >> (sf::Packet& packer, PlayerInput& input);
+sf::Packet& operator >> (sf::Packet& packet, PlayerInput& input);
 
 #endif //ST_PLAYER_INPUT_HPP_

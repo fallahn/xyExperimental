@@ -29,10 +29,10 @@ source distribution.
 
 sf::Packet& operator <<(sf::Packet& packet, const PlayerInput& ip)
 {
-    return packet << ip.clientID << ip.counter << ip.input << ip.timestamp;
+    return packet << ip.clientID << ip.counter << ip.flags << ip.timestamp << ip.mousePosX << ip.mousePosY;
 }
 
 sf::Packet& operator >> (sf::Packet& packet, PlayerInput& ip)
 {
-    return packet >> ip.clientID >> ip.counter >> ip.input >> ip.timestamp;
+    return packet >> ip.clientID >> ip.counter >> ip.flags >> ip.timestamp >> ip.mousePosX >> ip.mousePosY;
 }

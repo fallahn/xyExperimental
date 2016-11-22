@@ -61,11 +61,11 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
 
-    init();
+    //init();
 
     //TODO option to not start if connecting to remote server
     m_server.start();
-    sf::sleep(sf::seconds(1.f));
+    sf::sleep(sf::seconds(2.f));
 
     m_packetHandler = std::bind(&WorldClientState::handlePacket, this, _1, _2, _3);
     m_connection.setPacketHandler(m_packetHandler);
@@ -78,12 +78,17 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 //public
 bool WorldClientState::update(float dt)
 {
-    sf::Uint32 input = 0;
+    sf::Uint16 input = 0;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) input |= st::PlayerController::Left;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) input |= st::PlayerController::Right;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) input |= st::PlayerController::Forward;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) input |= st::PlayerController::Back;
-    //TODO we need entity rotation, or mouse position
+    
+    auto mousePos = xy::App::getMouseWorldPosition();
+
+    m_playerInput.flags = input;
+    m_playerInput.mousePosX = mousePos.x;
+    m_playerInput.mousePosY = mousePos.y;
 
     const float sendRate = 1.f / m_connection.getSendRate();
     m_broadcastAccumulator += m_broadcastClock.restart().asSeconds();
@@ -91,7 +96,6 @@ bool WorldClientState::update(float dt)
     {
         m_playerInput.clientID = m_connection.getClientID();
         m_playerInput.timestamp = m_connection.getTime().asMilliseconds();
-        m_playerInput.input = input;
 
         m_broadcastAccumulator -= sendRate;
         sf::Packet packet;
@@ -108,14 +112,9 @@ bool WorldClientState::update(float dt)
     //do client side prediction
     xy::Command cmd;
     cmd.category = playerID;
-    cmd.action = [this, &input](xy::Entity& entity, float dt)
+    cmd.action = [this](xy::Entity& entity, float dt)
     {
-        //TODO move this to player calc
-        auto direction = xy::App::getMouseWorldPosition() - entity.getWorldPosition();
-        auto angle = xy::Util::Vector::rotation(direction);
-        input |= (static_cast<sf::Int16>(angle) << 16);
-
-        entity.getComponent<st::PlayerController>()->setInput(input);
+        entity.getComponent<st::PlayerController>()->setInput(m_playerInput);
     };
     m_scene.sendCommand(cmd);
     
@@ -163,22 +162,40 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
     {
     default: break;
     case xy::Network::Connect:
-    {
-        sf::Packet newPacket;
-        newPacket << xy::PacketID(PacketID::PlayerDetails) << m_connection.getClientID() << "Player";
-        connection->send(newPacket, true);
+    {        
+        /*xy::ClientID id;
+        packet >> id;
+
+        if (id == m_connection.getClientID())*/
+        {
+            sf::Packet newPacket;
+            newPacket << xy::PacketID(PacketID::PlayerDetails) << m_connection.getClientID() << "Player";
+            connection->send(newPacket, true);
+            //std::cout << "got connected packet" << std::endl;
+        }
     }
     break;
-
+    case PacketID::PlayerSpawned:
+    {
+        sf::Lock(m_connection.getMutex());
+        xy::ClientID clid; sf::Uint64 entid; sf::Vector2f position;
+        packet >> clid >> entid >> position.x >> position.y;
+        sf::Lock(m_connection.getMutex());
+        {
+            addPlayer(clid, entid, position); //TODO we actually just want a generic player spawn here, and add a controller if has our clientID
+            //std::cout << "got player spawned packet" << std::endl;
+        }
+    }
+        break;
     }
 }
 
-void WorldClientState::init()
+void WorldClientState::addPlayer(xy::ClientID clid, sf::Uint64 entid, const sf::Vector2f& position)
 {
-    auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);
+    /*auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(tc);
-    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);*/
 
     auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
     dwb->getDrawable().setRadius(20.f);
@@ -188,13 +205,15 @@ void WorldClientState::init()
     dwb->getDrawable().setRotation(90.f);
     dwb->getDrawable().setScale(1.f, 2.f);
 
+    //TODO only add controller, camera and command cat to local player
     auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
 
-    entity = xy::Entity::create(m_messageBus);
+    auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
     entity->addComponent(playerController);
     entity->addCommandCategories(playerID);
-    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    entity->setPosition(position);
+    entity->setUID(entid);
     auto playerEnt = m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
     auto cam = xy::Component::create<xy::Camera>(m_messageBus, getContext().defaultView);

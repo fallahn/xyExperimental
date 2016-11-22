@@ -30,10 +30,14 @@ source distribution.
 
 #include <xygine/network/Config.hpp>
 
-enum PacketID
+namespace PacketID
 {
-    PlayerInput = xy::Network::PacketType::Count,
-    PlayerDetails
-};
-
+    enum PacketID
+    {
+        PlayerInput = xy::Network::PacketType::Count,
+        PlayerDetails,
+        PlayerSpawned, //client ID, ent ID, posX, posY, name
+        PositionUpdate //ent count, {id, posX, posY}
+    };
+}
 #endif //ST_PACKET_IDS_HPP_

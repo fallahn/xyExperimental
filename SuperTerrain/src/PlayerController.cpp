@@ -30,6 +30,7 @@ source distribution.
 #include <xygine/Entity.hpp>
 #include <xygine/Reports.hpp>
 #include <xygine/util/Vector.hpp>
+#include <xygine/components/Camera.hpp>
 
 using namespace st;
 
@@ -40,9 +41,7 @@ namespace
 
 PlayerController::PlayerController(xy::MessageBus& mb)
     : xy::Component (mb, this),
-    m_entity        (nullptr),
-    m_input         (0u),
-    m_lastInput     (0u)
+    m_entity        (nullptr)
 {
 
 }
@@ -50,7 +49,9 @@ PlayerController::PlayerController(xy::MessageBus& mb)
 //public
 void PlayerController::entityUpdate(xy::Entity& entity, float dt)
 {
-    entity.setRotation(static_cast<sf::Int16>((m_input & 0xffff0000) >> 16));
+    auto direction = sf::Vector2f(m_input.mousePosX, m_input.mousePosY) - entity.getWorldPosition();
+    auto angle = xy::Util::Vector::rotation(direction);
+    entity.setRotation(angle);
 
     sf::Vector2f velocity;
     //if (m_input & Forward) velocity.y -= 1.f;
@@ -58,10 +59,10 @@ void PlayerController::entityUpdate(xy::Entity& entity, float dt)
     //if (m_input & Left) velocity.x -= 1.f;
     //if (m_input & Right) velocity.x += 1.f;
 
-    if (m_input & Forward) velocity.x += 1.f;
-    if (m_input & Back) velocity.x -= 1.f;
-    if (m_input & Left) velocity.y += 1.f;
-    if (m_input & Right) velocity.y -= 1.f;
+    if (m_input.flags & Forward) velocity.x += 1.f;
+    if (m_input.flags & Back) velocity.x -= 1.f;
+    if (m_input.flags & Left) velocity.y += 1.f;
+    if (m_input.flags & Right) velocity.y -= 1.f;
 
 
     if (xy::Util::Vector::lengthSquared(velocity) > 1)
@@ -69,7 +70,7 @@ void PlayerController::entityUpdate(xy::Entity& entity, float dt)
         velocity = xy::Util::Vector::normalise(velocity);
     }
     
-    velocity = xy::Util::Vector::rotate(velocity, entity.getRotation());
+    velocity = xy::Util::Vector::rotate(velocity, angle);
     entity.move(velocity * moveSpeed * dt);
 }
 

@@ -69,7 +69,7 @@ private:
     PlayerInput m_playerInput;
     void handlePacket(xy::Network::PacketType, sf::Packet&, xy::Network::ClientConnection*);
 
-    void init();
+    void addPlayer(sf::Int32, sf::Uint64, const sf::Vector2f&);
 };
 
 #endif //ST_WORLD_CLIENT_STATE_HPP_

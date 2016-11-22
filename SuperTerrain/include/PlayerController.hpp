@@ -30,6 +30,8 @@ source distribution.
 
 #include <xygine/components/Component.hpp>
 
+#include <PlayerInput.hpp>
+
 namespace st
 {
     class PlayerController final : public xy::Component
@@ -51,11 +53,11 @@ namespace st
 
         void onStart(xy::Entity&) override;
 
-        void setInput(sf::Uint32 input) { m_lastInput = m_input; m_input = input; }
+        void setInput(const PlayerInput& input) { m_lastInput = m_input; m_input = input; }
 
     private:
         xy::Entity* m_entity;
-        sf::Uint32 m_input, m_lastInput;
+        PlayerInput m_input, m_lastInput;
     };
 }
 
