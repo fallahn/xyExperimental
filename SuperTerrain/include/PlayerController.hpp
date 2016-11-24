@@ -32,6 +32,9 @@ source distribution.
 
 #include <PlayerInput.hpp>
 
+#include <queue>
+#include <list>
+
 namespace st
 {
     class PlayerController final : public xy::Component
@@ -53,11 +56,19 @@ namespace st
 
         void onStart(xy::Entity&) override;
 
-        void setInput(const PlayerInput& input) { m_lastInput = m_input; m_input = input; }
+        void setInput(const PlayerInput& input, bool = true);
+        void reconcile(const sf::Vector2f&, sf::Uint64);
+
+        sf::Uint64 getLastInputID() const { return m_lastInputID; }
+        const sf::Vector2f& getLastPosition() const { return m_lastPosition; }
 
     private:
         xy::Entity* m_entity;
-        PlayerInput m_input, m_lastInput;
+        PlayerInput m_currentInput;
+        sf::Uint64 m_lastInputID;
+        std::queue<PlayerInput> m_inputBuffer;
+        std::list<PlayerInput> m_reconcileInputs;
+        sf::Vector2f m_lastPosition;
     };
 }
 

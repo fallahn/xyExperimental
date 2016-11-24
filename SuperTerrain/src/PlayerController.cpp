@@ -41,7 +41,8 @@ namespace
 
 PlayerController::PlayerController(xy::MessageBus& mb)
     : xy::Component (mb, this),
-    m_entity        (nullptr)
+    m_entity        (nullptr),
+    m_lastInputID   (0)
 {
 
 }
@@ -49,7 +50,13 @@ PlayerController::PlayerController(xy::MessageBus& mb)
 //public
 void PlayerController::entityUpdate(xy::Entity& entity, float dt)
 {
-    auto direction = sf::Vector2f(m_input.mousePosX, m_input.mousePosY) - entity.getWorldPosition();
+    if (!m_inputBuffer.empty())
+    {
+        m_currentInput = std::move(m_inputBuffer.front());
+        m_inputBuffer.pop();
+    }
+        
+    auto direction = sf::Vector2f(m_currentInput.mousePosX, m_currentInput.mousePosY) - entity.getWorldPosition();
     auto angle = xy::Util::Vector::rotation(direction);
     entity.setRotation(angle);
 
@@ -59,10 +66,10 @@ void PlayerController::entityUpdate(xy::Entity& entity, float dt)
     //if (m_input & Left) velocity.x -= 1.f;
     //if (m_input & Right) velocity.x += 1.f;
 
-    if (m_input.flags & Forward) velocity.x += 1.f;
-    if (m_input.flags & Back) velocity.x -= 1.f;
-    if (m_input.flags & Left) velocity.y += 1.f;
-    if (m_input.flags & Right) velocity.y -= 1.f;
+    if (m_currentInput.flags & Forward) velocity.x += 1.f;
+    if (m_currentInput.flags & Back) velocity.x -= 1.f;
+    if (m_currentInput.flags & Left) velocity.y += 1.f;
+    if (m_currentInput.flags & Right) velocity.y -= 1.f;
 
 
     if (xy::Util::Vector::lengthSquared(velocity) > 1)
@@ -72,9 +79,39 @@ void PlayerController::entityUpdate(xy::Entity& entity, float dt)
     
     velocity = xy::Util::Vector::rotate(velocity, angle);
     entity.move(velocity * moveSpeed * dt);
+
+    m_lastInputID = m_currentInput.counter;
+    m_lastPosition = entity.getWorldPosition();
 }
 
 void PlayerController::onStart(xy::Entity& entity)
 {
     m_entity = &entity;
+}
+
+void PlayerController::setInput(const PlayerInput& ip, bool keep)
+{
+    if (keep) m_reconcileInputs.push_back(ip);
+    m_inputBuffer.push(ip);
+}
+
+void PlayerController::reconcile(const sf::Vector2f& position, sf::Uint64 inputID)
+{
+    while (!m_reconcileInputs.empty() &&
+        m_reconcileInputs.front().counter <= inputID)
+    {
+        m_reconcileInputs.pop_front();
+    }
+
+    m_entity->setWorldPosition(position);
+
+    //make sure the input buffer is empty before doing updates
+    std::queue<PlayerInput> newQueue;
+    std::swap(m_inputBuffer, newQueue);
+
+    for (const auto& input : m_reconcileInputs)
+    {
+        m_currentInput = input;
+        entityUpdate(*m_entity, 1.f/60.f); //TODO delta value should be stored as part of input
+    }
 }

@@ -31,6 +31,7 @@ source distribution.
 #include <PlayerController.hpp>
 
 #include <xygine/Entity.hpp>
+#include <xygine/Reports.hpp>
 
 using namespace std::placeholders;
 
@@ -85,6 +86,13 @@ void Server::update(float dt)
             m_snapshotAccumulator -= snapshotInterval;
             sendSnapshot();
         }
+#ifdef _DEBUG_
+        for (const auto& p : m_players)
+        {
+            REPORT("Player Server Position", std::to_string(p.worldPosition.x) + ", " + std::to_string(p.worldPosition.y));
+        }
+#endif //_DEBUG_
+
     }
 }
 
@@ -132,7 +140,14 @@ void Server::sendSnapshot()
     }
     m_connection.broadcast(packet);
 
-    //TODO send player specific info for reconciliation
+    //send player specific info for reconciliation
+    packet.clear();
+    packet << xy::PacketID(PacketID::PlayerUpdate) << sf::Uint8(m_players.size());
+    for (const auto& p : m_players)
+    {
+        packet << p.entID << p.worldPosition.x << p.worldPosition.y << p.lastInputID;
+    }
+    m_connection.broadcast(packet);
 }
 
 void Server::handlePacket(const sf::IpAddress& ipAddress, xy::PortNumber portNumber,
@@ -186,10 +201,10 @@ void Server::handlePacket(const sf::IpAddress& ipAddress, xy::PortNumber portNum
             cmd.action = [result, input](xy::Entity& entity, float)
             {
                 auto controller = entity.getComponent<st::PlayerController>();
-                controller->setInput(input);
+                controller->setInput(input, false);
 
-                //result->lastInputID = controller->getLastInputID();
-                //result->worldPosition = controller->getLastPosition();
+                result->lastInputID = controller->getLastInputID();
+                result->worldPosition = controller->getLastPosition();
             };
             sf::Lock(m_connection.getMutex());
             m_scene.sendCommand(cmd);

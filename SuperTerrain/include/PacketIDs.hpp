@@ -37,7 +37,8 @@ namespace PacketID
         PlayerInput = xy::Network::PacketType::Count,
         PlayerDetails,
         PlayerSpawned, //client ID, ent ID, posX, posY, name
-        PositionUpdate //ent count, {id, posX, posY}
+        PositionUpdate, //ent count, {id, posX, posY}
+        PlayerUpdate //player count, {player entID, posX, posY, last input ID}
     };
 }
 #endif //ST_PACKET_IDS_HPP_

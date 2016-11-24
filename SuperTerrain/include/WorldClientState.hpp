@@ -59,17 +59,18 @@ private:
     float m_broadcastAccumulator;
     sf::Clock m_broadcastClock;
 
-    struct PlayerInfo final
-    {
-        sf::Uint64 entityID = 0;
-        xy::ClientID clientID = -1;
-        //std::string name;
-    };
-    std::vector<PlayerInfo> m_playerInfo;
+    //struct PlayerInfo final
+    //{
+    //    sf::Uint64 entityID = 0;
+    //    xy::ClientID clientID = -1;
+    //    //std::string name;
+    //};
+    //std::vector<PlayerInfo> m_playerInfo;
     PlayerInput m_playerInput;
+    sf::Uint64 m_playerEntID;
     void handlePacket(xy::Network::PacketType, sf::Packet&, xy::Network::ClientConnection*);
 
-    void addPlayer(sf::Int32, sf::Uint64, const sf::Vector2f&);
+    void addPlayer(xy::ClientID, sf::Uint64, const sf::Vector2f&);
 };
 
 #endif //ST_WORLD_CLIENT_STATE_HPP_

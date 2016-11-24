@@ -45,7 +45,7 @@ source distribution.
 
 namespace
 {
-    const int playerID = 300;
+    const int playerID = 300; //command category for player ent
 
     //xy::Camera* playerCamera = nullptr;
 }
@@ -56,7 +56,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     : State                 (stateStack, context),
     m_messageBus            (context.appInstance.getMessageBus()),
     m_scene                 (m_messageBus),
-    m_broadcastAccumulator  (0.f)
+    m_broadcastAccumulator  (0.f),
+    m_playerEntID           (0)
 {
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
@@ -182,8 +183,42 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
         packet >> clid >> entid >> position.x >> position.y;
         sf::Lock(m_connection.getMutex());
         {
-            addPlayer(clid, entid, position); //TODO we actually just want a generic player spawn here, and add a controller if has our clientID
-            //std::cout << "got player spawned packet" << std::endl;
+            addPlayer(clid, entid, position);
+        }
+    }
+        break;
+    case PacketID::PositionUpdate:
+        //updates all the non-predicted entities from the server via interpolation
+    {
+        
+    }
+        break;
+    case PacketID::PlayerUpdate:
+        //updates the clientside predicted entities (our local player) with server correction
+    {
+        sf::Uint8 count;
+        packet >> count;
+
+        sf::Uint64 entID;
+        sf::Vector2f position;
+        sf::Uint64 lastInput;
+
+        while (count--)
+        {
+            packet >> entID >> position.x >> position.y >> lastInput;
+            if (entID == m_playerEntID)
+            {
+                xy::Command cmd;
+                cmd.action = [position, lastInput](xy::Entity& entity, float)
+                {
+                    entity.getComponent<st::PlayerController>()->reconcile(position, lastInput);
+                };
+                cmd.entityID = entID;
+
+                sf::Lock(m_connection.getMutex());
+                m_scene.sendCommand(cmd);
+                break;
+            }
         }
     }
         break;
@@ -204,24 +239,28 @@ void WorldClientState::addPlayer(xy::ClientID clid, sf::Uint64 entid, const sf::
     dwb->getDrawable().setPointCount(3);
     dwb->getDrawable().setRotation(90.f);
     dwb->getDrawable().setScale(1.f, 2.f);
-
-    //TODO only add controller, camera and command cat to local player
-    auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
-
+    
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
-    entity->addComponent(playerController);
-    entity->addCommandCategories(playerID);
     entity->setPosition(position);
     entity->setUID(entid);
     auto playerEnt = m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
-    auto cam = xy::Component::create<xy::Camera>(m_messageBus, getContext().defaultView);
-    auto camControl = xy::Component::create<st::CameraController>(m_messageBus, *playerEnt);
-    entity = xy::Entity::create(m_messageBus);
-    entity->addComponent(camControl);
-    entity->setPosition(playerEnt->getPosition());
-    auto sceneCam = entity->addComponent(cam);
-    m_scene.setActiveCamera(sceneCam);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    //if this is our player add control and camera
+    if (clid == m_connection.getClientID())
+    {
+        auto playerController = xy::Component::create<st::PlayerController>(m_messageBus);
+        playerEnt->addComponent(playerController);
+        playerEnt->addCommandCategories(playerID);
+        m_playerEntID = entid;
+
+        auto cam = xy::Component::create<xy::Camera>(m_messageBus, getContext().defaultView);
+        auto camControl = xy::Component::create<st::CameraController>(m_messageBus, *playerEnt);
+        entity = xy::Entity::create(m_messageBus);
+        entity->addComponent(camControl);
+        entity->setPosition(playerEnt->getPosition());
+        auto sceneCam = entity->addComponent(cam);
+        m_scene.setActiveCamera(sceneCam);
+        m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    }
 }
