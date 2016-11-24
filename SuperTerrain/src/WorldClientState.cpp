@@ -270,7 +270,8 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
                 xy::Command cmd;
                 cmd.action = [position](xy::Entity& entity, float)
                 {
-                    entity.getComponent<st::NetworkController>()->setDestination(position);
+                    auto c = entity.getComponent<st::NetworkController>();
+                    if(c) c->setDestination(position);
                 };
                 cmd.entityID = entID;
 

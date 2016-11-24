@@ -1,3 +1,8 @@
 Debug
 Release
 *.user
+output.log
+input.kbd
+imgui.ini
+scores.dat
+settings.set
