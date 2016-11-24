@@ -157,7 +157,7 @@ namespace
                     colour = mix(colour, detailColour, detailColour.a);
                 }
 
-                float depth = float((value & 0xF000u) >> 12) / 60.0;
+                float depth = float((value & 0xF000u) >> 12) / 30.0;
                 depth += 0.75;                
                 colour.rgb *= depth;
 

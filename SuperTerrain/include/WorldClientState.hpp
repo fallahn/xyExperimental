@@ -59,13 +59,17 @@ private:
     float m_broadcastAccumulator;
     sf::Clock m_broadcastClock;
 
-    //struct PlayerInfo final
-    //{
-    //    sf::Uint64 entityID = 0;
-    //    xy::ClientID clientID = -1;
-    //    //std::string name;
-    //};
-    //std::vector<PlayerInfo> m_playerInfo;
+    struct PlayerInfo final
+    {
+        PlayerInfo() = default;
+        PlayerInfo(xy::ClientID clid, sf::Uint64 entid)
+            : clientID(clid), entityID(entid) {}
+        xy::ClientID clientID = -1;
+        sf::Uint64 entityID = 0;
+        //std::string name;
+    };
+    std::vector<PlayerInfo> m_playerInfo;
+
     PlayerInput m_playerInput;
     sf::Uint64 m_playerEntID;
     void handlePacket(xy::Network::PacketType, sf::Packet&, xy::Network::ClientConnection*);

@@ -136,6 +136,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   <ItemGroup>
     <ClInclude Include="include\CameraController.hpp" />
     <ClInclude Include="include\Chunk.hpp" />
+    <ClInclude Include="include\ClientEntityController.hpp" />
     <ClInclude Include="include\FastNoiseSIMD.h" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\PacketIDs.hpp" />
@@ -149,6 +150,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   <ItemGroup>
     <ClCompile Include="src\CameraController.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\ClientEntityController.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_avx2.cpp" />
     <ClCompile Include="src\fastnoise\FastNoiseSIMD_internal.cpp" />

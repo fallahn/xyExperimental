@@ -29,6 +29,7 @@ source distribution.
 #include <TerrainComponent.hpp>
 #include <PlayerController.hpp>
 #include <CameraController.hpp>
+#include <ClientEntityController.hpp>
 #include <PacketIDs.hpp>
 
 #include <xygine/App.hpp>
@@ -62,8 +63,6 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
 
-    //init();
-
     //TODO option to not start if connecting to remote server
     m_server.start();
     sf::sleep(sf::seconds(2.f));
@@ -72,6 +71,33 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_connection.setPacketHandler(m_packetHandler);
     m_connection.setServerInfo({ "127.0.0.1" }, xy::Network::ServerPort);
     m_connection.connect();
+
+    auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(tc);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
+
+    xy::Console::addCommand("connect", [this](const std::string& address)
+    {        
+        //TODO we need to validate the address string
+        m_connection.disconnect();
+
+        m_server.stop();
+        sf::sleep(sf::seconds(1.f));
+
+        m_connection.setServerInfo({ address }, xy::Network::ServerPort);
+
+        if (address == "localhost" || address == "127.0.0.1")
+        {
+            m_server.start();
+            sf::sleep(sf::seconds(1.f));
+        }
+
+        if (!m_connection.connect())
+        {
+            xy::Console::print("Failed to connect to " + address);
+        }
+    });
 
     quitLoadingScreen();
 }
@@ -176,6 +202,45 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
         }
     }
     break;
+    case xy::Network::Disconnect:
+    {
+        xy::Command cmd;
+        cmd.entityID = m_playerEntID;
+        cmd.action = [this](xy::Entity& e, float) { e.destroy(); m_playerEntID = 0; };
+        sf::Lock lock(m_connection.getMutex());
+        m_scene.sendCommand(cmd);
+
+        m_playerInfo.erase(std::remove_if(std::begin(m_playerInfo), std::end(m_playerInfo), 
+            [this](const PlayerInfo& pi)
+        { 
+            return pi.clientID == m_connection.getClientID(); 
+        }));
+    }
+        break;
+    case xy::Network::ClientLeft:
+    {
+        xy::ClientID clid;
+        packet >> clid;
+
+        auto result = std::find_if(std::begin(m_playerInfo), std::end(m_playerInfo),
+            [clid](const PlayerInfo& pi)
+        {
+            return pi.clientID == clid;
+        });
+
+        if (result != m_playerInfo.end())
+        {
+            xy::Command cmd;
+            cmd.entityID = result->entityID;
+            cmd.action = [](xy::Entity& e, float) { e.destroy(); };
+            sf::Lock lock(m_connection.getMutex());
+            m_scene.sendCommand(cmd);
+
+            m_playerInfo.erase(result);
+            xy::Logger::log("Player " + std::to_string(clid) + " has left game", xy::Logger::Type::Info);
+        }
+    }
+    break;
     case PacketID::PlayerSpawned:
     {
         sf::Lock(m_connection.getMutex());
@@ -184,13 +249,35 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
         sf::Lock(m_connection.getMutex());
         {
             addPlayer(clid, entid, position);
+            xy::Logger::log("Player " + std::to_string(clid) + " has joined game", xy::Logger::Type::Info);
         }
     }
         break;
     case PacketID::PositionUpdate:
         //updates all the non-predicted entities from the server via interpolation
     {
-        
+        sf::Uint8 count;
+        packet >> count;
+
+        sf::Uint64 entID;
+        sf::Vector2f position;
+
+        while (count--)
+        {
+            packet >> entID >> position.x >> position.y;
+            if (entID != m_playerEntID)
+            {
+                xy::Command cmd;
+                cmd.action = [position](xy::Entity& entity, float)
+                {
+                    entity.getComponent<st::NetworkController>()->setDestination(position);
+                };
+                cmd.entityID = entID;
+
+                sf::Lock(m_connection.getMutex());
+                m_scene.sendCommand(cmd);
+            }
+        }
     }
         break;
     case PacketID::PlayerUpdate:
@@ -227,11 +314,6 @@ void WorldClientState::handlePacket(xy::Network::PacketType packetType, sf::Pack
 
 void WorldClientState::addPlayer(xy::ClientID clid, sf::Uint64 entid, const sf::Vector2f& position)
 {
-    /*auto tc = xy::Component::create<TerrainComponent>(m_messageBus, getContext().appInstance);
-    auto entity = xy::Entity::create(m_messageBus);
-    entity->addComponent(tc);
-    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);*/
-
     auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::CircleShape>>(m_messageBus);
     dwb->getDrawable().setRadius(20.f);
     dwb->getDrawable().setOrigin(20.f, 20.f);
@@ -263,4 +345,14 @@ void WorldClientState::addPlayer(xy::ClientID clid, sf::Uint64 entid, const sf::
         m_scene.setActiveCamera(sceneCam);
         m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
     }
+    else
+    {
+        //add a interpolator controller
+        auto entController = xy::Component::create<st::NetworkController>(m_messageBus);
+        playerEnt->addComponent(entController);
+        //TODO could we set the command cat to client ID? Iiiiinteresting...
+    }
+
+    //log player details so we can remove them again when  they leave
+    m_playerInfo.emplace_back(clid, entid);
 }
