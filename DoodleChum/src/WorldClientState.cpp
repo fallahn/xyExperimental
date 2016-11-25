@@ -26,12 +26,17 @@ source distribution.
 *********************************************************************/
 
 #include <WorldClientState.hpp>
+#include <MeshIDs.hpp>
+#include <DayNightCycle.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/components/SfDrawableComponent.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/Reports.hpp>
-
+#include <xygine/components/MeshDrawable.hpp>
+#include <xygine/mesh/IQMBuilder.hpp>
+#include <xygine/mesh/shaders/DeferredRenderer.hpp>
+#include <xygine/components/Model.hpp>
 
 namespace
 {
@@ -43,10 +48,14 @@ using namespace std::placeholders;
 WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     : State                 (stateStack, context),
     m_messageBus            (context.appInstance.getMessageBus()),
-    m_scene                 (m_messageBus)
+    m_scene                 (m_messageBus),
+    m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene)
 {
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
+
+    initMeshes();
+    initUI();
 
     quitLoadingScreen();
 }
@@ -55,6 +64,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 bool WorldClientState::update(float dt)
 {    
     m_scene.update(dt);
+    m_meshRenderer.update();
     return false;
 }
 
@@ -66,6 +76,7 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
 void WorldClientState::handleMessage(const xy::Message& msg)
 {
     m_scene.handleMessage(msg);
+    m_meshRenderer.handleMessage(msg);
 
     if (msg.id == xy::Message::UIMessage)
     {
@@ -79,6 +90,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             v.setViewport(getContext().defaultView.getViewport());
             playerCamera->setView(v);*/
             m_scene.setView(getContext().defaultView);
+            m_meshRenderer.setView(getContext().defaultView);
         }
         break;
         }
@@ -89,6 +101,47 @@ void WorldClientState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
+    //rw.draw(m_meshRenderer);
 }
 
 //private
+void WorldClientState::initMeshes()
+{
+    m_meshRenderer.setView(getContext().defaultView);
+    
+    xy::IQMBuilder haus("assets/models/haus.iqm");
+    m_meshRenderer.loadModel(Mesh::Haus, haus);
+
+    m_shaderResource.preload(Shader::TexturedBumped, DEFERRED_TEXTURED_BUMPED_VERTEX, DEFERRED_TEXTURED_BUMPED_FRAGMENT);
+    m_shaderResource.preload(Shader::Shadow, SHADOW_VERTEX, SHADOW_FRAGMENT);
+
+    auto& hausMat = m_materialResource.add(Material::Haus, m_shaderResource.get(Shader::TexturedBumped));
+    hausMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    hausMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/haus_diffuse.png") });
+    hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
+    //hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/mask.png") });
+    hausMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
+    hausMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+
+    auto model = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
+    model->setBaseMaterial(hausMat);
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(model);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    m_scene.addEntity(entity, xy::Scene::BackFront);
+
+    entity = xy::Entity::create(m_messageBus);
+    auto md = m_meshRenderer.createDrawable(m_messageBus);
+    entity->addComponent(md);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackFront);
+}
+
+void WorldClientState::initUI()
+{
+    auto entity = xy::Entity::create(m_messageBus);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("spanish chicken"), true);
+    entity->addComponent(dnc);
+    entity->setPosition(20.f, 10.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}

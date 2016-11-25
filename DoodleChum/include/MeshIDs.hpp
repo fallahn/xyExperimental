@@ -25,43 +25,32 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_WORLDCLIENT_STATE_HPP_
-#define DC_WORLDCLIENT_STATE_HPP_
+#ifndef DC_MESH_IDS_HPP_
+#define DC_MESH_IDS_HPP_
 
-#include <StateIDs.hpp>
-
-#include <xygine/State.hpp>
-#include <xygine/Scene.hpp>
-#include <xygine/mesh/MeshRenderer.hpp>
-#include <xygine/Resource.hpp>
-#include <xygine/ShaderResource.hpp>
-#include <xygine/mesh/MaterialResource.hpp>
-
-class WorldClientState final : public xy::State
+namespace Mesh
 {
-public:
-    WorldClientState(xy::StateStack&, Context);
-    ~WorldClientState() = default;
+    enum ID
+    {
+        Haus = 0
+    };
+}
 
-    bool update(float) override;
-    bool handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override;
-    void draw() override;
+namespace Material
+{
+    enum ID
+    {
+        Haus = 0
+    };
+}
 
-    xy::StateID stateID() const override { return States::WorldClient; }
+namespace Shader
+{
+    enum ID
+    {
+        TexturedBumped,
+        Shadow
+    };
+}
 
-private:
-    xy::MessageBus& m_messageBus;
-    xy::Scene m_scene;
-    xy::MeshRenderer m_meshRenderer;
-
-    xy::TextureResource m_textureResource;
-    xy::ShaderResource m_shaderResource;
-    xy::MaterialResource m_materialResource;
-    xy::FontResource m_fontResource;
-
-    void initMeshes();
-    void initUI();
-};
-
-#endif //DC_WORLD_CLIENT_STATE_HPP_
+#endif //DC_MESH_IDS_HPP_

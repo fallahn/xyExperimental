@@ -25,43 +25,42 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_WORLDCLIENT_STATE_HPP_
-#define DC_WORLDCLIENT_STATE_HPP_
+#ifndef DC_DAY_NIGHT_HPP_
+#define DC_DAY_NIGHT_HPP_
 
-#include <StateIDs.hpp>
-
-#include <xygine/State.hpp>
+#include <xygine/components/Component.hpp>
 #include <xygine/Scene.hpp>
-#include <xygine/mesh/MeshRenderer.hpp>
-#include <xygine/Resource.hpp>
-#include <xygine/ShaderResource.hpp>
-#include <xygine/mesh/MaterialResource.hpp>
 
-class WorldClientState final : public xy::State
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Text.hpp>
+
+namespace sf
+{
+    class Font;
+}
+
+class DayNightCycle final : public xy::Component, public sf::Drawable
 {
 public:
-    WorldClientState(xy::StateStack&, Context);
-    ~WorldClientState() = default;
+    DayNightCycle(xy::MessageBus&, xy::Scene::SkyLight&, sf::Font&, bool = false);
+    ~DayNightCycle() = default;
 
-    bool update(float) override;
-    bool handleEvent(const sf::Event&) override;
-    void handleMessage(const xy::Message&) override;
-    void draw() override;
-
-    xy::StateID stateID() const override { return States::WorldClient; }
+    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
+    void entityUpdate(xy::Entity&, float);
 
 private:
-    xy::MessageBus& m_messageBus;
-    xy::Scene m_scene;
-    xy::MeshRenderer m_meshRenderer;
 
-    xy::TextureResource m_textureResource;
-    xy::ShaderResource m_shaderResource;
-    xy::MaterialResource m_materialResource;
-    xy::FontResource m_fontResource;
+    float m_rotation;
+    float m_intensity;
+    sf::Color m_lightColour;
+    
+    float m_time; //current time in seconds
+    xy::Scene::SkyLight& m_light;
 
-    void initMeshes();
-    void initUI();
+    sf::Text m_text;
+
+    void updateText();
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //DC_WORLD_CLIENT_STATE_HPP_
+#endif //DC_DAY_NIGHT_HPP_
