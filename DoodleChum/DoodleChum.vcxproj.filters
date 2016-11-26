@@ -19,6 +19,12 @@
     <Filter Include="Source Files\states">
       <UniqueIdentifier>{7a5ef29c-fded-40ee-90ba-a22c9ec6b244}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Controllers">
+      <UniqueIdentifier>{bcefd22e-5d8d-4f6c-a34f-e5c193df83c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Controllers">
+      <UniqueIdentifier>{87bb5956-171a-4965-a9d7-b939cd4a8f8f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -31,10 +37,16 @@
       <Filter>Header Files\states</Filter>
     </ClInclude>
     <ClInclude Include="include\MeshIDs.hpp">
-      <Filter>Header Files\states</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageIDs.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\DayNightCycle.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RoomLightController.hpp">
+      <Filter>Header Files\Controllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -48,7 +60,10 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\DayNightCycle.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RoomLightController.cpp">
+      <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

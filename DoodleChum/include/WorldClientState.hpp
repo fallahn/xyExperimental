@@ -61,6 +61,7 @@ private:
     xy::FontResource m_fontResource;
 
     void initMeshes();
+    void initMapData();
     void initUI();
 };
 

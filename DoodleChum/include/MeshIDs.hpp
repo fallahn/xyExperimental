@@ -28,11 +28,14 @@ source distribution.
 #ifndef DC_MESH_IDS_HPP_
 #define DC_MESH_IDS_HPP_
 
+#include <xygine/shaders/Default.hpp>
+
 namespace Mesh
 {
     enum ID
     {
-        Haus = 0
+        Haus = 0,
+        Background
     };
 }
 
@@ -40,7 +43,8 @@ namespace Material
 {
     enum ID
     {
-        Haus = 0
+        Haus = 0,
+        Background
     };
 }
 
@@ -48,7 +52,7 @@ namespace Shader
 {
     enum ID
     {
-        TexturedBumped,
+        TexturedBumped = xy::Shader::Count,
         Shadow
     };
 }

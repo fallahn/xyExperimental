@@ -26,6 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <DayNightCycle.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/Reports.hpp>
 #include <xygine/Entity.hpp>
@@ -46,11 +47,11 @@ namespace
     const float sunset = xy::Util::Const::PI / 2.f;
     const float sunrise = sunset + xy::Util::Const::PI;
     const float fadeAngle = xy::Util::Const::TAU / 24.f;
-    const float minIntensity = 0.1f;
+    const float minIntensity = 0.2f;
     const float maxIntensity = 0.7f - minIntensity;
 
-    const sf::Uint8 minBlue = 40;
-    const sf::Uint8 minAmbience = 10;
+    const sf::Uint8 minBlue = 100;
+    const sf::Uint8 minAmbience = 18;
     const sf::Uint8 maxAmbience = 80 - minAmbience;
 }
 
@@ -82,7 +83,8 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
     m_time += dt/* * 1000.f*/;
     if (m_time > totalSeconds) m_time -= totalSeconds;
 
-    m_rotation = (1.f - (m_time / totalSeconds)) * xy::Util::Const::TAU;
+    m_rotation = ((1.f - (m_time / totalSeconds)) * xy::Util::Const::TAU);// +xy::Util::Const::PI;
+    
     REPORT("rotation", std::to_string(m_rotation));
 
     float intensity = 0.f;
@@ -103,7 +105,7 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
 
     sf::Uint8 ambience = static_cast<sf::Uint8>(float(maxAmbience) * intensity) + minAmbience;
 
-    REPORT("intensity", std::to_string(m_intensity));
+    REPORT("intensity", std::to_string(intensity));
 
     m_light.setIntensity(m_intensity);
     m_light.setDiffuseColour(m_lightColour);
@@ -115,6 +117,10 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
     REPORT("Y", std::to_string(dirY));
 
     updateText();
+
+    auto msg = sendMessage<Message::TODEvent>(Message::TimeOfDay);
+    msg->sunIntensity = intensity;
+    msg->time = m_time;
 }
 
 //private
@@ -128,7 +134,7 @@ void DayNightCycle::updateText()
     hours = (hours > 12) ? hours - 12 : hours + 12;
 
     std::stringstream ss;
-    ss << std::setw(2) << std::setfill('0') << hours << ":"
+    ss << std::setw(2) << std::setfill('0') << hours % 24 << ":"
         << std::setw(2) << std::setfill('0') << minutes;
 
     m_text.setString(ss.str());

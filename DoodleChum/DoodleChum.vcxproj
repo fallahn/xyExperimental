@@ -137,6 +137,8 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\DayNightCycle.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\MeshIDs.hpp" />
+    <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\RoomLightController.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
@@ -144,6 +146,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\DayNightCycle.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\RoomLightController.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
