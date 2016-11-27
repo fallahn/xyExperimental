@@ -103,7 +103,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             v.setViewport(getContext().defaultView.getViewport());
             playerCamera->setView(v);*/
             m_scene.setView(getContext().defaultView);
-            m_meshRenderer.setView(getContext().defaultView);
+            //m_meshRenderer.setView(getContext().defaultView);
         }
         break;
         }
@@ -139,6 +139,7 @@ void WorldClientState::initMeshes()
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
     hausModel->setBaseMaterial(hausMat);
     hausModel->setPosition({ 0.f, 0.f, 64.f });
+    //hausModel->setScale({ 1.f, 1.f, -1.f });
 
     xy::IQMBuilder background("assets/models/background.iqm");
     m_meshRenderer.loadModel(Mesh::Background, background);
