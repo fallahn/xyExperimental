@@ -29,6 +29,7 @@ source distribution.
 #include <MeshIDs.hpp>
 #include <DayNightCycle.hpp>
 #include <RoomLightController.hpp>
+#include <BudController.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/components/SfDrawableComponent.hpp>
@@ -42,13 +43,16 @@ source distribution.
 #include <xygine/components/TileMapLayer.hpp>
 #include <xygine/shaders/Tilemap.hpp>
 #include <xygine/components/PointLight.hpp>
+#include <xygine/tilemap/TileLayer.hpp>
 
 #include <xygine/postprocess/ChromeAb.hpp>
 #include <xygine/postprocess/Antique.hpp>
 
+#include <SFML/Graphics/RectangleShape.hpp>
+
 namespace
 {
-
+    sf::Vector2f spawnPosition;
 }
 
 using namespace std::placeholders;
@@ -68,6 +72,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 
     initMeshes();
     initMapData();
+    initBud();
     initUI();
 
     quitLoadingScreen();
@@ -115,6 +120,7 @@ void WorldClientState::draw()
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
     //rw.draw(m_meshRenderer);
+    rw.draw(m_pathFinder);
 }
 
 //private
@@ -172,6 +178,9 @@ void WorldClientState::initMapData()
         m_shaderResource.preload(xy::Shader::Tilemap, xy::Shader::tmx::vertex, xy::Shader::tmx::fragment);
 
         sf::Vector2f mapOffset = (xy::DefaultSceneSize / 2.f) - sf::Vector2f(map.getBounds().width / 2.f, map.getBounds().height / 2.f);
+        m_pathFinder.setTileSize(static_cast<sf::Vector2f>(map.getTileSize()));
+        m_pathFinder.setGridOffset(mapOffset);
+        m_pathFinder.setGridSize(map.getTileCount());
 
         const auto& layers = map.getLayers();
         for (const auto& l : layers)
@@ -184,6 +193,24 @@ void WorldClientState::initMapData()
                 entity->addComponent(dwb);
                 entity->setPosition(mapOffset);
                 m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);*/
+
+                if (l->getName() == "navigation")
+                {
+                    xy::tmx::TileLayer* tl = dynamic_cast<xy::tmx::TileLayer*>(l.get());
+                    const auto& tiles = tl->getTiles();
+                    auto mapSize = map.getTileCount();
+                    for (auto y = 0u; y < mapSize.y; ++y)
+                    {
+                        for (auto x = 0u; x < mapSize.x; ++x)
+                        {
+                            if (tiles[y * mapSize.x + x].ID != 0)
+                            {
+                                //any tile counts as a wall
+                                m_pathFinder.addSolidTile({ x, y });
+                            }
+                        }
+                    }
+                }
             }
             else if (l->getType() == xy::tmx::Layer::Type::Object)
             {
@@ -208,11 +235,37 @@ void WorldClientState::initMapData()
                 }
             }
         }
+
+        spawnPosition = xy::DefaultSceneSize / 2.f;
+        spawnPosition.y += map.getBounds().height / 2.f;
+
+        if (!m_pathFinder.hasData())
+        {
+            xy::Logger::log("No navigation data has been loaded!", xy::Logger::Type::Error);
+        }
+        m_pathFinder.plotPath({ 26u, 29u }, { 49u, 9u });
     }
     else
     {
         xy::Logger::log("Failed to open map data", xy::Logger::Type::Error, xy::Logger::Output::All);
     }
+}
+
+void WorldClientState::initBud()
+{
+    auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::RectangleShape>>(m_messageBus);
+    dwb->getDrawable().setFillColor(sf::Color::Red);
+    dwb->getDrawable().setSize({ 50.f, 120.f });
+    dwb->setOrigin(25.f, 120.f);
+
+    auto controller = xy::Component::create<BudController>(m_messageBus);
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(dwb);
+    entity->addComponent(controller);
+    entity->setPosition(spawnPosition);
+
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
 void WorldClientState::initUI()

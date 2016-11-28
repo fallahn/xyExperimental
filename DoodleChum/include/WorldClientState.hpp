@@ -29,6 +29,7 @@ source distribution.
 #define DC_WORLDCLIENT_STATE_HPP_
 
 #include <StateIDs.hpp>
+#include <PathFinder.hpp>
 
 #include <xygine/State.hpp>
 #include <xygine/Scene.hpp>
@@ -60,8 +61,11 @@ private:
     xy::MaterialResource m_materialResource;
     xy::FontResource m_fontResource;
 
+    PathFinder m_pathFinder;
+
     void initMeshes();
     void initMapData();
+    void initBud();
     void initUI();
 };
 

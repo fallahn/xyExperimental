@@ -5,12 +5,12 @@
  </tileset>
  <layer name="navigation" width="52" height="30" opacity="0.5">
   <data encoding="base64" compression="zlib">
-   eJzt1mEKQBEYRFHF/tfsr0Qh+dxpTs0C5j0aKZmZmb2XRVPgWekX/Y1P0hp1oVLpMjtjVKM7Rdb3oXOfv+1sEiHRu/7qnUD9Xy2lHVLp4vfB39T3h069Dz3Re347FVXsBmU=
+   eJzt1lEKACAIBNHo/ocOvy0IgnSXedABpgIdAwCA/6bpUXfTV33Hr++ya1Hl0nL6Yw6cWoJTS6Cnt+rZwV6QsR9ocGlhP9Dh1BLo6a16drAfZAvhqQJJ
   </data>
  </layer>
  <layer name="waypoints" width="52" height="30">
   <data encoding="base64" compression="zlib">
-   eJzt1sENADAIAzHYf+kOUZAKtRfI8xIBALPksh0AoE93z/0FAHjLTZuruv7TPzhRSAAI
+   eJzt1rENADAIBDHYf+lskIYgUGQP8JRHBAAwKT+7AwD06e65fwEAdqm0+VXXbzsHS5gACA==
   </data>
  </layer>
  <objectgroup name="lights">

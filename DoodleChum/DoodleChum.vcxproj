@@ -134,18 +134,23 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\BudController.hpp" />
     <ClInclude Include="include\DayNightCycle.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\MeshIDs.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\PathFinder.hpp" />
     <ClInclude Include="include\RoomLightController.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
+    <ClInclude Include="include\Task.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BudController.cpp" />
     <ClCompile Include="src\DayNightCycle.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\PathFinder.cpp" />
     <ClCompile Include="src\RoomLightController.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
