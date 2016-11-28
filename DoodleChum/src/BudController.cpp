@@ -26,15 +26,19 @@ source distribution.
 *********************************************************************/
 
 #include <BudController.hpp>
+#include <PathFinder.hpp>
+#include <TravelTask.hpp>
 
 #include <xygine/Entity.hpp>
+#include <xygine/util/Random.hpp>
 
 
-
-BudController::BudController(xy::MessageBus& mb)
-    : xy::Component(mb, this)
+BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<sf::Vector2u>& waypoints)
+    : xy::Component(mb, this),
+    m_pathFinder(pf),
+    m_wayPoints(waypoints)
 {
-
+    m_currentPosition = { 26u, 29u };
 }
 
 //public
@@ -46,6 +50,15 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
         if (m_tasks.front()->completed())
         {
             m_tasks.pop_front();
+            m_currentPosition = m_destinationPosition;
         }
+    }
+    else
+    {
+        //just for testing create a task to travel somewhere at random
+        m_destinationPosition = m_wayPoints[xy::Util::Random::value(0, m_wayPoints.size() - 1)];
+
+        auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+        m_tasks.emplace_back(std::make_unique<TravelTask>(entity, points));
     }
 }

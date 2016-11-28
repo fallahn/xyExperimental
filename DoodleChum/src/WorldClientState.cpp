@@ -53,6 +53,7 @@ source distribution.
 namespace
 {
     sf::Vector2f spawnPosition;
+    std::vector<sf::Vector2u> waypoints;
 }
 
 using namespace std::placeholders;
@@ -188,28 +189,36 @@ void WorldClientState::initMapData()
             if (l->getType() == xy::tmx::Layer::Type::Tile)
             {
                 //TODO check dwb is not nullptr
-                /*auto dwb = map.getDrawable(m_messageBus, *l, m_textureResource, m_shaderResource);
+                auto dwb = map.getDrawable(m_messageBus, *l, m_textureResource, m_shaderResource);
                 auto entity = xy::Entity::create(m_messageBus);
                 entity->addComponent(dwb);
                 entity->setPosition(mapOffset);
-                m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);*/
+                m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
-                if (l->getName() == "navigation")
+
+                xy::tmx::TileLayer* tl = dynamic_cast<xy::tmx::TileLayer*>(l.get());
+                const auto& tiles = tl->getTiles();
+                auto mapSize = map.getTileCount();
+                for (auto y = 0u; y < mapSize.y; ++y)
                 {
-                    xy::tmx::TileLayer* tl = dynamic_cast<xy::tmx::TileLayer*>(l.get());
-                    const auto& tiles = tl->getTiles();
-                    auto mapSize = map.getTileCount();
-                    for (auto y = 0u; y < mapSize.y; ++y)
+                    for (auto x = 0u; x < mapSize.x; ++x)
                     {
-                        for (auto x = 0u; x < mapSize.x; ++x)
+                        if (tiles[y * mapSize.x + x].ID != 0)
                         {
-                            if (tiles[y * mapSize.x + x].ID != 0)
+                            const auto& name = l->getName();
+                            if (name == "navigation")
                             {
                                 //any tile counts as a wall
                                 m_pathFinder.addSolidTile({ x, y });
                             }
+                            else if (name == "waypoints")
+                            {
+                                //TODO we'll make these objects
+                                //and add properties to them describing activity
+                                waypoints.emplace_back(x, y);
+                            }
                         }
-                    }
+                    }           
                 }
             }
             else if (l->getType() == xy::tmx::Layer::Type::Object)
@@ -243,7 +252,7 @@ void WorldClientState::initMapData()
         {
             xy::Logger::log("No navigation data has been loaded!", xy::Logger::Type::Error);
         }
-        m_pathFinder.plotPath({ 26u, 29u }, { 49u, 9u });
+        //m_pathFinder.plotPath({ 26u, 29u }, { 49u, 9u });
     }
     else
     {
@@ -258,7 +267,7 @@ void WorldClientState::initBud()
     dwb->getDrawable().setSize({ 50.f, 120.f });
     dwb->setOrigin(25.f, 120.f);
 
-    auto controller = xy::Component::create<BudController>(m_messageBus);
+    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, waypoints);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);

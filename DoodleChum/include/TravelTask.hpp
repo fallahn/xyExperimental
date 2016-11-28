@@ -25,34 +25,25 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_BUD_CONTROLLER_HPP_
-#define DC_BUD_CONTROLLER_HPP_
+#ifndef DC_TRAVEL_TASK_HPP_
+#define DC_TRAVEL_TASK_HPP_
 
 #include <Task.hpp>
 
-#include <xygine/components/Component.hpp>
+#include <SFML/System/Vector2.hpp>
 
-#include <list>
+#include <vector>
 
-class PathFinder;
-class BudController final : public xy::Component
+class TravelTask final : public Task
 {
 public:
-    BudController(xy::MessageBus&, const PathFinder&, const std::vector<sf::Vector2u>&);
-    ~BudController() = default;
+    TravelTask(xy::Entity&, std::vector<sf::Vector2f>&);
+    ~TravelTask() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Script; }
-    void entityUpdate(xy::Entity&, float) override;
+    void update(float) override;
 
 private:
-
-    const PathFinder& m_pathFinder;
-    const std::vector<sf::Vector2u>& m_wayPoints;
-
-    sf::Vector2u m_currentPosition;
-    sf::Vector2u m_destinationPosition;
-
-    std::list<Task::Ptr> m_tasks;
+    std::vector<sf::Vector2f> m_points;
 };
 
-#endif //DC_BUD_CONTROLLER_HPP_
+#endif //DC_TRAVEL_TASK_HPP_

@@ -25,34 +25,40 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_BUD_CONTROLLER_HPP_
-#define DC_BUD_CONTROLLER_HPP_
+#include <TravelTask.hpp>
 
-#include <Task.hpp>
+#include <xygine/util/Vector.hpp>
+#include <xygine/Entity.hpp>
 
-#include <xygine/components/Component.hpp>
-
-#include <list>
-
-class PathFinder;
-class BudController final : public xy::Component
+namespace
 {
-public:
-    BudController(xy::MessageBus&, const PathFinder&, const std::vector<sf::Vector2u>&);
-    ~BudController() = default;
+    const float minDistance = 100.f;
+    const float moveSpeed = 220.f;
+}
 
-    xy::Component::Type type() const override { return xy::Component::Type::Script; }
-    void entityUpdate(xy::Entity&, float) override;
+TravelTask::TravelTask(xy::Entity& entity, std::vector<sf::Vector2f>& points)
+    : Task(entity),
+    m_points(std::move(points))
+{
 
-private:
+}
 
-    const PathFinder& m_pathFinder;
-    const std::vector<sf::Vector2u>& m_wayPoints;
+//public
+void TravelTask::update(float dt)
+{
+    auto direction = m_points.back() - getEntity().getWorldPosition();
+    auto distance = xy::Util::Vector::lengthSquared(direction);
 
-    sf::Vector2u m_currentPosition;
-    sf::Vector2u m_destinationPosition;
-
-    std::list<Task::Ptr> m_tasks;
-};
-
-#endif //DC_BUD_CONTROLLER_HPP_
+    if (distance > minDistance)
+    {
+        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
+    }
+    else
+    {
+        m_points.pop_back();
+        if (m_points.empty())
+        {
+            setCompleted();
+        }
+    }
+}

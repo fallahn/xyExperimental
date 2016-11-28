@@ -138,7 +138,7 @@ std::vector<sf::Vector2f> PathFinder::plotPath(const sf::Vector2u& start, const 
     m_path.clear();
     for (const auto& p : points)
     {
-        m_path.emplace_back(p, sf::Color::Red);
+        m_path.emplace_back(p, sf::Color::Blue);
     }
 
     return std::move(points);
@@ -160,6 +160,6 @@ PathFinder::Node::Ptr PathFinder::nodeOnList(const std::set<Node::Ptr>& list, co
 
 void PathFinder::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.draw(m_walls.data(), m_walls.size(), sf::Quads, states);
+    //rt.draw(m_walls.data(), m_walls.size(), sf::Quads, states);
     rt.draw(m_path.data(), m_path.size(), sf::LineStrip, states);
 }

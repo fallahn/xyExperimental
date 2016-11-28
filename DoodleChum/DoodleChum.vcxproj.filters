@@ -57,6 +57,9 @@
     <ClInclude Include="include\PathFinder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\TravelTask.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -79,6 +82,9 @@
     </ClCompile>
     <ClCompile Include="src\PathFinder.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TravelTask.cpp">
+      <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
