@@ -49,16 +49,16 @@ void TravelTask::update(float dt)
     auto direction = m_points.back() - getEntity().getWorldPosition();
     auto distance = xy::Util::Vector::lengthSquared(direction);
 
-    if (distance > minDistance)
-    {
-        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
-    }
-    else
+    if (distance < minDistance)
     {
         m_points.pop_back();
         if (m_points.empty())
         {
             setCompleted();
-        }
+        }        
+    }
+    else //if(distance != 0)
+    {
+        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
     }
 }

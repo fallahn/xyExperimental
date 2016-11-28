@@ -128,6 +128,7 @@ void WorldClientState::draw()
 void WorldClientState::initMeshes()
 {
     m_meshRenderer.setView(getContext().defaultView);
+    m_meshRenderer.setFOV(45.f);
 
     m_shaderResource.preload(Shader::TexturedBumped, DEFERRED_TEXTURED_BUMPED_VERTEX, DEFERRED_TEXTURED_BUMPED_FRAGMENT);
     m_shaderResource.preload(Shader::Shadow, SHADOW_VERTEX, SHADOW_FRAGMENT);
@@ -189,11 +190,11 @@ void WorldClientState::initMapData()
             if (l->getType() == xy::tmx::Layer::Type::Tile)
             {
                 //TODO check dwb is not nullptr
-                auto dwb = map.getDrawable(m_messageBus, *l, m_textureResource, m_shaderResource);
+                /*auto dwb = map.getDrawable(m_messageBus, *l, m_textureResource, m_shaderResource);
                 auto entity = xy::Entity::create(m_messageBus);
                 entity->addComponent(dwb);
                 entity->setPosition(mapOffset);
-                m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+                m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);*/
 
 
                 xy::tmx::TileLayer* tl = dynamic_cast<xy::tmx::TileLayer*>(l.get());
