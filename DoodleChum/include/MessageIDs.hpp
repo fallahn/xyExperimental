@@ -34,13 +34,30 @@ namespace Message
 {
     enum ID
     {
-        TimeOfDay = xy::Message::Count
+        TimeOfDay = xy::Message::Count,
+        NewTask
     };
 
     struct TODEvent final
     {
         float time = 0.f; //< TODO really got to fix this being out by 12 hours
         float sunIntensity = 0.f;
+    };
+
+    struct TaskEvent
+    {
+        enum Name
+        {
+            Eat,
+            Drink,
+            Poop,
+            Shower,
+            Sleep,
+            WatchTV,
+            PlayPiano,
+            PlayMusic,
+            PlayComputer
+        }taskName;
     };
 }
 

@@ -32,11 +32,11 @@ source distribution.
 #include <BudController.hpp>
 
 #include <xygine/App.hpp>
-#include <xygine/components/SfDrawableComponent.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/Reports.hpp>
 #include <xygine/components/MeshDrawable.hpp>
 #include <xygine/mesh/IQMBuilder.hpp>
+#include <xygine/mesh/QuadBuilder.hpp>
 #include <xygine/mesh/shaders/DeferredRenderer.hpp>
 #include <xygine/components/Model.hpp>
 #include <xygine/tilemap/Map.hpp>
@@ -53,7 +53,6 @@ source distribution.
 namespace
 {
     sf::Vector2f spawnPosition;
-    std::vector<sf::Vector2u> waypoints;
 }
 
 using namespace std::placeholders;
@@ -170,6 +169,15 @@ void WorldClientState::initMeshes()
     auto md = m_meshRenderer.createDrawable(m_messageBus);
     entity->addComponent(md);
     m_scene.addEntity(entity, xy::Scene::Layer::BackFront);
+
+    //quad for player
+    xy::QuadBuilder qb({ 64.f, 120.f });
+    m_meshRenderer.loadModel(Mesh::Bud, qb);
+    
+    auto& budMat = m_materialResource.add(Material::Bud, m_shaderResource.get(Shader::TexturedBumped));
+    budMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    budMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/db_diffuse.png") });
+    budMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
 }
 
 void WorldClientState::initMapData()
@@ -212,19 +220,14 @@ void WorldClientState::initMapData()
                                 //any tile counts as a wall
                                 m_pathFinder.addSolidTile({ x, y });
                             }
-                            else if (name == "waypoints")
-                            {
-                                //TODO we'll make these objects
-                                //and add properties to them describing activity
-                                waypoints.emplace_back(x, y);
-                            }
                         }
                     }           
                 }
             }
             else if (l->getType() == xy::tmx::Layer::Type::Object)
             {
-                if (l->getName() == "lights")
+                const auto& name = l->getName();
+                if (name == "lights")
                 {
                     const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& o : objs)
@@ -241,6 +244,31 @@ void WorldClientState::initMapData()
                         entity->addComponent(light);
                         entity->addComponent(controller);
                         m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+                    }
+                }
+                else if (name == "tasks")
+                {
+                    const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
+                    for (const auto& obj : objs)
+                    {
+                        m_tasks.emplace_back();
+                        auto& task = m_tasks.back();
+                        task.name = obj.getName();
+                        task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
+                        task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
+                        
+                        const auto& properties = obj.getProperties();
+                        for (const auto& prop : properties)
+                        {
+                            if (prop.getType() == xy::tmx::Property::Type::Int)
+                            {
+                                const auto propName = prop.getName();
+                                if (propName == "id")
+                                {
+                                    task.id = prop.getIntValue();
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -263,12 +291,11 @@ void WorldClientState::initMapData()
 
 void WorldClientState::initBud()
 {
-    auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::RectangleShape>>(m_messageBus);
-    dwb->getDrawable().setFillColor(sf::Color::Red);
-    dwb->getDrawable().setSize({ 50.f, 120.f });
-    dwb->setOrigin(25.f, 120.f);
+    auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);
+    dwb->setBaseMaterial(m_materialResource.get(Material::Bud));
+    dwb->setPosition({ 0.f, -60.f, 4.f });
 
-    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, waypoints);
+    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, m_tasks);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);

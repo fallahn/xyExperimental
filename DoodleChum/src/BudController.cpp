@@ -28,17 +28,77 @@ source distribution.
 #include <BudController.hpp>
 #include <PathFinder.hpp>
 #include <TravelTask.hpp>
+#include <ThinkTask.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/Entity.hpp>
-#include <xygine/util/Random.hpp>
 
 
-BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<sf::Vector2u>& waypoints)
+BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData)
     : xy::Component(mb, this),
+    m_entity(nullptr),
     m_pathFinder(pf),
-    m_wayPoints(waypoints)
+    m_taskData(taskData)
 {
-    m_currentPosition = { 26u, 29u };
+    //messagehandler takes requests from think task   
+    xy::Component::MessageHandler mh;
+    mh.id = Message::NewTask;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+
+        //lookup task data
+        auto result = std::find_if(std::begin(m_taskData), std::end(m_taskData), [&data](const TaskData& td)
+        {
+            return td.id == data.taskName;
+        });
+
+        if (result != m_taskData.end())
+        {
+            //get new destination for requested task and calculate path
+            m_destinationPosition = result->position;
+
+            auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+            m_tasks.emplace_back(std::make_unique<TravelTask>(*m_entity, getMessageBus(), points));
+        }
+
+        //add the requested task
+        switch (data.taskName)
+        {
+        default: break;
+        case Message::TaskEvent::Eat:
+            LOG("Bud decided to eat!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::Drink:
+            LOG("Bud decided to drink!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::Poop:
+            LOG("Bud decided to poop!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::Shower:
+            LOG("Bud decided to shower!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::Sleep:
+            LOG("Bud decided to sleep!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::WatchTV:
+            LOG("Bud decided to watch TV!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::PlayPiano:
+            LOG("Bud decided to play piano!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::PlayMusic:
+            LOG("Bud decided to play music!", xy::Logger::Type::Info);
+            break;
+        case Message::TaskEvent::PlayComputer:
+            LOG("Bud decided to play computer!", xy::Logger::Type::Info);
+            break;
+        }
+
+        //add a new think task to think about what happens when task complete
+        m_tasks.emplace_back(std::make_unique<ThinkTask>(*m_entity, getMessageBus()));
+    };
+    addMessageHandler(mh);
 }
 
 //public
@@ -53,12 +113,16 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
             m_currentPosition = m_destinationPosition;
         }
     }
-    else
-    {
-        //just for testing create a task to travel somewhere at random
-        m_destinationPosition = m_wayPoints[xy::Util::Random::value(0, m_wayPoints.size() - 1)];
+}
 
-        auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
-        m_tasks.emplace_back(std::make_unique<TravelTask>(entity, points));
-    }
+void BudController::onStart(xy::Entity& entity)
+{
+    //TODO set current grid position from entity position
+    m_currentPosition = { 26u, 29u };
+    m_destinationPosition = m_currentPosition;
+
+    //place a ThinkTask on stack first so bud decides what to do
+    m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus()));
+
+    m_entity = &entity;
 }

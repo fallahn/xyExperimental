@@ -6,5 +6,6 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/PathFinder.cpp
   ${PROJECT_DIR}/RoomLightController.cpp
+  ${PROJECT_DIR}/ThinkTask.cpp
   ${PROJECT_DIR}/TravelTask.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

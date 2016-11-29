@@ -25,40 +25,29 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <TravelTask.hpp>
+#include <ThinkTask.hpp>
+#include <MessageIDs.hpp>
 
-#include <xygine/util/Vector.hpp>
-#include <xygine/Entity.hpp>
+#include <xygine/Log.hpp>
+#include <xygine/util/Random.hpp>
 
-namespace
-{
-    const float minDistance = 100.f;
-    const float moveSpeed = 220.f;
-}
-
-TravelTask::TravelTask(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vector2f>& points)
+ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb)
     : Task(entity, mb),
-    m_points(std::move(points))
+    m_time(2.f)
 {
-
 }
 
 //public
-void TravelTask::update(float dt)
+void ThinkTask::update(float dt)
 {
-    auto direction = m_points.back() - getEntity().getWorldPosition();
-    auto distance = xy::Util::Vector::lengthSquared(direction);
+    //check for time out, request next task if expired and mark as complete
+    m_time -= dt;
+    if(m_time <= 0)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = static_cast<Message::TaskEvent::Name>(xy::Util::Random::value(0, 8));
+        setCompleted();
+    }
 
-    if (distance < minDistance)
-    {
-        m_points.pop_back();
-        if (m_points.empty())
-        {
-            setCompleted();
-        }        
-    }
-    else //if(distance != 0)
-    {
-        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
-    }
+    //TODO skew task decision based on needs - ie make eating more likely when hungry
 }

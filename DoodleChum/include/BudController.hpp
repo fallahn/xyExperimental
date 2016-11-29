@@ -35,19 +35,21 @@ source distribution.
 #include <list>
 
 class PathFinder;
+struct TaskData;
 class BudController final : public xy::Component
 {
 public:
-    BudController(xy::MessageBus&, const PathFinder&, const std::vector<sf::Vector2u>&);
+    BudController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&);
     ~BudController() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Script; }
     void entityUpdate(xy::Entity&, float) override;
+    void onStart(xy::Entity&) override;
 
 private:
-
+    xy::Entity* m_entity;
     const PathFinder& m_pathFinder;
-    const std::vector<sf::Vector2u>& m_wayPoints;
+    const std::vector<TaskData>& m_taskData;
 
     sf::Vector2u m_currentPosition;
     sf::Vector2u m_destinationPosition;

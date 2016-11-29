@@ -30,6 +30,7 @@ source distribution.
 
 #include <StateIDs.hpp>
 #include <PathFinder.hpp>
+#include <Task.hpp>
 
 #include <xygine/State.hpp>
 #include <xygine/Scene.hpp>
@@ -62,6 +63,7 @@ private:
     xy::FontResource m_fontResource;
 
     PathFinder m_pathFinder;
+    std::vector<TaskData> m_tasks;
 
     void initMeshes();
     void initMapData();

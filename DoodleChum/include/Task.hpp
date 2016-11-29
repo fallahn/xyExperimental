@@ -28,11 +28,15 @@ source distribution.
 #ifndef DC_TASK_HPP_
 #define DC_TASK_HPP_
 
+#include <SFML/System/Vector2.hpp>
+
 #include <memory>
+#include <string>
 
 namespace xy
 {
     class Entity;
+    class MessageBus;
 }
 
 class Task
@@ -40,7 +44,7 @@ class Task
 public:
     using Ptr = std::unique_ptr<Task>;
 
-    explicit Task(xy::Entity& e) : m_entity(e), m_completed(false) {}
+    explicit Task(xy::Entity& e, xy::MessageBus& mb) : m_entity(e), m_messageBus(mb), m_completed(false) {}
     virtual ~Task() = default;
 
     virtual void update(float) = 0;
@@ -49,9 +53,18 @@ public:
 protected:
     xy::Entity&  getEntity() { return m_entity; }
     void setCompleted() { m_completed = true; }
+    xy::MessageBus& getMessageBus() { return m_messageBus; }
 private:
     xy::Entity& m_entity;
+    xy::MessageBus& m_messageBus;
     bool m_completed;
+};
+
+struct TaskData final
+{
+    std::string name;
+    std::int32_t id = -1;
+    sf::Vector2u position;
 };
 
 #endif //DC_TASK_HPP_

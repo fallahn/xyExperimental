@@ -37,7 +37,7 @@ source distribution.
 class TravelTask final : public Task
 {
 public:
-    TravelTask(xy::Entity&, std::vector<sf::Vector2f>&);
+    TravelTask(xy::Entity&, xy::MessageBus&, std::vector<sf::Vector2f>&);
     ~TravelTask() = default;
 
     void update(float) override;

@@ -25,40 +25,21 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <TravelTask.hpp>
+#ifndef DC_THINK_TASK_HPP_
+#define DC_THINK_TASK_HPP_
 
-#include <xygine/util/Vector.hpp>
-#include <xygine/Entity.hpp>
+#include <Task.hpp>
 
-namespace
+class ThinkTask final : public Task
 {
-    const float minDistance = 100.f;
-    const float moveSpeed = 220.f;
-}
+public:
+    ThinkTask(xy::Entity&, xy::MessageBus&);
+    ~ThinkTask() = default;
 
-TravelTask::TravelTask(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vector2f>& points)
-    : Task(entity, mb),
-    m_points(std::move(points))
-{
+    void update(float) override;
 
-}
+private:
+    float m_time;
+};
 
-//public
-void TravelTask::update(float dt)
-{
-    auto direction = m_points.back() - getEntity().getWorldPosition();
-    auto distance = xy::Util::Vector::lengthSquared(direction);
-
-    if (distance < minDistance)
-    {
-        m_points.pop_back();
-        if (m_points.empty())
-        {
-            setCompleted();
-        }        
-    }
-    else //if(distance != 0)
-    {
-        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
-    }
-}
+#endif //DC_THINK_TASK_HPP_

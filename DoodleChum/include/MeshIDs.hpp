@@ -35,7 +35,8 @@ namespace Mesh
     enum ID
     {
         Haus = 0,
-        Background
+        Background,
+        Bud
     };
 }
 
@@ -44,7 +45,8 @@ namespace Material
     enum ID
     {
         Haus = 0,
-        Background
+        Background,
+        Bud
     };
 }
 

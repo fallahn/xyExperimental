@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="left-down" width="52" height="30" tilewidth="32" tileheight="32" nextobjectid="8">
+<map version="1.0" orientation="orthogonal" renderorder="left-down" width="52" height="30" tilewidth="32" tileheight="32" nextobjectid="17">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="4" columns="2">
   <image source="tileset.png" width="64" height="64"/>
  </tileset>
@@ -8,7 +8,7 @@
    eJzt1lEKACAIBNHo/ocOvy0IgnSXedABpgIdAwCA/6bpUXfTV33Hr++ya1Hl0nL6Yw6cWoJTS6Cnt+rZwV6QsR9ocGlhP9Dh1BLo6a16drAfZAvhqQJJ
   </data>
  </layer>
- <layer name="waypoints" width="52" height="30">
+ <layer name="waypoints" width="52" height="30" visible="0">
   <data encoding="base64" compression="zlib">
    eJzt1rENADAIBDHYf+lskIYgUGQP8JRHBAAwKT+7AwD06e65fwEAdqm0+VXXbzsHS5gACA==
   </data>
@@ -34,6 +34,53 @@
   </object>
   <object id="7" x="1280" y="126">
    <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#00ff00" name="tasks">
+  <object id="8" name="eat" x="1632" y="928" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="9" name="drink" x="1408" y="928" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="10" name="poop" x="1568" y="608" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="11" name="shower" x="1312" y="608" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="12" name="sleep" x="736" y="608" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+  </object>
+  <object id="13" name="watchtv" x="1408" y="288" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="14" name="playpiano" x="352" y="928" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="6"/>
+   </properties>
+  </object>
+  <object id="15" name="playmusic" x="448" y="288" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="7"/>
+   </properties>
+  </object>
+  <object id="16" name="playcomputer" x="928" y="288" width="32" height="32">
+   <properties>
+    <property name="id" type="int" value="8"/>
+   </properties>
   </object>
  </objectgroup>
 </map>
