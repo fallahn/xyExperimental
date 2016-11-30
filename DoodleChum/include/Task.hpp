@@ -47,6 +47,7 @@ public:
     explicit Task(xy::Entity& e, xy::MessageBus& mb) : m_entity(e), m_messageBus(mb), m_completed(false) {}
     virtual ~Task() = default;
 
+    virtual void onStart() {}
     virtual void update(float) = 0;
     bool completed() const { return m_completed; }
 

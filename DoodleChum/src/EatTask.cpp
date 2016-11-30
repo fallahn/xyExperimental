@@ -25,54 +25,30 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESSAGE_IDS_HPP_
-#define DC_MESSAGE_IDS_HPP_
+#include <EatTask.hpp>
+#include <MessageIDs.hpp>
 
-#include <xygine/MessageBus.hpp>
-
-namespace Message
+EatTask::EatTask(xy::Entity& e, xy::MessageBus& mb)
+    : Task(e, mb),
+    m_time(6.f)
 {
-    enum ID
-    {
-        TimeOfDay = xy::Message::Count,
-        NewTask,
-        Animation
-    };
 
-    struct TODEvent final
-    {
-        float time = 0.f; //< TODO really got to fix this being out by 12 hours
-        float sunIntensity = 0.f;
-    };
-
-    struct TaskEvent
-    {
-        enum Name
-        {
-            Eat,
-            Drink,
-            Poop,
-            Shower,
-            Sleep,
-            WatchTV,
-            PlayPiano,
-            PlayMusic,
-            PlayComputer
-        }taskName;
-    };
-
-    struct AnimationEvent
-    {
-        enum ID
-        {
-            Up = 0,
-            Down,
-            Right,
-            Left,
-            Idle,
-            Eat
-        }id;
-    };
 }
 
-#endif //DC_MESSAGE_IDS_HPP_
+//public
+void EatTask::onStart()
+{
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Eat;
+}
+
+void EatTask::update(float dt)
+{
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = Message::AnimationEvent::Idle;
+    }
+}

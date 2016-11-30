@@ -25,54 +25,21 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESSAGE_IDS_HPP_
-#define DC_MESSAGE_IDS_HPP_
+#ifndef DC_TV_TASK_HPP_
+#define DC_TV_TASK_HPP_
 
-#include <xygine/MessageBus.hpp>
+#include <Task.hpp>
 
-namespace Message
+class TVTask final : public Task
 {
-    enum ID
-    {
-        TimeOfDay = xy::Message::Count,
-        NewTask,
-        Animation
-    };
+public:
+    TVTask(xy::Entity&, xy::MessageBus&);
+    ~TVTask() = default;
 
-    struct TODEvent final
-    {
-        float time = 0.f; //< TODO really got to fix this being out by 12 hours
-        float sunIntensity = 0.f;
-    };
+    void onStart() override;
+    void update(float) override;
 
-    struct TaskEvent
-    {
-        enum Name
-        {
-            Eat,
-            Drink,
-            Poop,
-            Shower,
-            Sleep,
-            WatchTV,
-            PlayPiano,
-            PlayMusic,
-            PlayComputer
-        }taskName;
-    };
+private:
+};
 
-    struct AnimationEvent
-    {
-        enum ID
-        {
-            Up = 0,
-            Down,
-            Right,
-            Left,
-            Idle,
-            Eat
-        }id;
-    };
-}
-
-#endif //DC_MESSAGE_IDS_HPP_
+#endif //DC_TV_TASK_HPP_

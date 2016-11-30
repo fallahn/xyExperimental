@@ -135,27 +135,45 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BudController.hpp" />
+    <ClInclude Include="include\ComputerTask.hpp" />
     <ClInclude Include="include\DayNightCycle.hpp" />
+    <ClInclude Include="include\DrinkTask.hpp" />
+    <ClInclude Include="include\EatTask.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\MeshIDs.hpp" />
     <ClInclude Include="include\MessageIDs.hpp" />
+    <ClInclude Include="include\MusicTask.hpp" />
     <ClInclude Include="include\PathFinder.hpp" />
+    <ClInclude Include="include\PianoTask.hpp" />
+    <ClInclude Include="include\PoopTask.hpp" />
     <ClInclude Include="include\RoomLightController.hpp" />
+    <ClInclude Include="include\ShowerTask.hpp" />
+    <ClInclude Include="include\SleepTask.hpp" />
     <ClInclude Include="include\StateIDs.hpp" />
     <ClInclude Include="include\Task.hpp" />
     <ClInclude Include="include\ThinkTask.hpp" />
     <ClInclude Include="include\TravelTask.hpp" />
+    <ClInclude Include="include\TVTask.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BudController.cpp" />
+    <ClCompile Include="src\ComputerTask.cpp" />
     <ClCompile Include="src\DayNightCycle.cpp" />
+    <ClCompile Include="src\DrinkTask.cpp" />
+    <ClCompile Include="src\EatTask.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MusicTask.cpp" />
     <ClCompile Include="src\PathFinder.cpp" />
+    <ClCompile Include="src\PianoTask.cpp" />
+    <ClCompile Include="src\PoopTask.cpp" />
     <ClCompile Include="src\RoomLightController.cpp" />
+    <ClCompile Include="src\ShowerTask.cpp" />
+    <ClCompile Include="src\SleepTask.cpp" />
     <ClCompile Include="src\ThinkTask.cpp" />
     <ClCompile Include="src\TravelTask.cpp" />
+    <ClCompile Include="src\TVTask.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

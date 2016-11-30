@@ -1,11 +1,20 @@
 #add source files used by your project here
 set(PROJECT_SRC
   ${PROJECT_DIR}/BudController.cpp
+  ${PROJECT_DIR}/ComputerTask.cpp
   ${PROJECT_DIR}/DayNightCycle.cpp
+  ${PROJECT_DIR}/DrinkTask.cpp
+  ${PROJECT_DIR}/EatTask.cpp
   ${PROJECT_DIR}/Game.cpp
   ${PROJECT_DIR}/main.cpp
+  ${PROJECT_DIR}/MusicTask.cpp
   ${PROJECT_DIR}/PathFinder.cpp
+  ${PROJECT_DIR}/PianoTask.cpp
+  ${PROJECT_DIR}/PoopTask.cpp
   ${PROJECT_DIR}/RoomLightController.cpp
   ${PROJECT_DIR}/ThinkTask.cpp
+  ${PROJECT_DIR}/ShowerTask.cpp
+  ${PROJECT_DIR}/SleepTask.cpp
   ${PROJECT_DIR}/TravelTask.cpp
+  ${PROJECT_DIR}/TVTask.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

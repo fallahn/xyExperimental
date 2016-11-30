@@ -29,6 +29,15 @@ source distribution.
 #include <PathFinder.hpp>
 #include <TravelTask.hpp>
 #include <ThinkTask.hpp>
+#include <EatTask.hpp>
+#include <DrinkTask.hpp>
+#include <PoopTask.hpp>
+#include <ShowerTask.hpp>
+#include <SleepTask.hpp>
+#include <TVTask.hpp>
+#include <PianoTask.hpp>
+#include <MusicTask.hpp>
+#include <ComputerTask.hpp>
 #include <MessageIDs.hpp>
 
 #include <xygine/Entity.hpp>
@@ -72,30 +81,47 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
         default: break;
         case Message::TaskEvent::Eat:
             LOG("Bud decided to eat!", xy::Logger::Type::Info);
+            m_tasks.emplace_back(std::make_unique<EatTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Drink:
             LOG("Bud decided to drink!", xy::Logger::Type::Info);
+            //two frame - repeat 4/4 raised/lowered
+            m_tasks.emplace_back(std::make_unique<DrinkTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Poop:
             LOG("Bud decided to poop!", xy::Logger::Type::Info);
+            //one frame?
+            m_tasks.emplace_back(std::make_unique<PoopTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Shower:
             LOG("Bud decided to shower!", xy::Logger::Type::Info);
+            //scale 0, steam particle effect
+            m_tasks.emplace_back(std::make_unique<ShowerTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Sleep:
             LOG("Bud decided to sleep!", xy::Logger::Type::Info);
+            //scale 0, ZZzz particle effect
+            m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::WatchTV:
             LOG("Bud decided to watch TV!", xy::Logger::Type::Info);
+            //sitting with remote animation?
+            m_tasks.emplace_back(std::make_unique<TVTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::PlayPiano:
             LOG("Bud decided to play piano!", xy::Logger::Type::Info);
+            //animation
+            m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::PlayMusic:
             LOG("Bud decided to play music!", xy::Logger::Type::Info);
+            //dancing animation with note particle effect
+            m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::PlayComputer:
             LOG("Bud decided to play computer!", xy::Logger::Type::Info);
+            //probably recycle piano animation
+            m_tasks.emplace_back(std::make_unique<ComputerTask>(*m_entity, getMessageBus()));
             break;
         }
 
@@ -114,6 +140,7 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
         if (m_tasks.front()->completed())
         {
             m_tasks.pop_front();
+            if (!m_tasks.empty()) m_tasks.front()->onStart();
             m_currentPosition = m_destinationPosition;
         }
     }

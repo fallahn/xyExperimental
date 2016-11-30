@@ -25,54 +25,21 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESSAGE_IDS_HPP_
-#define DC_MESSAGE_IDS_HPP_
+#include <PoopTask.hpp>
 
-#include <xygine/MessageBus.hpp>
-
-namespace Message
+PoopTask::PoopTask(xy::Entity& e, xy::MessageBus& mb)
+    : Task(e, mb)
 {
-    enum ID
-    {
-        TimeOfDay = xy::Message::Count,
-        NewTask,
-        Animation
-    };
 
-    struct TODEvent final
-    {
-        float time = 0.f; //< TODO really got to fix this being out by 12 hours
-        float sunIntensity = 0.f;
-    };
-
-    struct TaskEvent
-    {
-        enum Name
-        {
-            Eat,
-            Drink,
-            Poop,
-            Shower,
-            Sleep,
-            WatchTV,
-            PlayPiano,
-            PlayMusic,
-            PlayComputer
-        }taskName;
-    };
-
-    struct AnimationEvent
-    {
-        enum ID
-        {
-            Up = 0,
-            Down,
-            Right,
-            Left,
-            Idle,
-            Eat
-        }id;
-    };
 }
 
-#endif //DC_MESSAGE_IDS_HPP_
+//public
+void PoopTask::onStart()
+{
+
+}
+
+void PoopTask::update(float dt)
+{
+    setCompleted();
+}
