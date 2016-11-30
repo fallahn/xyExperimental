@@ -26,9 +26,11 @@ source distribution.
 *********************************************************************/
 
 #include <PoopTask.hpp>
+#include <MessageIDs.hpp>
 
 PoopTask::PoopTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb)
+    : Task(e, mb),
+    m_time(7.f)
 {
 
 }
@@ -36,10 +38,15 @@ PoopTask::PoopTask(xy::Entity& e, xy::MessageBus& mb)
 //public
 void PoopTask::onStart()
 {
-
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Poop;
 }
 
 void PoopTask::update(float dt)
 {
-    setCompleted();
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+    }
 }

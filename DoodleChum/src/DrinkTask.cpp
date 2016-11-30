@@ -26,9 +26,11 @@ source distribution.
 *********************************************************************/
 
 #include <DrinkTask.hpp>
+#include <MessageIDs.hpp>
 
 DrinkTask::DrinkTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb)
+    : Task(e, mb),
+    m_time(5.f)
 {
 
 }
@@ -36,10 +38,15 @@ DrinkTask::DrinkTask(xy::Entity& e, xy::MessageBus& mb)
 //public
 void DrinkTask::onStart()
 {
-
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Drink;
 }
 
 void DrinkTask::update(float dt)
 {
-    setCompleted();
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+    }
 }

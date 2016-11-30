@@ -45,7 +45,7 @@ class BudController final : public xy::Component, public sf::Drawable
 {
 public:
     BudController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
-    ~BudController() = default;
+    ~BudController();
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
@@ -64,11 +64,14 @@ private:
     std::list<Task::Ptr> m_tasks;
 
     const sf::Texture& m_spriteSheet;
-    //sf::Sprite m_sprite;
     xy::AnimatedDrawable::Ptr m_sprite; //unconventional but saves reinventing the wheel
     void initSprite();
     mutable sf::RenderTexture m_texture;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+#ifdef _DEBUG_
+    void addConCommands();
+#endif //_DEBUG_
 };
 
 #endif //DC_BUD_CONTROLLER_HPP_

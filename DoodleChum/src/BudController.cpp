@@ -41,7 +41,7 @@ source distribution.
 #include <MessageIDs.hpp>
 
 #include <xygine/Entity.hpp>
-
+#include <xygine/Console.hpp>
 
 BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
     : xy::Component (mb, this),
@@ -52,6 +52,10 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
 {
     //set up render texture ready for animations
     initSprite();
+
+#ifdef _DEBUG_
+    addConCommands();
+#endif //_DEBUG_
 
     //messagehandler takes requests from think task   
     xy::Component::MessageHandler mh;
@@ -131,6 +135,11 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
     addMessageHandler(mh);
 }
 
+BudController::~BudController()
+{
+    xy::Console::unregisterCommands(this);
+}
+
 //public
 void BudController::entityUpdate(xy::Entity& entity, float dt)
 {
@@ -188,3 +197,21 @@ void BudController::draw(sf::RenderTarget&, sf::RenderStates) const
     m_texture.draw(*m_sprite);
     m_texture.display();
 }
+
+#ifdef _DEBUG_
+
+void BudController::addConCommands()
+{
+    xy::Console::addCommand("eat", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Eat;
+    }, this);
+
+    xy::Console::addCommand("drink", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Drink;
+    }, this);
+}
+#endif //_DEBUG_

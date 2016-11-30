@@ -70,7 +70,10 @@ namespace Message
             Right,
             Left,
             Idle,
-            Eat
+            Eat,
+            Drink,
+            Poop,
+            TV
         }id;
     };
 }

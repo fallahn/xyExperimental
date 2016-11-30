@@ -40,6 +40,7 @@ public:
     void update(float) override;
 
 private:
+    float m_time;
 };
 
 #endif //DC_DRINK_TASK_HPP_

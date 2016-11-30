@@ -40,6 +40,7 @@ public:
     void update(float) override;
 
 private:
+    float m_time;
 };
 
 #endif //DC_POOP_TASK_HPP_

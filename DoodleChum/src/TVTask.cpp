@@ -26,9 +26,11 @@ source distribution.
 *********************************************************************/
 
 #include <TVTask.hpp>
+#include <MessageIDs.hpp>
 
 TVTask::TVTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb)
+    : Task(e, mb),
+    m_time(15.f)
 {
 
 }
@@ -36,10 +38,15 @@ TVTask::TVTask(xy::Entity& e, xy::MessageBus& mb)
 //public
 void TVTask::onStart()
 {
-
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::TV;
 }
 
 void TVTask::update(float dt)
 {
-    setCompleted();
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+    }
 }

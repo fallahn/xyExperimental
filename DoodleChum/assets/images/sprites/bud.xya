@@ -35,9 +35,27 @@
       "End": 39,
       "Loop": true,
       "Name": "eat"
+    },
+    {
+      "Start": 40,
+      "End": 47,
+      "Loop": true,
+      "Name": "drink"
+    },
+    {
+      "Start": 48,
+      "End": 51,
+      "Loop": true,
+      "Name": "poop"
+    },
+    {
+      "Start": 52,
+      "End": 55,
+      "Loop": true,
+      "Name": "tv"
     }
   ],
-  "FrameCount": 40,
+  "FrameCount": 56,
   "FrameSize": "32, 64",
   "FrameRate": 14.0,
   "Texture": "bud.png",
