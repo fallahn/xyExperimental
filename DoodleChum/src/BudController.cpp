@@ -34,12 +34,16 @@ source distribution.
 #include <xygine/Entity.hpp>
 
 
-BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData)
-    : xy::Component(mb, this),
-    m_entity(nullptr),
-    m_pathFinder(pf),
-    m_taskData(taskData)
+BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
+    : xy::Component (mb, this),
+    m_entity        (nullptr),
+    m_pathFinder    (pf),
+    m_taskData      (taskData),
+    m_spriteSheet   (spriteSheet)
 {
+    //set up render texture ready for animations
+    initSprite();
+
     //messagehandler takes requests from think task   
     xy::Component::MessageHandler mh;
     mh.id = Message::NewTask;
@@ -113,6 +117,7 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
             m_currentPosition = m_destinationPosition;
         }
     }
+    m_sprite->entityUpdate(entity, dt);
 }
 
 void BudController::onStart(xy::Entity& entity)
@@ -125,4 +130,34 @@ void BudController::onStart(xy::Entity& entity)
     m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus()));
 
     m_entity = &entity;
+}
+
+//private
+void BudController::initSprite()
+{   
+    m_sprite = xy::Component::create<xy::AnimatedDrawable>(getMessageBus(), m_spriteSheet);
+    m_sprite->loadAnimationData("assets/images/sprites/bud.xya");
+    m_sprite->playAnimation(2);
+    auto frameSize = m_sprite->getFrameSize();
+    m_sprite->setScale(1.f, -1.f);
+    m_sprite->setOrigin(0.f, static_cast<float>(frameSize.y));
+
+    m_texture.create(frameSize.x, frameSize.y);
+
+    //add a message handler to respond to animation changes
+    xy::Component::MessageHandler mh;
+    mh.id = Message::Animation;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        m_sprite->playAnimation(data.id);
+    };
+    addMessageHandler(mh);
+}
+
+void BudController::draw(sf::RenderTarget&, sf::RenderStates) const
+{
+    m_texture.clear(sf::Color::Transparent);
+    m_texture.draw(*m_sprite);
+    m_texture.display();
 }

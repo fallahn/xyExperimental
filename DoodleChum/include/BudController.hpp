@@ -31,20 +31,27 @@ source distribution.
 #include <Task.hpp>
 
 #include <xygine/components/Component.hpp>
+#include <xygine/components/AnimatedDrawable.hpp>
+
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <list>
 
 class PathFinder;
 struct TaskData;
-class BudController final : public xy::Component
+class BudController final : public xy::Component, public sf::Drawable
 {
 public:
-    BudController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&);
+    BudController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
     ~BudController() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Script; }
+    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
     void onStart(xy::Entity&) override;
+
+    const sf::Texture& getTexture() const { return m_texture.getTexture(); }
 
 private:
     xy::Entity* m_entity;
@@ -55,6 +62,13 @@ private:
     sf::Vector2u m_destinationPosition;
 
     std::list<Task::Ptr> m_tasks;
+
+    const sf::Texture& m_spriteSheet;
+    //sf::Sprite m_sprite;
+    xy::AnimatedDrawable::Ptr m_sprite; //unconventional but saves reinventing the wheel
+    void initSprite();
+    mutable sf::RenderTexture m_texture;
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
 #endif //DC_BUD_CONTROLLER_HPP_

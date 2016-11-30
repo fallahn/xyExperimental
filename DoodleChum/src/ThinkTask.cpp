@@ -35,6 +35,8 @@ ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb)
     : Task(entity, mb),
     m_time(2.f)
 {
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Idle;
 }
 
 //public

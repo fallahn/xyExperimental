@@ -44,6 +44,10 @@ public:
 
 private:
     std::vector<sf::Vector2f> m_points;
+    int m_currentAnimation;
+    float m_moveSpeed;
+
+    void setAnimation(const sf::Vector2f&);
 };
 
 #endif //DC_TRAVEL_TASK_HPP_

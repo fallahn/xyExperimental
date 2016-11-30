@@ -26,19 +26,26 @@ source distribution.
 *********************************************************************/
 
 #include <TravelTask.hpp>
+#include <BudController.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/util/Vector.hpp>
 #include <xygine/Entity.hpp>
+#include <xygine/util/Vector.hpp>
+#include <xygine/Reports.hpp>
 
 namespace
 {
     const float minDistance = 100.f;
-    const float moveSpeed = 220.f;
+    const float moveSpeedX = 80.f;
+    const float moveSpeedY = 50.f;
 }
 
 TravelTask::TravelTask(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vector2f>& points)
     : Task(entity, mb),
-    m_points(std::move(points))
+    m_points(std::move(points)),
+    m_currentAnimation(Message::AnimationEvent::Idle),
+    m_moveSpeed(moveSpeedX)
 {
 
 }
@@ -54,11 +61,48 @@ void TravelTask::update(float dt)
         m_points.pop_back();
         if (m_points.empty())
         {
+            auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+            msg->id = Message::AnimationEvent::Idle;
             setCompleted();
-        }        
+        }
+        else
+        {
+            setAnimation(m_points.back() - getEntity().getWorldPosition());
+        }
     }
     else //if(distance != 0)
     {
-        getEntity().move(xy::Util::Vector::normalise(direction) * moveSpeed * dt);
+        getEntity().move(xy::Util::Vector::normalise(direction) * m_moveSpeed * dt);
+    }
+}
+
+//private
+void TravelTask::setAnimation(const sf::Vector2f& direction)
+{
+    //TODO switch to emitting messages
+    float angle = xy::Util::Vector::rotation(direction);
+    REPORT("angle", std::to_string(angle));
+
+    Message::AnimationEvent::ID anim = Message::AnimationEvent::Idle;
+    if (angle > -80 && angle < 80) anim = Message::AnimationEvent::Right;
+    else if (angle > 81 && angle < 100) anim = Message::AnimationEvent::Down;
+    else if (angle > -120 && angle < -80) anim = Message::AnimationEvent::Up;
+    else anim = Message::AnimationEvent::Left;
+
+    if (anim != m_currentAnimation)
+    {
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = anim;
+
+        m_currentAnimation = anim;
+
+        if (anim == Message::AnimationEvent::Left || anim == Message::AnimationEvent::Right)
+        {
+            m_moveSpeed = moveSpeedX;
+        }
+        else
+        {
+            m_moveSpeed = moveSpeedY;
+        }
     }
 }

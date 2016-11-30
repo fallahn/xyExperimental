@@ -35,7 +35,8 @@ namespace Message
     enum ID
     {
         TimeOfDay = xy::Message::Count,
-        NewTask
+        NewTask,
+        Animation
     };
 
     struct TODEvent final
@@ -58,6 +59,18 @@ namespace Message
             PlayMusic,
             PlayComputer
         }taskName;
+    };
+
+    struct AnimationEvent
+    {
+        enum ID
+        {
+            Up = 0,
+            Down,
+            Right,
+            Left,
+            Idle
+        }id;
     };
 }
 

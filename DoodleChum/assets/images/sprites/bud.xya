@@ -1,0 +1,39 @@
+{
+  "Animations": [
+    {
+      "Start": 0,
+      "End": 7,
+      "Loop": true,
+      "Name": "up"
+    },
+    {
+      "Start": 8,
+      "End": 15,
+      "Loop": true,
+      "Name": "down"
+    },
+    {
+      "Start": 16,
+      "End": 23,
+      "Loop": true,
+      "Name": "right"
+    },
+    {
+      "Start": 24,
+      "End": 31,
+      "Loop": true,
+      "Name": "left"
+    },
+    {
+      "Start": 10,
+      "End": 10,
+      "Loop": false,
+      "Name": "idle"
+    }
+  ],
+  "FrameCount": 32,
+  "FrameSize": "32, 64",
+  "FrameRate": 14.0,
+  "Texture": "bud.png",
+  "NormalMap": "none.png"
+}

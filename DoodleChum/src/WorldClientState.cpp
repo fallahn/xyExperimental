@@ -53,6 +53,7 @@ source distribution.
 namespace
 {
     sf::Vector2f spawnPosition;
+    sf::Vector2f budSize(90.f, 160.f);
 }
 
 using namespace std::placeholders;
@@ -171,12 +172,15 @@ void WorldClientState::initMeshes()
     m_scene.addEntity(entity, xy::Scene::Layer::BackFront);
 
     //quad for player
-    xy::QuadBuilder qb({ 64.f, 120.f });
+    xy::QuadBuilder qb(budSize);
     m_meshRenderer.loadModel(Mesh::Bud, qb);
     
+    m_textureResource.setFallbackColour({ 127, 127, 255 });
+
     auto& budMat = m_materialResource.add(Material::Bud, m_shaderResource.get(Shader::TexturedBumped));
     budMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
-    budMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/db_diffuse.png") });
+    //budMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/db_diffuse.png") });
+    budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
     budMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
 }
 
@@ -291,11 +295,14 @@ void WorldClientState::initMapData()
 
 void WorldClientState::initBud()
 {
-    auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);
-    dwb->setBaseMaterial(m_materialResource.get(Material::Bud));
-    dwb->setPosition({ 0.f, -60.f, 4.f });
+    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, m_tasks, m_textureResource.get("assets/images/sprites/bud.png"));
 
-    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, m_tasks);
+    auto& material = m_materialResource.get(Material::Bud);
+    material.addProperty({ "u_diffuseMap", controller->getTexture() });
+
+    auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);
+    dwb->setBaseMaterial(material);
+    dwb->setPosition({ 0.f, -budSize.y / 2.f, 4.f });
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
