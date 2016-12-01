@@ -36,6 +36,7 @@ public:
     ThinkTask(xy::Entity&, xy::MessageBus&);
     ~ThinkTask() = default;
 
+    void onStart() override;
     void update(float) override;
 
 private:

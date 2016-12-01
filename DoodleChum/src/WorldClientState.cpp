@@ -30,6 +30,7 @@ source distribution.
 #include <DayNightCycle.hpp>
 #include <RoomLightController.hpp>
 #include <BudController.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -44,6 +45,7 @@ source distribution.
 #include <xygine/shaders/Tilemap.hpp>
 #include <xygine/components/PointLight.hpp>
 #include <xygine/tilemap/TileLayer.hpp>
+#include <xygine/components/ParticleController.hpp>
 
 #include <xygine/postprocess/ChromeAb.hpp>
 #include <xygine/postprocess/Antique.hpp>
@@ -53,7 +55,7 @@ source distribution.
 namespace
 {
     sf::Vector2f spawnPosition;
-    sf::Vector2f budSize(90.f, 160.f);
+    sf::Vector2f budSize(90.f, 180.f);
 }
 
 using namespace std::placeholders;
@@ -74,6 +76,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initMeshes();
     initMapData();
     initBud();
+    initParticles();
     initUI();
 
     quitLoadingScreen();
@@ -312,10 +315,34 @@ void WorldClientState::initBud()
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
+void WorldClientState::initParticles()
+{
+    xy::ParticleSystem::Definition steam;
+    steam.loadFromFile("assets/particles/steam.xyp", m_textureResource);
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Particle::Steam);
+    entity->addComponent(steam.createSystem(m_messageBus));
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    xy::ParticleSystem::Definition music;
+    music.loadFromFile("assets/particles/music.xyp", m_textureResource);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Particle::Music);
+    entity->addComponent(music.createSystem(m_messageBus));
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    xy::ParticleSystem::Definition zz;
+    zz.loadFromFile("assets/particles/zz.xyp", m_textureResource);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Particle::Sleep);
+    entity->addComponent(zz.createSystem(m_messageBus));
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+}
+
 void WorldClientState::initUI()
 {
     auto entity = xy::Entity::create(m_messageBus);
-    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("spanish chicken"), true);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/clock.ttf"), true);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);

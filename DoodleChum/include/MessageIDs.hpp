@@ -30,13 +30,24 @@ source distribution.
 
 #include <xygine/MessageBus.hpp>
 
+namespace Particle
+{
+    enum ID
+    {
+        Steam = 0x1,
+        Music = 0x2,
+        Sleep = 0x4
+    };
+}
+
 namespace Message
 {
     enum ID
     {
         TimeOfDay = xy::Message::Count,
         NewTask,
-        Animation
+        Animation,
+        Particle
     };
 
     struct TODEvent final
@@ -73,7 +84,8 @@ namespace Message
             Eat,
             Drink,
             Poop,
-            TV
+            TV,
+            Count
         }id;
     };
 }

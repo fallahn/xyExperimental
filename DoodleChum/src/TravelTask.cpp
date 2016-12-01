@@ -45,12 +45,18 @@ TravelTask::TravelTask(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::V
     : Task(entity, mb),
     m_points(std::move(points)),
     m_currentAnimation(Message::AnimationEvent::Idle),
-    m_moveSpeed(moveSpeedX)
+    m_moveSpeed(moveSpeedX),
+    m_startDirection(m_points.back() - getEntity().getWorldPosition())
 {
 
 }
 
 //public
+void TravelTask::onStart()
+{
+    setAnimation(m_startDirection);
+}
+
 void TravelTask::update(float dt)
 {
     auto direction = m_points.back() - getEntity().getWorldPosition();

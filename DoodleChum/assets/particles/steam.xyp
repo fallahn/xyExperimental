@@ -1,0 +1,59 @@
+{
+  "Editor": {
+    "EmitterPosition": "0, 0",
+    "BackgroundColour": 255,
+    "EnableMovement": false
+  },
+  "ReleaseCount": 1,
+  "Delay": 0.0,
+  "Duration": -1.0,
+  "Texture": "assets\\images\\particles\\puff01.png",
+  "Colour": 255,
+  "BlendMode": "Add",
+  "ParticleSize": "8, 8",
+  "ParticlePosition": "0, 0",
+  "FollowParent": false,
+  "Lifetime": 1.8,
+  "InitialVelocity": "0, -36",
+  "RandomInitialVelocities": [],
+  "EmitRate": 12.0,
+  "RandomInitialPositions": [
+    "4, 1",
+    "7, 0",
+    "20, 1",
+    "-18, 1",
+    "-9, 0",
+    "1, 0",
+    "-12, 1"
+  ],
+  "Affectors": [
+    {
+      "Type": "Scale",
+      "Data": [
+        2.0,
+        2.2
+      ]
+    },
+    {
+      "Type": "Rotation",
+      "Data": [
+        140.0
+      ]
+    },
+    {
+      "Type": "Force",
+      "Data": [
+        2.0,
+        -5.0
+      ]
+    },
+    {
+      "Type": "Colour",
+      "Data": [
+        255.0,
+        -1.0,
+        1.3
+      ]
+    }
+  ]
+}

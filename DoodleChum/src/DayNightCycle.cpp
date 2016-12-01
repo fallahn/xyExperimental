@@ -74,6 +74,13 @@ DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, sf:
     }
     m_text.setFont(font);
     m_text.setFillColor(sf::Color::Red);
+    m_text.setCharacterSize(70);
+
+    m_shadowText = m_text;
+    m_shadowText.move(1.f, 1.f);
+    m_shadowText.setString("00:00");
+    m_shadowText.setFillColor({ 120, 120, 120, 120 });
+
     updateText();
 }
 
@@ -142,5 +149,6 @@ void DayNightCycle::updateText()
 
 void DayNightCycle::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    rt.draw(m_shadowText, states);
     rt.draw(m_text, states);
 }

@@ -68,6 +68,7 @@ private:
     void initMeshes();
     void initMapData();
     void initBud();
+    void initParticles();
     void initUI();
 };
 

@@ -26,9 +26,22 @@ source distribution.
 *********************************************************************/
 
 #include <SleepTask.hpp>
+#include <MessageIDs.hpp>
 
-SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb)
+#include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
+#include <xygine/Command.hpp>
+#include <xygine/components/ParticleSystem.hpp>
+
+namespace
+{
+    const sf::Vector2f offset(32.f, -50.f);
+}
+
+SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
+    : Task(e, mb),
+    m_time(10.f),
+    m_position(position + offset)
 {
 
 }
@@ -36,10 +49,29 @@ SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb)
 //public
 void SleepTask::onStart()
 {
-
+    xy::Command cmd;
+    cmd.category = Particle::Sleep;
+    cmd.action = [this](xy::Entity& entity, float dt)
+    {
+        entity.setWorldPosition(m_position);
+        entity.getComponent<xy::ParticleSystem>()->start();
+    };
+    getEntity().getScene()->sendCommand(cmd);
 }
 
 void SleepTask::update(float dt)
 {
-    setCompleted();
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+
+        xy::Command cmd;
+        cmd.category = Particle::Sleep;
+        cmd.action = [this](xy::Entity& entity, float dt)
+        {
+            entity.getComponent<xy::ParticleSystem>()->stop();
+        };
+        getEntity().getScene()->sendCommand(cmd);
+    }
 }

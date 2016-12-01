@@ -40,12 +40,14 @@ public:
     TravelTask(xy::Entity&, xy::MessageBus&, std::vector<sf::Vector2f>&);
     ~TravelTask() = default;
 
+    void onStart() override;
     void update(float) override;
 
 private:
     std::vector<sf::Vector2f> m_points;
     int m_currentAnimation;
     float m_moveSpeed;
+    sf::Vector2f m_startDirection;
 
     void setAnimation(const sf::Vector2f&);
 };

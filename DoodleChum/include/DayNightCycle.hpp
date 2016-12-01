@@ -58,6 +58,7 @@ private:
     xy::Scene::SkyLight& m_light;
 
     sf::Text m_text;
+    sf::Text m_shadowText;
 
     void updateText();
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

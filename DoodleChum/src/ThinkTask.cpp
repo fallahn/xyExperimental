@@ -35,11 +35,16 @@ ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb)
     : Task(entity, mb),
     m_time(2.f)
 {
+    
+}
+
+//public
+void ThinkTask::onStart()
+{
     auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
     msg->id = Message::AnimationEvent::Idle;
 }
 
-//public
 void ThinkTask::update(float dt)
 {
     //check for time out, request next task if expired and mark as complete

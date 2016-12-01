@@ -43,6 +43,25 @@ source distribution.
 #include <xygine/Entity.hpp>
 #include <xygine/Console.hpp>
 
+#include <array>
+
+namespace
+{
+    //TODO this should be in the animation data in xy
+    std::array<float, Message::AnimationEvent::ID::Count> frameRates = 
+    {
+        12.f, //Up
+        12.f, //Down
+        14.f, //Left
+        14.f, //Right
+        1.f, //Idle
+        5.f, //Eat
+        5.f, //Drink
+        1.f, //Poop
+        1.f, //TV
+    };
+}
+
 BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
     : xy::Component (mb, this),
     m_entity        (nullptr),
@@ -70,13 +89,18 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
             return td.id == data.taskName;
         });
 
+        std::vector<sf::Vector2f> points;
+        sf::Vector2f particlePos;
         if (result != m_taskData.end())
         {
             //get new destination for requested task and calculate path
             m_destinationPosition = result->position;
 
-            auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+            points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+            particlePos = points.empty() ? m_entity->getWorldPosition() : points.front();
+
             m_tasks.emplace_back(std::make_unique<TravelTask>(*m_entity, getMessageBus(), points));
+            m_currentPosition = m_destinationPosition; //we'll assume any travelling will be completed, so pushing on another travel task is correctly calculated
         }
 
         //add the requested task
@@ -89,7 +113,6 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
             break;
         case Message::TaskEvent::Drink:
             LOG("Bud decided to drink!", xy::Logger::Type::Info);
-            //two frame - repeat 4/4 raised/lowered
             m_tasks.emplace_back(std::make_unique<DrinkTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Poop:
@@ -100,27 +123,26 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
         case Message::TaskEvent::Shower:
             LOG("Bud decided to shower!", xy::Logger::Type::Info);
             //scale 0, steam particle effect
-            m_tasks.emplace_back(std::make_unique<ShowerTask>(*m_entity, getMessageBus()));
+            m_tasks.emplace_back(std::make_unique<ShowerTask>(*m_entity, getMessageBus(), particlePos));
             break;
         case Message::TaskEvent::Sleep:
             LOG("Bud decided to sleep!", xy::Logger::Type::Info);
             //scale 0, ZZzz particle effect
-            m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus()));
+            m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus(), particlePos));
             break;
         case Message::TaskEvent::WatchTV:
             LOG("Bud decided to watch TV!", xy::Logger::Type::Info);
-            //sitting with remote animation?
             m_tasks.emplace_back(std::make_unique<TVTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::PlayPiano:
             LOG("Bud decided to play piano!", xy::Logger::Type::Info);
             //animation
-            m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus()));
+            m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus(), particlePos));
             break;
         case Message::TaskEvent::PlayMusic:
             LOG("Bud decided to play music!", xy::Logger::Type::Info);
             //dancing animation with note particle effect
-            m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus()));
+            m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus(), particlePos));
             break;
         case Message::TaskEvent::PlayComputer:
             LOG("Bud decided to play computer!", xy::Logger::Type::Info);
@@ -150,7 +172,7 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
         {
             m_tasks.pop_front();
             if (!m_tasks.empty()) m_tasks.front()->onStart();
-            m_currentPosition = m_destinationPosition;
+            //m_currentPosition = m_destinationPosition;
         }
     }
     m_sprite->entityUpdate(entity, dt);
@@ -177,6 +199,7 @@ void BudController::initSprite()
     auto frameSize = m_sprite->getFrameSize();
     m_sprite->setScale(1.f, -1.f);
     m_sprite->setOrigin(0.f, static_cast<float>(frameSize.y));
+    m_sprite->playAnimation(Message::AnimationEvent::Idle);
 
     m_texture.create(frameSize.x, frameSize.y);
 
@@ -186,6 +209,7 @@ void BudController::initSprite()
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
+        m_sprite->setFrameRate(frameRates[data.id]);
         m_sprite->playAnimation(data.id);
     };
     addMessageHandler(mh);
@@ -199,7 +223,6 @@ void BudController::draw(sf::RenderTarget&, sf::RenderStates) const
 }
 
 #ifdef _DEBUG_
-
 void BudController::addConCommands()
 {
     xy::Console::addCommand("eat", [this](const std::string&)
@@ -212,6 +235,42 @@ void BudController::addConCommands()
     {
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Drink;
+    }, this);
+
+    xy::Console::addCommand("poop", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Poop;
+    }, this);
+
+    xy::Console::addCommand("watch_tv", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::WatchTV;
+    }, this);
+
+    xy::Console::addCommand("shower", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Shower;
+    }, this);
+
+    xy::Console::addCommand("sleep", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Sleep;
+    }, this);
+
+    xy::Console::addCommand("play_music", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::PlayMusic;
+    }, this);
+
+    xy::Console::addCommand("play_piano", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::PlayPiano;
     }, this);
 }
 #endif //_DEBUG_

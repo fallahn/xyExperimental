@@ -33,14 +33,15 @@ source distribution.
 class SleepTask final : public Task
 {
 public:
-    SleepTask(xy::Entity&, xy::MessageBus&);
+    SleepTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&);
     ~SleepTask() = default;
 
     void onStart() override;
     void update(float) override;
 
 private:
-
+    float m_time;
+    sf::Vector2f m_position;
 };
 
 #endif //DC_SLEEP_TASK_HPP_

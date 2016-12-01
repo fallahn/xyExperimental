@@ -1,0 +1,50 @@
+{
+  "Editor": {
+    "EmitterPosition": "0, 0",
+    "BackgroundColour": -421075201,
+    "EnableMovement": false
+  },
+  "ReleaseCount": 1,
+  "Delay": 0.0,
+  "Duration": -1.0,
+  "Texture": "assets\\images\\particles\\music.png",
+  "Colour": 255,
+  "BlendMode": "Alpha",
+  "ParticleSize": "2, 3",
+  "ParticlePosition": "0, 0",
+  "FollowParent": false,
+  "Lifetime": 3.0,
+  "InitialVelocity": "9, -60",
+  "RandomInitialVelocities": [],
+  "EmitRate": 1.4,
+  "RandomInitialPositions": [
+    "2, 2",
+    "-3, -3",
+    "-2, 1",
+    "1, 0"
+  ],
+  "Affectors": [
+    {
+      "Type": "Force",
+      "Data": [
+        50.0,
+        20.0
+      ]
+    },
+    {
+      "Type": "Colour",
+      "Data": [
+        255.0,
+        -1.0,
+        0.6
+      ]
+    },
+    {
+      "Type": "Scale",
+      "Data": [
+        8.0,
+        8.0
+      ]
+    }
+  ]
+}

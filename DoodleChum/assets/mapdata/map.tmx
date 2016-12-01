@@ -37,22 +37,22 @@
   </object>
  </objectgroup>
  <objectgroup color="#00ff00" name="tasks">
-  <object id="8" name="eat" x="1632" y="928" width="32" height="32">
+  <object id="8" name="eat" x="1600" y="928" width="32" height="32">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" name="drink" x="1408" y="928" width="32" height="32">
+  <object id="9" name="drink" x="1312" y="928" width="32" height="32">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="10" name="poop" x="1568" y="608" width="32" height="32">
+  <object id="10" name="poop" x="1312" y="608" width="32" height="32">
    <properties>
     <property name="id" type="int" value="2"/>
    </properties>
   </object>
-  <object id="11" name="shower" x="1312" y="608" width="32" height="32">
+  <object id="11" name="shower" x="1600" y="608" width="32" height="32">
    <properties>
     <property name="id" type="int" value="3"/>
    </properties>

@@ -33,14 +33,15 @@ source distribution.
 class PianoTask final : public Task
 {
 public:
-    PianoTask(xy::Entity&, xy::MessageBus&);
+    PianoTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&);
     ~PianoTask() = default;
 
     void onStart() override;
     void update(float) override;
 
 private:
-
+    float m_time;
+    sf::Vector2f m_position;
 };
 
 #endif //DC_PIANO_TASK_HPP_

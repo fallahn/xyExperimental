@@ -33,14 +33,15 @@ source distribution.
 class MusicTask final : public Task
 {
 public:
-    MusicTask(xy::Entity&, xy::MessageBus&);
+    MusicTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&);
     ~MusicTask() = default;
 
     void onStart() override;
     void update(float) override;
 
 private:
-
+    float m_time;
+    sf::Vector2f m_position;
 };
 
 #endif //DC_MUSIC_TASK_HPP_

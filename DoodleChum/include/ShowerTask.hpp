@@ -33,14 +33,15 @@ source distribution.
 class ShowerTask final : public Task
 {
 public:
-    ShowerTask(xy::Entity&, xy::MessageBus&);
+    ShowerTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&);
     ~ShowerTask() = default;
 
     void onStart() override;
     void update(float) override;
 
 private:
-
+    float m_time;
+    sf::Vector2f m_position;
 };
 
 #endif //DC_SHOWER_TASK_HPP_
