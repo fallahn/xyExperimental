@@ -321,21 +321,24 @@ void WorldClientState::initParticles()
     steam.loadFromFile("assets/particles/steam.xyp", m_textureResource);
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Steam);
-    entity->addComponent(steam.createSystem(m_messageBus));
+    auto ps = steam.createSystem(m_messageBus);
+    entity->addComponent(ps);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 
     xy::ParticleSystem::Definition music;
     music.loadFromFile("assets/particles/music.xyp", m_textureResource);
     entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Music);
-    entity->addComponent(music.createSystem(m_messageBus));
+    ps = music.createSystem(m_messageBus);
+    entity->addComponent(ps);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 
     xy::ParticleSystem::Definition zz;
     zz.loadFromFile("assets/particles/zz.xyp", m_textureResource);
     entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Sleep);
-    entity->addComponent(zz.createSystem(m_messageBus));
+    ps = zz.createSystem(m_messageBus);
+    entity->addComponent(ps);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
