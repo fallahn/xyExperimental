@@ -58,7 +58,8 @@ namespace
         5.f, //Eat
         5.f, //Drink
         1.f, //Poop
-        1.f, //TV
+        12.f, //TV
+        8.f //Piano
     };
 }
 

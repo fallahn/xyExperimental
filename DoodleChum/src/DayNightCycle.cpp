@@ -73,7 +73,7 @@ DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, sf:
         m_time += hours * 60.f * 60.f;
     }
     m_text.setFont(font);
-    m_text.setFillColor(sf::Color::Red);
+    m_text.setFillColor({ 255, 0, 0, 220 });
     m_text.setCharacterSize(70);
 
     m_shadowText = m_text;

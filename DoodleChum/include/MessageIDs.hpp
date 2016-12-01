@@ -85,6 +85,7 @@ namespace Message
             Drink,
             Poop,
             TV,
+            Piano,
             Count
         }id;
     };

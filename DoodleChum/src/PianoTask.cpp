@@ -40,7 +40,7 @@ namespace
 
 PianoTask::PianoTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
     : Task(e, mb),
-    m_time(5.f),
+    m_time(10.f),
     m_position(position + offset)
 {
 
@@ -57,6 +57,10 @@ void PianoTask::onStart()
         entity.getComponent<xy::ParticleSystem>()->start();
     };
     getEntity().getScene()->sendCommand(cmd);
+
+    //play anim
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Piano;
 }
 
 void PianoTask::update(float dt)
