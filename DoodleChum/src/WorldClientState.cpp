@@ -345,7 +345,7 @@ void WorldClientState::initParticles()
 void WorldClientState::initUI()
 {
     auto entity = xy::Entity::create(m_messageBus);
-    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/clock.ttf"), true);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);

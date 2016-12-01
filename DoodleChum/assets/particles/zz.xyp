@@ -7,7 +7,7 @@
   "ReleaseCount": 1,
   "Delay": 0.0,
   "Duration": -1.0,
-  "Texture": "assets\\images\\particles\\zz.png",
+  "Texture": "assets/images/particles/zz.png",
   "Colour": 255,
   "BlendMode": "Alpha",
   "ParticleSize": "2, 3",
