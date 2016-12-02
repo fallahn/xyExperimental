@@ -55,7 +55,7 @@ source distribution.
 
 namespace
 {
-    sf::Vector2f spawnPosition;
+    //sf::Vector2f spawnPosition;
     sf::Vector2f budSize(90.f, 180.f);
 }
 
@@ -264,6 +264,9 @@ void WorldClientState::initMapData()
                         task.name = obj.getName();
                         task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
                         task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
+                        task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
+                        task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
+                        task.worldPosition += mapOffset;
                         
                         const auto& properties = obj.getProperties();
                         for (const auto& prop : properties)
@@ -282,14 +285,10 @@ void WorldClientState::initMapData()
             }
         }
 
-        spawnPosition = xy::DefaultSceneSize / 2.f;
-        spawnPosition.y += map.getBounds().height / 2.f;
-
         if (!m_pathFinder.hasData())
         {
             xy::Logger::log("No navigation data has been loaded!", xy::Logger::Type::Error);
         }
-        //m_pathFinder.plotPath({ 26u, 29u }, { 49u, 9u });
     }
     else
     {
@@ -311,7 +310,6 @@ void WorldClientState::initBud()
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
     entity->addComponent(controller);
-    entity->setPosition(spawnPosition);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }

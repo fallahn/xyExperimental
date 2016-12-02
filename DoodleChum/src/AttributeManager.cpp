@@ -30,6 +30,7 @@ source distribution.
 #include <xygine/App.hpp>
 #include <xygine/imgui/imgui.h>
 #include <xygine/Log.hpp>
+#include <xygine/util/Random.hpp>
 
 #include <iostream>
 #include <cstring>
@@ -118,12 +119,12 @@ void AttribManager::initValues()
         m_stats.totalOutGoing = 0;
         
         m_personalAttribs[Personal::Health] = 100.f;
-        m_personalAttribs[Personal::Hunger] = 0.f;
-        m_personalAttribs[Personal::Thirst] = 0.f;
-        m_personalAttribs[Personal::Tiredness] = 0.f;
-        m_personalAttribs[Personal::Poopiness] = 0.f;
+        m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(10.f, 25.f);
+        m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(15.f, 30.f);
+        m_personalAttribs[Personal::Tiredness] = xy::Util::Random::value(12.f, 28.f);
+        m_personalAttribs[Personal::Poopiness] = xy::Util::Random::value(10.f, 20.f);
         m_personalAttribs[Personal::Cleanliness] = 100.f;
-        m_personalAttribs[Personal::Boredness] = 0.f;
+        m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(50.f, 70.f);
 
         m_householdAttribs[Household::Food] = 100.f;
         m_householdAttribs[Household::Water] = 100.f;
@@ -224,7 +225,7 @@ bool AttribManager::load()
     std::uint64_t timeElapsed;
     std::memcpy(&timeElapsed, ptr, sizeof(std::uint64_t));
 
-    //check time difference and update values, 10x slower than real time
+    //check time difference and update values, 5x slower than real time
     //rather than force a user to play at least once a day
     //make sure time difference is positive (could penalise people trying to cheat?)
     std::uint64_t timeNow = std::time(nullptr);
@@ -238,7 +239,7 @@ bool AttribManager::load()
         }
     }
 
-    updateValues(static_cast<float>(diff) / 10.f); //time is 10 times slower when not played
+    updateValues(static_cast<float>(diff) / 5.f); //time is 10 times slower when not played
 
     return true;
 }

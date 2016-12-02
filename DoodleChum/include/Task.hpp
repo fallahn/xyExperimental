@@ -66,6 +66,7 @@ struct TaskData final
     std::string name;
     std::int32_t id = -1;
     sf::Vector2u position;
+    sf::Vector2f worldPosition;
 };
 
 #endif //DC_TASK_HPP_

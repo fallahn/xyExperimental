@@ -42,6 +42,7 @@ source distribution.
 
 #include <xygine/Entity.hpp>
 #include <xygine/Console.hpp>
+#include <xygine/util/Random.hpp>
 
 #include <array>
 
@@ -181,8 +182,9 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
 
 void BudController::onStart(xy::Entity& entity)
 {
-    //TODO set current grid position from entity position
-    m_currentPosition = { 26u, 29u };
+    const auto& td = m_taskData[xy::Util::Random::value(0, m_taskData.size() - 1)];
+    entity.setWorldPosition(td.worldPosition);
+    m_currentPosition = td.position;
     m_destinationPosition = m_currentPosition;
 
     //place a ThinkTask on stack first so bud decides what to do
