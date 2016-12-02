@@ -35,7 +35,7 @@ source distribution.
 
 namespace
 {
-    const sf::Vector2f offset(32.f, -50.f);
+    const sf::Vector2f offset(32.f, -160.f);
 }
 
 SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)

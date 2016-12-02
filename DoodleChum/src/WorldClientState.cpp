@@ -31,6 +31,7 @@ source distribution.
 #include <RoomLightController.hpp>
 #include <BudController.hpp>
 #include <MessageIDs.hpp>
+#include <AttributeManager.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -346,7 +347,9 @@ void WorldClientState::initUI()
 {
     auto entity = xy::Entity::create(m_messageBus);
     auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
+    auto attMan = xy::Component::create<AttribManager>(m_messageBus);
     entity->addComponent(dnc);
+    entity->addComponent(attMan);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 }

@@ -90,6 +90,9 @@
     <ClInclude Include="include\MusicTask.hpp">
       <Filter>Header Files\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="include\AttributeManager.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -144,6 +147,9 @@
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="src\MusicTask.cpp">
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AttributeManager.cpp">
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>

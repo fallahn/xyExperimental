@@ -35,7 +35,7 @@ source distribution.
 
 namespace
 {
-    const sf::Vector2f offset(0.f, -50.f);
+    const sf::Vector2f offset(20.f, -150.f);
 }
 
 MusicTask::MusicTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
