@@ -35,7 +35,7 @@ source distribution.
 
 namespace
 {
-    const sf::Vector2f offset(20.f, -150.f);
+    const sf::Vector2f offset(256.f, -150.f);
 }
 
 MusicTask::MusicTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
@@ -57,6 +57,9 @@ void MusicTask::onStart()
         entity.getComponent<xy::ParticleSystem>()->start();
     };
     getEntity().getScene()->sendCommand(cmd);
+
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::TV;
 }
 
 void MusicTask::update(float dt)

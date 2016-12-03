@@ -35,7 +35,7 @@ source distribution.
 
 namespace
 {
-    const sf::Vector2f offset(32.f, -160.f);
+    const sf::Vector2f offset(140.f, -110.f);
 }
 
 SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
@@ -57,6 +57,14 @@ void SleepTask::onStart()
         entity.getComponent<xy::ParticleSystem>()->start();
     };
     getEntity().getScene()->sendCommand(cmd);
+
+    //make him lie on his back
+    getEntity().setRotation(90.f);
+    getEntity().move(0.f, -50.f);
+
+    //anim
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Sleep;
 }
 
 void SleepTask::update(float dt)
@@ -73,5 +81,8 @@ void SleepTask::update(float dt)
             entity.getComponent<xy::ParticleSystem>()->stop();
         };
         getEntity().getScene()->sendCommand(cmd);
+
+        getEntity().setRotation(0.f);
+        getEntity().move(0.f, 50.f);
     }
 }

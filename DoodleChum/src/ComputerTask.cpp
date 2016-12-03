@@ -26,9 +26,11 @@ source distribution.
 *********************************************************************/
 
 #include <ComputerTask.hpp>
+#include <MessageIDs.hpp>
 
 ComputerTask::ComputerTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb)
+    : Task(e, mb),
+    m_time(6.f)
 {
 
 }
@@ -36,10 +38,15 @@ ComputerTask::ComputerTask(xy::Entity& e, xy::MessageBus& mb)
 //public
 void ComputerTask::onStart()
 {
-
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = Message::AnimationEvent::Computer;
 }
 
 void ComputerTask::update(float dt)
 {
-    setCompleted();
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted();
+    }
 }

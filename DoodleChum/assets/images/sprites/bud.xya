@@ -39,7 +39,7 @@
     {
       "Start": 40,
       "End": 47,
-      "Loop": true,
+      "Loop": false,
       "Name": "drink"
     },
     {
@@ -59,6 +59,18 @@
       "End": 71,
       "Loop": true,
       "Name": "piano"
+    },
+    {
+      "Start": 72,
+      "End": 79,
+      "Loop": false,
+      "Name": "computer"
+    },
+    {
+      "Start": 52,
+      "End": 55,
+      "Loop": true,
+      "Name": "sleep"
     }
   ],
   "FrameCount": 80,

@@ -40,7 +40,7 @@ public:
     void update(float) override;
 
 private:
-
+    float m_time;
 };
 
 #endif //DC_COMPUTER_TASK_HPP_

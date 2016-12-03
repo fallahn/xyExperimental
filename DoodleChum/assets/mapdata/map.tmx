@@ -72,7 +72,7 @@
     <property name="id" type="int" value="6"/>
    </properties>
   </object>
-  <object id="15" name="playmusic" x="448" y="288" width="32" height="32">
+  <object id="15" name="playmusic" x="320" y="288" width="32" height="32">
    <properties>
     <property name="id" type="int" value="7"/>
    </properties>

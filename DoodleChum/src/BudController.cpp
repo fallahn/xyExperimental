@@ -57,10 +57,12 @@ namespace
         14.f, //Right
         1.f, //Idle
         5.f, //Eat
-        5.f, //Drink
+        12.f, //Drink
         1.f, //Poop
         12.f, //TV
-        8.f //Piano
+        12.f, //Piano
+        12.f, //Computer
+        2.f //sleeping
     };
 }
 
@@ -274,6 +276,12 @@ void BudController::addConCommands()
     {
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::PlayPiano;
+    }, this);
+
+    xy::Console::addCommand("play_computer", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::PlayComputer;
     }, this);
 }
 #endif //_DEBUG_

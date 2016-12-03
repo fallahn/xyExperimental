@@ -86,6 +86,8 @@ namespace Message
             Poop,
             TV,
             Piano,
+            Computer,
+            Sleep,
             Count
         }id;
     };

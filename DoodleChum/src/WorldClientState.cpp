@@ -55,8 +55,7 @@ source distribution.
 
 namespace
 {
-    //sf::Vector2f spawnPosition;
-    sf::Vector2f budSize(90.f, 180.f);
+    sf::Vector2f budSize(100.f, 200.f);
 }
 
 using namespace std::placeholders;
@@ -146,12 +145,10 @@ void WorldClientState::initMeshes()
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
     //hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/mask.png") });
     hausMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
-    hausMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+    hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
     hausModel->setBaseMaterial(hausMat);
-    hausModel->setPosition({ 0.f, 0.f, 64.f });
-    //hausModel->setScale({ 1.f, 1.f, -1.f });
 
     xy::IQMBuilder background("assets/models/background.iqm");
     m_meshRenderer.loadModel(Mesh::Background, background);
