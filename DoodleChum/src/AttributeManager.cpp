@@ -239,7 +239,7 @@ bool AttribManager::load()
         }
     }
 
-    updateValues(static_cast<float>(diff) / 5.f); //time is 10 times slower when not played
+    updateValues(static_cast<float>(diff) / 5.f); //time is 5 times slower when not played
 
     return true;
 }
