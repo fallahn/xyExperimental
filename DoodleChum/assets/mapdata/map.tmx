@@ -62,7 +62,7 @@
     <property name="id" type="int" value="4"/>
    </properties>
   </object>
-  <object id="13" name="watchtv" x="1408" y="288" width="32" height="32">
+  <object id="13" name="watchtv" x="1248" y="288" width="32" height="32">
    <properties>
     <property name="id" type="int" value="5"/>
    </properties>

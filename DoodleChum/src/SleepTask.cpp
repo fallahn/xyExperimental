@@ -59,8 +59,8 @@ void SleepTask::onStart()
     getEntity().getScene()->sendCommand(cmd);
 
     //make him lie on his back
-    getEntity().setRotation(90.f);
-    getEntity().move(0.f, -50.f);
+    getEntity().setRotation(76.f);
+    getEntity().move(0.f, -40.f);
 
     //anim
     auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
@@ -83,6 +83,6 @@ void SleepTask::update(float dt)
         getEntity().getScene()->sendCommand(cmd);
 
         getEntity().setRotation(0.f);
-        getEntity().move(0.f, 50.f);
+        getEntity().move(0.f, 40.f);
     }
 }

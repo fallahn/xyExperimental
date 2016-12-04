@@ -150,7 +150,7 @@ void WorldClientState::initMeshes()
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
     hausModel->setBaseMaterial(hausMat);
 
-    xy::IQMBuilder background("assets/models/background.iqm");
+    /*xy::IQMBuilder background("assets/models/background.iqm");
     m_meshRenderer.loadModel(Mesh::Background, background);
 
     auto& backMat = m_materialResource.add(Material::Background, m_shaderResource.get(Shader::TexturedBumped));
@@ -159,11 +159,26 @@ void WorldClientState::initMeshes()
     backMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
 
     auto backgroundModel = m_meshRenderer.createModel(Mesh::Background, m_messageBus);
-    backgroundModel->setBaseMaterial(backMat);
+    backgroundModel->setBaseMaterial(backMat);*/
+
+    xy::IQMBuilder furniture("assets/models/furniture.iqm");
+    m_meshRenderer.loadModel(Mesh::Furniture, furniture);
+
+    auto& furnitureMat = m_materialResource.add(Material::Furniture, m_shaderResource.get(Shader::TexturedBumped));
+    furnitureMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    furnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture_diffuse.png") });
+    furnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture_normal.png") });
+    furnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+    furnitureMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
+    furnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+
+    auto furnitureModel = m_meshRenderer.createModel(Mesh::Furniture, m_messageBus);
+    furnitureModel->setBaseMaterial(furnitureMat);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(hausModel);
-    entity->addComponent(backgroundModel);
+    //entity->addComponent(backgroundModel);
+    entity->addComponent(furnitureModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::BackFront);
 

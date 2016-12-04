@@ -36,7 +36,8 @@ namespace Mesh
     {
         Haus = 0,
         Background,
-        Bud
+        Bud,
+        Furniture
     };
 }
 
@@ -46,7 +47,8 @@ namespace Material
     {
         Haus = 0,
         Background,
-        Bud
+        Bud,
+        Furniture
     };
 }
 
