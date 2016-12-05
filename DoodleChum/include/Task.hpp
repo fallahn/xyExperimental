@@ -28,6 +28,8 @@ source distribution.
 #ifndef DC_TASK_HPP_
 #define DC_TASK_HPP_
 
+#include <MessageIDs.hpp>
+
 #include <SFML/System/Vector2.hpp>
 
 #include <memory>
@@ -53,7 +55,12 @@ public:
 
 protected:
     xy::Entity&  getEntity() { return m_entity; }
-    void setCompleted() { m_completed = true; }
+    void setCompleted(Message::TaskEvent::Name name)
+    {
+        m_completed = true; 
+        auto msg = m_messageBus.post<Message::TaskEvent>(Message::TaskCompleted);
+        msg->taskName = name;
+    }
     xy::MessageBus& getMessageBus() { return m_messageBus; }
 private:
     xy::Entity& m_entity;

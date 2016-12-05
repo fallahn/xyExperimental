@@ -47,7 +47,7 @@ void EatTask::update(float dt)
     m_time -= dt;
     if (m_time <= 0)
     {
-        setCompleted();
+        setCompleted(Message::TaskEvent::Eat);
         auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
         msg->id = Message::AnimationEvent::Idle;
     }

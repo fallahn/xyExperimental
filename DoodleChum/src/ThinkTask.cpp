@@ -27,13 +27,15 @@ source distribution.
 
 #include <ThinkTask.hpp>
 #include <MessageIDs.hpp>
+#include <AttributeManager.hpp>
 
 #include <xygine/Log.hpp>
 #include <xygine/util/Random.hpp>
 
-ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb)
-    : Task(entity, mb),
-    m_time(2.f)
+ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb, const AttribManager& am)
+    : Task          (entity, mb),
+    m_time          (2.f),
+    m_attribManager (am)
 {
     
 }
@@ -51,10 +53,105 @@ void ThinkTask::update(float dt)
     m_time -= dt;
     if(m_time <= 0)
     {
-        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
-        msg->taskName = static_cast<Message::TaskEvent::Name>(xy::Util::Random::value(0, 8));
-        setCompleted();
-    }
+        //check our attributes and decide on what to do next   
+        auto personalAttribs = m_attribManager.getPersonalAttribs();
+        std::sort(std::begin(personalAttribs), std::end(personalAttribs),
+            [](const std::pair<std::int32_t, float>& a, const std::pair<std::int32_t, float>& b)
+        {
+            return a.second > b.second;
+        });
+        
+        //make sure we ignore the health attrib
+        std::int32_t attrib = -1;
+        std::size_t idx = 0;
+        do
+        {
+            attrib = personalAttribs[idx++].first;
+        } while (attrib == AttribManager::Personal::Health || !canDo(attrib));
+        
 
-    //TODO skew task decision based on needs - ie make eating more likely when hungry
+        //perform task based on most dire attrib
+        Message::TaskEvent::Name task = Message::TaskEvent::Sleep;
+        switch (attrib)
+        {
+        case AttribManager::Personal::Tiredness:
+        default: break;
+        case AttribManager::Personal::Boredness:
+            //pick whichever is most entertaining
+        {
+            const auto& hhAtt = m_attribManager.getHouseholdAttribs();
+            std::int32_t entertainment = AttribManager::Household::Music;
+            for (auto i = 0; i < AttribManager::Household::Count; ++i)
+            {
+                //a bit kludgy, but fuck it
+                if (i == AttribManager::Household::Music ||
+                    i == AttribManager::Household::SheetMusic ||
+                    i == AttribManager::Household::Games ||
+                    i == AttribManager::Household::Films)
+                {
+                    if (hhAtt[i] > hhAtt[entertainment])
+                    {
+                        entertainment = i;
+                    }
+                }
+            }
+
+            switch (entertainment)
+            {
+            default:
+            case AttribManager::Household::Music:
+                task = Message::TaskEvent::PlayMusic;
+                break;
+            case AttribManager::Household::SheetMusic:
+                task = Message::TaskEvent::PlayPiano;
+                break;
+            case AttribManager::Household::Games:
+                task = Message::TaskEvent::PlayComputer;
+                break;
+            case AttribManager::Household::Films:
+                task = Message::TaskEvent::WatchTV;
+                break;
+            }
+        }
+            break;
+        case AttribManager::Personal::Hunger:
+            task = Message::TaskEvent::Eat;
+            break;
+        case AttribManager::Personal::Cleanliness:
+            task = Message::TaskEvent::Shower;
+            break;
+        case AttribManager::Personal::Poopiness:
+            task = Message::TaskEvent::Poop;
+            break;
+        case AttribManager::Personal::Thirst:
+            task = Message::TaskEvent::Drink;
+            break;
+        }
+
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = task;
+        setCompleted(Message::TaskEvent::Think);
+    }
+}
+
+//private
+bool ThinkTask::canDo(std::int32_t attrib)
+{
+    const auto& householdAttribs = m_attribManager.getHouseholdAttribs();
+    
+    switch (attrib)
+    {
+    default: return false;
+    case AttribManager::Personal::Boredness:
+        return true; //can always do an activity - it may just not alleviate boredness
+    case AttribManager::Personal::Hunger:
+        return householdAttribs[AttribManager::Household::Food] > 0;    
+    case AttribManager::Personal::Cleanliness:
+    case AttribManager::Personal::Poopiness:
+    case AttribManager::Personal::Thirst:
+        return householdAttribs[AttribManager::Household::Water] > 0;
+        break;
+    case AttribManager::Personal::Tiredness:
+        return true;
+    }
 }

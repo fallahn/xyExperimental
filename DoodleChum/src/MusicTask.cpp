@@ -67,7 +67,7 @@ void MusicTask::update(float dt)
     m_time -= dt;
     if (m_time <= 0)
     {
-        setCompleted();
+        setCompleted(Message::TaskEvent::PlayMusic);
 
         xy::Command cmd;
         cmd.category = Particle::Music;

@@ -31,6 +31,7 @@ source distribution.
 #include <StateIDs.hpp>
 #include <PathFinder.hpp>
 #include <Task.hpp>
+#include <AttributeManager.hpp>
 
 #include <xygine/State.hpp>
 #include <xygine/Scene.hpp>
@@ -64,6 +65,8 @@ private:
 
     PathFinder m_pathFinder;
     std::vector<TaskData> m_tasks;
+
+    AttribManager m_attribManager;
 
     void initMeshes();
     void initMapData();

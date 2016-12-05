@@ -46,6 +46,7 @@ namespace Message
     {
         TimeOfDay = xy::Message::Count,
         NewTask,
+        TaskCompleted,
         Animation,
         Particle
     };
@@ -68,7 +69,9 @@ namespace Message
             WatchTV,
             PlayPiano,
             PlayMusic,
-            PlayComputer
+            PlayComputer,
+            Think,
+            Travel
         }taskName;
     };
 

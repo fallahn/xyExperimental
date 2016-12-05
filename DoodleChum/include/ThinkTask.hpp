@@ -30,10 +30,11 @@ source distribution.
 
 #include <Task.hpp>
 
+class AttribManager;
 class ThinkTask final : public Task
 {
 public:
-    ThinkTask(xy::Entity&, xy::MessageBus&);
+    ThinkTask(xy::Entity&, xy::MessageBus&, const AttribManager&);
     ~ThinkTask() = default;
 
     void onStart() override;
@@ -41,6 +42,9 @@ public:
 
 private:
     float m_time;
+    const AttribManager& m_attribManager;
+
+    bool canDo(std::int32_t);
 };
 
 #endif //DC_THINK_TASK_HPP_

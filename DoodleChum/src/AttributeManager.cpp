@@ -26,6 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <AttributeManager.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/imgui/imgui.h>
@@ -74,16 +75,25 @@ namespace
     const float tirednessPerSecond = 0.00154f; //approx 18 hours
     const float poopPerSecond = 0.00115f; //approx every 24 hours
     const float borednessPerSecond = 0.166667f; //approx every 10 minutes
+
+    const std::uint64_t fourHours = 60 * 60 * 4;
+    const std::uint64_t twelveHours = fourHours * 3;
+    const std::uint64_t twentyfourHours = twelveHours * 2;
+
+    const float waterPerDrink = 10.f;
+    const float waterPerFlush = 25.f;
+    const float waterPerShower = 40.f;
+    const float foodPerEat = 20.f;
+    const float tirednessPerSleep = 75.f;
+    const float entertainmentValue = 20.f; //a particular entertainment's novelty is reduced by this much
+    const float boredomReduction = 25.f; //boredome is reduced this much multiplied by the value of the activity
 }
 
 AttribManager::AttribManager(xy::MessageBus& mb)
-    : xy::Component (mb, this)
+    : m_messageBus(mb)
 {
     initValues();
     
-    //TODO register message handler to update attributes
-    //both from actions performed and time (like pay)
-
 #ifdef _DEBUG_
     addDebugWindow();
 #endif //_DEBUG_
@@ -101,10 +111,71 @@ AttribManager::~AttribManager()
 }
 
 //public
-void AttribManager::entityUpdate(xy::Entity&, float dt)
+void AttribManager::update(float dt)
 {
     updateValues(dt);
     updateHealth();
+}
+
+void AttribManager::handleMessage(const xy::Message& msg)
+{
+    //handle updates from completed tasks
+    if (msg.id == Message::TaskCompleted)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+        switch (data.taskName)
+        {
+        default: break;
+        case Message::TaskEvent::Drink:
+            m_personalAttribs[Personal::Thirst] = std::max(0.f, m_personalAttribs[Personal::Thirst] - waterPerDrink);
+            m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerDrink);
+            break;
+        case Message::TaskEvent::Eat:
+            m_personalAttribs[Personal::Hunger] = std::max(0.f, m_personalAttribs[Personal::Hunger] - foodPerEat);
+            m_householdAttribs[Household::Food] = std::max(0.f, m_householdAttribs[Household::Food] - foodPerEat);
+            break;
+        case Message::TaskEvent::PlayComputer:
+            m_householdAttribs[Household::Games] = std::max(0.f, m_householdAttribs[Household::Games] - entertainmentValue);
+            m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Games] / 100.f) * boredomReduction));
+            break;
+        case Message::TaskEvent::PlayMusic:
+            m_householdAttribs[Household::Music] = std::max(0.f, m_householdAttribs[Household::Music] - entertainmentValue);
+            m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Music] / 100.f) * boredomReduction));
+            break;
+        case Message::TaskEvent::PlayPiano:
+            m_householdAttribs[Household::SheetMusic] = std::max(0.f, m_householdAttribs[Household::SheetMusic] - entertainmentValue);
+            m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::SheetMusic] / 100.f) * boredomReduction));
+            break;
+        case Message::TaskEvent::WatchTV:
+            m_householdAttribs[Household::Films] = std::max(0.f, m_householdAttribs[Household::Films] - entertainmentValue);
+            m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Films] / 100.f) * boredomReduction));
+            break;
+        case Message::TaskEvent::Poop:
+            m_personalAttribs[Personal::Poopiness] *= 0.1f;
+            m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerFlush);
+            break;
+        case Message::TaskEvent::Shower:
+            m_personalAttribs[Personal::Cleanliness] *= 0.15f;
+            m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerShower);
+            break;
+        case Message::TaskEvent::Sleep:
+            m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - tirednessPerSleep);
+            break;
+        }
+    }
+
+    //TODO time based events such as pay day
+}
+
+AttribManager::PersonalAttribs AttribManager::getPersonalAttribs() const
+{
+    //we have to pair these up for later sorting
+    PersonalAttribs retVal;
+    for (auto i = 0; i < Personal::Count; ++i)
+    {
+        retVal[i] = std::make_pair(i, m_personalAttribs[i]);
+    }
+    return retVal;
 }
 
 //private
@@ -123,7 +194,7 @@ void AttribManager::initValues()
         m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(15.f, 30.f);
         m_personalAttribs[Personal::Tiredness] = xy::Util::Random::value(12.f, 28.f);
         m_personalAttribs[Personal::Poopiness] = xy::Util::Random::value(10.f, 20.f);
-        m_personalAttribs[Personal::Cleanliness] = 100.f;
+        m_personalAttribs[Personal::Cleanliness] = 0.f;
         m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(50.f, 70.f);
 
         m_householdAttribs[Household::Food] = 100.f;
@@ -142,7 +213,7 @@ void AttribManager::updateValues(float dt)
 {
     m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * dt));
     m_personalAttribs[Personal::Thirst] = std::min(100.f, m_personalAttribs[Personal::Thirst] + (thirstPerSecond * dt));
-    m_personalAttribs[Personal::Cleanliness] = std::max(0.f, m_personalAttribs[Personal::Cleanliness] - (cleanlinessPerSecond * dt));
+    m_personalAttribs[Personal::Cleanliness] = std::min(100.f, m_personalAttribs[Personal::Cleanliness] + (cleanlinessPerSecond * dt));
     m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] + (tirednessPerSecond * dt));
     m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (poopPerSecond * dt));
     m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (borednessPerSecond * dt));
@@ -153,13 +224,13 @@ void AttribManager::updateHealth()
     float average =
         m_personalAttribs[Personal::Hunger] +
         m_personalAttribs[Personal::Thirst] +
-        (100.f - m_personalAttribs[Personal::Cleanliness]) +
+        m_personalAttribs[Personal::Cleanliness] +
         m_personalAttribs[Personal::Tiredness] +
         m_personalAttribs[Personal::Poopiness] +
         m_personalAttribs[Personal::Boredness];
     m_personalAttribs[Personal::Health] = 100.f - (average / (Personal::Count - 1));
 
-    if (m_personalAttribs[Personal::Health] < 1)
+    if (m_personalAttribs[Personal::Health] < 10)
     {
         //DIED :(
     }
@@ -225,8 +296,7 @@ bool AttribManager::load()
     std::uint64_t timeElapsed;
     std::memcpy(&timeElapsed, ptr, sizeof(std::uint64_t));
 
-    //check time difference and update values, 5x slower than real time
-    //rather than force a user to play at least once a day
+    //check time difference and update values
     //make sure time difference is positive (could penalise people trying to cheat?)
     std::uint64_t timeNow = std::time(nullptr);
     auto diff = timeNow - timeElapsed;
@@ -239,7 +309,23 @@ bool AttribManager::load()
         }
     }
 
-    updateValues(static_cast<float>(diff) / 5.f); //time is 5 times slower when not played
+    //if the last play through was less than 4 hours ago elapsed time should be normal speed
+    //4 - 12 hours time passes at half speed, and more than 24 time slows to 20%
+    float divisor = 1.f;
+    if (diff > fourHours)
+    {
+        divisor = 2.f;
+        if (diff > twelveHours)
+        {
+            divisor = 3.f;
+            if (diff > twelveHours)
+            {
+                divisor = 5.f;
+            }
+        }
+    }
+
+    updateValues(static_cast<float>(diff) / divisor);
 
     return true;
 }

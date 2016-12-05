@@ -69,7 +69,7 @@ void TravelTask::update(float dt)
         {
             auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
             msg->id = Message::AnimationEvent::Idle;
-            setCompleted();
+            setCompleted(Message::TaskEvent::Travel);
         }
         else
         {

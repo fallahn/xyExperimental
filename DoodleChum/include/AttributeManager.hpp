@@ -28,18 +28,22 @@ source distribution.
 #ifndef DC_ATTRIB_MAN_HPP_
 #define DC_ATTRIB_MAN_HPP_
 
-#include <xygine/components/Component.hpp>
-
 #include <array>
 
-class AttribManager final : public xy::Component 
+namespace xy
+{
+    class MessageBus;
+    class Message;
+}
+
+class AttribManager final
 {
 public:
     explicit AttribManager(xy::MessageBus&);
     ~AttribManager();
 
-    xy::Component::Type type() const override { return xy::Component::Type::Script; }
-    void entityUpdate(xy::Entity&, float) override;
+    void update(float);
+    void handleMessage(const xy::Message&);
 
     struct Personal final
     {
@@ -71,11 +75,14 @@ public:
         };
     };
 
-    std::array<float, Personal::Count> getPersonalAttribs() const { return m_personalAttribs; }
-    std::array<float, Household::Count> getHouseholdAttribs() const { return m_householdAttribs; }
+    using PersonalAttribs = std::array<std::pair<std::int32_t, float>, Personal::Count>;
+    using HouseholdAttribs = std::array<float, Household::Count>;
+
+    PersonalAttribs getPersonalAttribs() const;
+    const HouseholdAttribs& getHouseholdAttribs() const { return m_householdAttribs; }
 
 private:
-
+    xy::MessageBus& m_messageBus;
     std::array<float, Personal::Count> m_personalAttribs;
     std::array<float, Household::Count> m_householdAttribs;
 

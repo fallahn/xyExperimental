@@ -72,7 +72,7 @@ void SleepTask::update(float dt)
     m_time -= dt;
     if (m_time <= 0)
     {
-        setCompleted();
+        setCompleted(Message::TaskEvent::Sleep);
 
         xy::Command cmd;
         cmd.category = Particle::Sleep;

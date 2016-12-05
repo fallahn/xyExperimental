@@ -66,9 +66,10 @@ namespace
     };
 }
 
-BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
+BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
     : xy::Component (mb, this),
     m_entity        (nullptr),
+    m_attribManager (am),
     m_pathFinder    (pf),
     m_taskData      (taskData),
     m_spriteSheet   (spriteSheet)
@@ -156,7 +157,7 @@ BudController::BudController(xy::MessageBus& mb, const PathFinder& pf, const std
         }
 
         //add a new think task to think about what happens when task complete
-        m_tasks.emplace_back(std::make_unique<ThinkTask>(*m_entity, getMessageBus()));
+        m_tasks.emplace_back(std::make_unique<ThinkTask>(*m_entity, getMessageBus(), m_attribManager));
     };
     addMessageHandler(mh);
 }
@@ -176,7 +177,6 @@ void BudController::entityUpdate(xy::Entity& entity, float dt)
         {
             m_tasks.pop_front();
             if (!m_tasks.empty()) m_tasks.front()->onStart();
-            //m_currentPosition = m_destinationPosition;
         }
     }
     m_sprite->entityUpdate(entity, dt);
@@ -190,7 +190,7 @@ void BudController::onStart(xy::Entity& entity)
     m_destinationPosition = m_currentPosition;
 
     //place a ThinkTask on stack first so bud decides what to do
-    m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus()));
+    m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus(), m_attribManager));
 
     m_entity = &entity;
 }

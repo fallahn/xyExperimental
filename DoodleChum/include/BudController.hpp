@@ -41,10 +41,11 @@ source distribution.
 
 class PathFinder;
 struct TaskData;
+class AttribManager;
 class BudController final : public xy::Component, public sf::Drawable
 {
 public:
-    BudController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
+    BudController(xy::MessageBus&, const AttribManager&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
     ~BudController();
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
@@ -55,6 +56,7 @@ public:
 
 private:
     xy::Entity* m_entity;
+    const AttribManager& m_attribManager;
     const PathFinder& m_pathFinder;
     const std::vector<TaskData>& m_taskData;
 

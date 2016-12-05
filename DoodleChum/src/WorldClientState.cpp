@@ -64,7 +64,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     : State                 (stateStack, context),
     m_messageBus            (context.appInstance.getMessageBus()),
     m_scene                 (m_messageBus),
-    m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene)
+    m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene),
+    m_attribManager         (m_messageBus)
 {
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
@@ -85,6 +86,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 //public
 bool WorldClientState::update(float dt)
 {    
+    m_attribManager.update(dt);
     m_scene.update(dt);
     m_meshRenderer.update();
     return false;
@@ -99,6 +101,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
 {
     m_scene.handleMessage(msg);
     m_meshRenderer.handleMessage(msg);
+    m_attribManager.handleMessage(msg);
 
     if (msg.id == xy::Message::UIMessage)
     {
@@ -310,7 +313,7 @@ void WorldClientState::initMapData()
 
 void WorldClientState::initBud()
 {
-    auto controller = xy::Component::create<BudController>(m_messageBus, m_pathFinder, m_tasks, m_textureResource.get("assets/images/sprites/bud.png"));
+    auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder, m_tasks, m_textureResource.get("assets/images/sprites/bud.png"));
 
     auto& material = m_materialResource.get(Material::Bud);
     material.addProperty({ "u_diffuseMap", controller->getTexture() });
@@ -357,9 +360,7 @@ void WorldClientState::initUI()
 {
     auto entity = xy::Entity::create(m_messageBus);
     auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
-    auto attMan = xy::Component::create<AttribManager>(m_messageBus);
     entity->addComponent(dnc);
-    entity->addComponent(attMan);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 }
