@@ -30,7 +30,7 @@ source distribution.
 
 ComputerTask::ComputerTask(xy::Entity& e, xy::MessageBus& mb)
     : Task(e, mb),
-    m_time(6.f)
+    m_time(15.f)
 {
 
 }

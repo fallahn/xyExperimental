@@ -29,8 +29,8 @@ source distribution.
 #include <MessageIDs.hpp>
 
 TVTask::TVTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb),
-    m_time(15.f)
+    : Task  (e, mb),
+    m_time  (35.f)
 {
 
 }
@@ -44,9 +44,16 @@ void TVTask::onStart()
 
 void TVTask::update(float dt)
 {
-    //TODO occasionally fire animation even
-    
+    float oldTime = m_time;
     m_time -= dt;
+
+    if ((oldTime > 15 && m_time < 15)
+        || (oldTime > 1 && m_time < 1))
+    {
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = Message::AnimationEvent::TV;
+    }
+
     if (m_time <= 0)
     {
         setCompleted(Message::TaskEvent::WatchTV);

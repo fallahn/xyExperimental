@@ -48,8 +48,7 @@ source distribution.
 #include <xygine/tilemap/TileLayer.hpp>
 #include <xygine/components/ParticleController.hpp>
 
-#include <xygine/postprocess/ChromeAb.hpp>
-#include <xygine/postprocess/Antique.hpp>
+#include <xygine/postprocess/Blur.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
@@ -79,6 +78,9 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initBud();
     initParticles();
     initUI();
+
+    //auto pp = xy::PostProcess::create<xy::PostBlur>();
+    //m_scene.addPostProcess(pp);
 
     quitLoadingScreen();
 }
@@ -127,7 +129,9 @@ void WorldClientState::draw()
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
     //rw.draw(m_meshRenderer);
+#ifdef _DEBUG_
     rw.draw(m_pathFinder);
+#endif //_DEBUG_    
 }
 
 //private
@@ -344,6 +348,7 @@ void WorldClientState::initParticles()
     entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Music);
     ps = music.createSystem(m_messageBus);
+    ps->followParent(true);
     entity->addComponent(ps);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 

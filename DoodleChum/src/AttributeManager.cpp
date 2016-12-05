@@ -132,6 +132,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
             break;
         case Message::TaskEvent::Eat:
             m_personalAttribs[Personal::Hunger] = std::max(0.f, m_personalAttribs[Personal::Hunger] - foodPerEat);
+            m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (foodPerEat / 2.f));
             m_householdAttribs[Household::Food] = std::max(0.f, m_householdAttribs[Household::Food] - foodPerEat);
             break;
         case Message::TaskEvent::PlayComputer:

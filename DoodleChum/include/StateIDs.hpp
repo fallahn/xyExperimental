@@ -32,6 +32,7 @@ namespace States
 {
     enum ID
     {
+        Intro,
         WorldClient
     };
 }

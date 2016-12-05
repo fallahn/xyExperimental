@@ -27,6 +27,7 @@ source distribution.
 
 #include <Game.hpp>
 #include <WorldClientState.hpp>
+#include <IntroState.hpp>
 
 #include <xygine/KeyBinds.hpp>
 
@@ -80,8 +81,11 @@ void Game::draw()
 void Game::initialise()
 {    
     registerStates();
+#ifdef _DEBUG_
     m_stateStack.pushState(States::WorldClient);
-
+#else
+    m_stateStack.pushState(States::Intro);
+#endif //_DEBUG_
     getRenderWindow().setKeyRepeatEnabled(false);
 
     if (!xy::Input::load()) xy::Input::save();
@@ -95,5 +99,6 @@ void Game::finalise()
 
 void Game::registerStates()
 {
-    m_stateStack.registerState<WorldClientState>(States::WorldClient);
+    m_stateStack.registerState<IntroState>(States::ID::Intro);
+    m_stateStack.registerState<WorldClientState>(States::ID::WorldClient);
 }

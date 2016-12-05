@@ -29,8 +29,8 @@ source distribution.
 #include <MessageIDs.hpp>
 
 PoopTask::PoopTask(xy::Entity& e, xy::MessageBus& mb)
-    : Task(e, mb),
-    m_time(7.f)
+    : Task  (e, mb),
+    m_time  (10.f)
 {
 
 }

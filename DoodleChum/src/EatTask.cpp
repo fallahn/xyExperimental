@@ -30,7 +30,7 @@ source distribution.
 
 EatTask::EatTask(xy::Entity& e, xy::MessageBus& mb)
     : Task(e, mb),
-    m_time(6.f)
+    m_time(16.f)
 {
 
 }

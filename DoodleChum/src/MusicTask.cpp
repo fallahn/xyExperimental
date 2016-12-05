@@ -39,9 +39,9 @@ namespace
 }
 
 MusicTask::MusicTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
-    :Task(e, mb),
-    m_time(5.f),
-    m_position(position + offset)
+    :Task       (e, mb),
+    m_time      (35.f),
+    m_position  (position + offset)
 {
 
 }
@@ -64,7 +64,15 @@ void MusicTask::onStart()
 
 void MusicTask::update(float dt)
 {
+    float oldTime = m_time;
     m_time -= dt;
+
+    if (oldTime > 1 && m_time < 1)
+    {
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = Message::AnimationEvent::TV;
+    }
+
     if (m_time <= 0)
     {
         setCompleted(Message::TaskEvent::PlayMusic);

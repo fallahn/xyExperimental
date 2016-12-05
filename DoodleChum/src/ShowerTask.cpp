@@ -34,9 +34,9 @@ source distribution.
 #include <xygine/components/ParticleSystem.hpp>
 
 ShowerTask::ShowerTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
-    : Task(e, mb),
-    m_time(5.f),
-    m_position(position)
+    : Task      (e, mb),
+    m_time      (15.f),
+    m_position  (position)
 {
 
 }

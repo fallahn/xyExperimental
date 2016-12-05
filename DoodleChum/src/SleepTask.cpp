@@ -39,9 +39,9 @@ namespace
 }
 
 SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
-    : Task(e, mb),
-    m_time(10.f),
-    m_position(position + offset)
+    : Task      (e, mb),
+    m_time      (120.f),
+    m_position  (position + offset)
 {
 
 }

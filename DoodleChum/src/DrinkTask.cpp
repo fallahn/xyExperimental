@@ -30,7 +30,7 @@ source distribution.
 
 DrinkTask::DrinkTask(xy::Entity& e, xy::MessageBus& mb)
     : Task(e, mb),
-    m_time(5.f)
+    m_time(10.f)
 {
 
 }
@@ -44,7 +44,15 @@ void DrinkTask::onStart()
 
 void DrinkTask::update(float dt)
 {
+    float oldTime = m_time;
     m_time -= dt;
+
+    if (oldTime > 5 && m_time < 5)
+    {
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = Message::AnimationEvent::Drink;
+    }
+
     if (m_time <= 0)
     {
         setCompleted(Message::TaskEvent::Drink);

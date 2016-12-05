@@ -93,6 +93,9 @@
     <ClInclude Include="include\AttributeManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\IntroState.hpp">
+      <Filter>Header Files\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -151,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="src\AttributeManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IntroState.cpp">
+      <Filter>Source Files\states</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
