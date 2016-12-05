@@ -79,9 +79,10 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initParticles();
     initUI();
 
-    //auto pp = xy::PostProcess::create<xy::PostBlur>();
-    //m_scene.addPostProcess(pp);
-
+    auto pp = xy::PostProcess::create<xy::PostBlur>();
+    //dynamic_cast<xy::PostBlur*>(pp.get())->setEnabled(true);
+    m_scene.addPostProcess(pp);
+    
     quitLoadingScreen();
 }
 
@@ -130,6 +131,7 @@ void WorldClientState::draw()
     rw.draw(m_scene);
     //rw.draw(m_meshRenderer);
 #ifdef _DEBUG_
+    rw.setView(getContext().defaultView);
     rw.draw(m_pathFinder);
 #endif //_DEBUG_    
 }
