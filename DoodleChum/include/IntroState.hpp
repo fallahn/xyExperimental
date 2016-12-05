@@ -28,7 +28,7 @@ source distribution.
 #ifndef DC_INTRO_STATE_HPP_
 #define DC_INTRO_STATE_HPP_
 
-#include <StateIds.hpp>
+#include <StateIDs.hpp>
 
 #include <xygine/State.hpp>
 
