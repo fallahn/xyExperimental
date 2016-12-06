@@ -74,7 +74,7 @@ namespace
     const float cleanlinessPerSecond = 0.0023f; //approx every 12 hours
     const float tirednessPerSecond = 0.00154f; //approx 18 hours
     const float poopPerSecond = 0.00115f; //approx every 24 hours
-    const float borednessPerSecond = 0.166667f; //approx every 10 minutes
+    const float borednessPerSecond = 0.056667f; //approx every 30 minutes
 
     const std::uint64_t fourHours = 60 * 60 * 4;
     const std::uint64_t twelveHours = fourHours * 3;
@@ -85,8 +85,9 @@ namespace
     const float waterPerShower = 40.f;
     const float foodPerEat = 20.f;
     const float tirednessPerSleep = 75.f;
-    const float entertainmentValue = 20.f; //a particular entertainment's novelty is reduced by this much
-    const float boredomReduction = 25.f; //boredome is reduced this much multiplied by the value of the activity
+    //const float entertainmentValue = 20.f; //a particular entertainment's novelty is reduced by this much
+    const float entertainmentReductionMultiplier = 0.2f; // see above
+    const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
 }
 
 AttribManager::AttribManager(xy::MessageBus& mb)
@@ -127,28 +128,28 @@ void AttribManager::handleMessage(const xy::Message& msg)
         {
         default: break;
         case Message::TaskEvent::Drink:
-            m_personalAttribs[Personal::Thirst] = std::max(0.f, m_personalAttribs[Personal::Thirst] - waterPerDrink);
+            m_personalAttribs[Personal::Thirst] = std::max(0.f, m_personalAttribs[Personal::Thirst] - (waterPerDrink * 3.f));
             m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerDrink);
             break;
         case Message::TaskEvent::Eat:
-            m_personalAttribs[Personal::Hunger] = std::max(0.f, m_personalAttribs[Personal::Hunger] - foodPerEat);
+            m_personalAttribs[Personal::Hunger] = std::max(0.f, m_personalAttribs[Personal::Hunger] - (foodPerEat* 3.f));
             m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (foodPerEat / 2.f));
             m_householdAttribs[Household::Food] = std::max(0.f, m_householdAttribs[Household::Food] - foodPerEat);
             break;
         case Message::TaskEvent::PlayComputer:
-            m_householdAttribs[Household::Games] = std::max(0.f, m_householdAttribs[Household::Games] - entertainmentValue);
+            m_householdAttribs[Household::Games] = std::max(0.f, m_householdAttribs[Household::Games] - (m_householdAttribs[Household::Games] * entertainmentReductionMultiplier));
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Games] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::PlayMusic:
-            m_householdAttribs[Household::Music] = std::max(0.f, m_householdAttribs[Household::Music] - entertainmentValue);
+            m_householdAttribs[Household::Music] = std::max(0.f, m_householdAttribs[Household::Music] - (m_householdAttribs[Household::Music] * entertainmentReductionMultiplier));
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Music] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::PlayPiano:
-            m_householdAttribs[Household::SheetMusic] = std::max(0.f, m_householdAttribs[Household::SheetMusic] - entertainmentValue);
+            m_householdAttribs[Household::SheetMusic] = std::max(0.f, m_householdAttribs[Household::SheetMusic] - (m_householdAttribs[Household::SheetMusic] * entertainmentReductionMultiplier));
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::SheetMusic] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::WatchTV:
-            m_householdAttribs[Household::Films] = std::max(0.f, m_householdAttribs[Household::Films] - entertainmentValue);
+            m_householdAttribs[Household::Films] = std::max(0.f, m_householdAttribs[Household::Films] - (m_householdAttribs[Household::Films] * entertainmentReductionMultiplier));
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Films] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::Poop:

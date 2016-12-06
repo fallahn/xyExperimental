@@ -62,7 +62,7 @@ namespace
         12.f, //TV
         12.f, //Piano
         12.f, //Computer
-        2.f //sleeping
+        0.4f //sleeping
     };
 }
 
