@@ -37,7 +37,8 @@ namespace Mesh
         Haus = 0,
         Background,
         Bud,
-        Furniture
+        Furniture,
+        MoreFurniture
     };
 }
 
@@ -48,7 +49,8 @@ namespace Material
         Haus = 0,
         Background,
         Bud,
-        Furniture
+        Furniture,
+        MoreFurniture
     };
 }
 

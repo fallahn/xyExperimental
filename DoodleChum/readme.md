@@ -1,6 +1,8 @@
 Look after your own virtual chappy (or chapette!). For those who are
 bored with hamsters.
 
+Special thanks to [Josh Mercier](http://steamcommunity.com/id/hunter-killer/myworkshopfiles/) for the furniture models
+
 /*********************************************************************
 Matt Marchant 2016
 http://trederia.blogspot.com

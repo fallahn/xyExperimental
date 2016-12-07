@@ -131,8 +131,8 @@ void WorldClientState::draw()
     rw.draw(m_scene);
     //rw.draw(m_meshRenderer);
 #ifdef _DEBUG_
-    rw.setView(getContext().defaultView);
-    rw.draw(m_pathFinder);
+    //rw.setView(getContext().defaultView);
+    //rw.draw(m_pathFinder);
 #endif //_DEBUG_    
 }
 
@@ -175,12 +175,26 @@ void WorldClientState::initMeshes()
     auto furnitureModel = m_meshRenderer.createModel(Mesh::Furniture, m_messageBus);
     furnitureModel->setBaseMaterial(furnitureMat);
 
+    xy::IQMBuilder moreFurniture("assets/models/more_furniture.iqm");
+    m_meshRenderer.loadModel(Mesh::MoreFurniture, moreFurniture);
+
+    auto& moreFurnitureMat = m_meshRenderer.addMaterial(Material::MoreFurniture, xy::Material::TexturedBumped, true);
+    moreFurnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture2_diffuse.png") });
+    moreFurnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture2_normal.png") });
+    moreFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+    moreFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+
+    auto moreFurnitureModel = m_meshRenderer.createModel(Mesh::MoreFurniture, m_messageBus);
+    moreFurnitureModel->setBaseMaterial(moreFurnitureMat);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(hausModel);
     //entity->addComponent(backgroundModel);
     entity->addComponent(furnitureModel);
+    entity->addComponent(moreFurnitureModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::BackFront);
+
 
     entity = xy::Entity::create(m_messageBus);
     auto md = m_meshRenderer.createDrawable(m_messageBus);
@@ -314,7 +328,7 @@ void WorldClientState::initBud()
 
     auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);
     dwb->setBaseMaterial(material);
-    dwb->setPosition({ 0.f, -budSize.y / 2.f, 4.f });
+    dwb->setPosition({ 0.f, -((budSize.y / 2.f) - 6.f), 4.f });
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
@@ -354,7 +368,7 @@ void WorldClientState::initParticles()
 void WorldClientState::initUI()
 {
     auto entity = xy::Entity::create(m_messageBus);
-    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf")/*, true*/);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);

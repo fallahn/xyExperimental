@@ -42,12 +42,12 @@
     <property name="id" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" name="drink" x="1312" y="928" width="32" height="32">
+  <object id="9" name="drink" x="1344" y="928" width="32" height="32">
    <properties>
     <property name="id" type="int" value="1"/>
    </properties>
   </object>
-  <object id="10" name="poop" x="1312" y="608" width="32" height="32">
+  <object id="10" name="poop" x="1344" y="608" width="32" height="32">
    <properties>
     <property name="id" type="int" value="2"/>
    </properties>
