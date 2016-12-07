@@ -192,12 +192,38 @@ namespace xy
         */
         float getFOV() const { return m_fov; }
 
+        /*!
+        \brief Makes a material 'transparent' based on the
+        diffuse colour's alpha channel.
+        \param Material to render transparently
+        \param enum representing description of this material's use
+        Note transparent materials currently only work with MeshDrawable
+        components, and are not affected by screen space water effects.
+        */
+        void enableTransparency(Material&, Material::Description) const;
+
+        /*!
+        \brief Adds a material to the MeshRenderer's material cache.
+        \param std::uint32_t ID Unique ID to assign to the material
+        \param Material::Description used to hint to the MeshRenderer which shader paramters should be set
+        \param bool castShadows Set to true if this material should cast shadows
+        \param bool useAlphaBlend Set to true to enable blending this material via the diffuse
+        colour's alpha value. \see enableTransparency()
+        \returns Reference to the newly added material
+        */
+        xy::Material& addMaterial(std::uint32_t, Material::Description, bool = false, bool = false);
+
+        /*!
+        \brief returns a pointer to the material with the given ID if it exists, else returns 
+        the default material.
+        */
+        xy::Material& getMaterial(std::uint32_t) const;
     private:
         struct Lock final {};
 
         MeshResource m_meshResource;
-        MaterialResource m_materialResource;
-        //ShaderResource m_shaderResource;
+        mutable MaterialResource m_materialResource;
+        mutable ShaderResource m_shaderResource;
 
         struct AnimationData
         {
@@ -211,6 +237,7 @@ namespace xy
         const Scene& m_scene;
         glm::mat4 m_viewMatrix;
         glm::mat4 m_projectionMatrix;
+        glm::mat4 m_flippedProjectionMatrix;
         float m_cameraZ;
         sf::View m_view;
 
@@ -283,7 +310,7 @@ namespace xy
 
         mutable DepthRenderTexture m_depthTexture;
         sf::Shader m_depthShader;
-        void drawDepth() const;
+        void drawDepth(const sf::FloatRect&) const;
 
         sf::Shader m_waterShader;
         sf::Texture m_surfaceTexture;
@@ -291,7 +318,8 @@ namespace xy
 
         mutable std::vector<Model*> m_models;
         mutable xy::MultiRenderTexture m_gBuffer;
-        void drawScene() const;
+        void drawScene(const sf::FloatRect&) const;
+        void drawAlphaBlended(const sf::FloatRect&) const;
 
         sf::Shader m_debugShader;
         sf::Texture m_dummyTexture;

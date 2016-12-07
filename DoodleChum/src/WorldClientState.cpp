@@ -141,19 +141,13 @@ void WorldClientState::initMeshes()
 {
     m_meshRenderer.setView(getContext().defaultView);
     m_meshRenderer.setFOV(45.f);
-
-    m_shaderResource.preload(Shader::TexturedBumped, DEFERRED_TEXTURED_BUMPED_VERTEX, DEFERRED_TEXTURED_BUMPED_FRAGMENT);
-    m_shaderResource.preload(Shader::Shadow, SHADOW_VERTEX, SHADOW_FRAGMENT);
     
     xy::IQMBuilder haus("assets/models/haus.iqm");
     m_meshRenderer.loadModel(Mesh::Haus, haus);
 
-    auto& hausMat = m_materialResource.add(Material::Haus, m_shaderResource.get(Shader::TexturedBumped));
-    hausMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    auto& hausMat = m_meshRenderer.addMaterial(Material::Haus, xy::Material::TexturedBumped, true);
     hausMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/haus_diffuse.png") });
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
-    //hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/mask.png") });
-    hausMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
     hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
@@ -162,8 +156,7 @@ void WorldClientState::initMeshes()
     /*xy::IQMBuilder background("assets/models/background.iqm");
     m_meshRenderer.loadModel(Mesh::Background, background);
 
-    auto& backMat = m_materialResource.add(Material::Background, m_shaderResource.get(Shader::TexturedBumped));
-    backMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    auto& backMat = m_meshRenderer.addMaterial(Material::Background, xy::Material::TexturedBumped)
     backMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/background_diffuse.png") });
     backMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
 
@@ -173,12 +166,10 @@ void WorldClientState::initMeshes()
     xy::IQMBuilder furniture("assets/models/furniture.iqm");
     m_meshRenderer.loadModel(Mesh::Furniture, furniture);
 
-    auto& furnitureMat = m_materialResource.add(Material::Furniture, m_shaderResource.get(Shader::TexturedBumped));
-    furnitureMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
+    auto& furnitureMat = m_meshRenderer.addMaterial(Material::Furniture, xy::Material::TexturedBumped, true);
     furnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture_diffuse.png") });
     furnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture_normal.png") });
     furnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
-    furnitureMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
     furnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
 
     auto furnitureModel = m_meshRenderer.createModel(Mesh::Furniture, m_messageBus);
@@ -202,11 +193,8 @@ void WorldClientState::initMeshes()
     
     m_textureResource.setFallbackColour({ 127, 127, 255 });
 
-    auto& budMat = m_materialResource.add(Material::Bud, m_shaderResource.get(Shader::TexturedBumped));
-    budMat.addUniformBuffer(m_meshRenderer.getMatrixUniforms());
-    //budMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/db_diffuse.png") });
+    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::TexturedBumped, true, true);
     budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
-    budMat.addRenderPass(xy::RenderPass::ID::ShadowMap, m_shaderResource.get(Shader::Shadow));
 }
 
 void WorldClientState::initMapData()
@@ -321,7 +309,7 @@ void WorldClientState::initBud()
 {
     auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder, m_tasks, m_textureResource.get("assets/images/sprites/bud.png"));
 
-    auto& material = m_materialResource.get(Material::Bud);
+    auto& material = m_meshRenderer.getMaterial(Material::Bud);
     material.addProperty({ "u_diffuseMap", controller->getTexture() });
 
     auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);

@@ -60,7 +60,6 @@ private:
 
     xy::TextureResource m_textureResource;
     xy::ShaderResource m_shaderResource;
-    xy::MaterialResource m_materialResource;
     xy::FontResource m_fontResource;
 
     PathFinder m_pathFinder;

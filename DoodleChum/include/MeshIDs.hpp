@@ -52,13 +52,4 @@ namespace Material
     };
 }
 
-namespace Shader
-{
-    enum ID
-    {
-        TexturedBumped = xy::Shader::Count,
-        Shadow
-    };
-}
-
 #endif //DC_MESH_IDS_HPP_
