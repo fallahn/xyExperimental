@@ -28,6 +28,7 @@ source distribution.
 #include <Game.hpp>
 #include <WorldClientState.hpp>
 #include <IntroState.hpp>
+#include <MenuState.hpp>
 
 #include <xygine/KeyBinds.hpp>
 
@@ -101,4 +102,5 @@ void Game::registerStates()
 {
     m_stateStack.registerState<IntroState>(States::ID::Intro);
     m_stateStack.registerState<WorldClientState>(States::ID::WorldClient);
+    m_stateStack.registerState<MenuState>(States::ID::Menu);
 }

@@ -51,6 +51,7 @@ source distribution.
 #include <xygine/postprocess/Blur.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace
 {
@@ -69,10 +70,6 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
 
-    //auto pp = xy::PostProcess::create<xy::PostChromeAb>();
-    //auto pp = xy::PostProcess::create<xy::PostAntique>();
-    //m_scene.addPostProcess(pp);
-
     initMeshes();
     initMapData();
     initBud();
@@ -80,7 +77,22 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initUI();
 
     auto pp = xy::PostProcess::create<xy::PostBlur>();
-    //dynamic_cast<xy::PostBlur*>(pp.get())->setEnabled(true);
+    auto pptr = dynamic_cast<xy::PostBlur*>(pp.get());
+    xy::PostProcess::MessageHandler mh;
+    mh.id = xy::Message::UIMessage;
+    mh.action = [pptr](const xy::Message& msg)
+    {
+        const auto& msgData = msg.getData<xy::Message::UIEvent>();
+        if (msgData.type == xy::Message::UIEvent::MenuClosed)
+        {
+            pptr->setEnabled(false);
+        }
+        else if (msgData.type == xy::Message::UIEvent::MenuOpened)
+        {
+            pptr->setEnabled(true);
+        }
+    };
+    pp->addMessageHandler(mh);
     m_scene.addPostProcess(pp);
     
     quitLoadingScreen();
@@ -97,6 +109,19 @@ bool WorldClientState::update(float dt)
 
 bool WorldClientState::handleEvent(const sf::Event& evt)
 {
+    if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case sf::Keyboard::Escape:
+        case sf::Keyboard::P:
+        case sf::Keyboard::Pause:
+            requestStackPush(States::ID::Menu);
+            break;
+        }
+    }
+
     return false;
 }
 

@@ -25,17 +25,28 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_STATES_HPP_
-#define DC_STATES_HPP_
+#ifndef DC_MENU_STATE_HPP_
+#define DC_MENU_STATE_HPP_
 
-namespace States
+#include <StateIDs.hpp>
+
+#include <xygine/State.hpp>
+
+class MenuState final : public xy::State
 {
-    enum ID
-    {
-        Intro,
-        WorldClient,
-        Menu
-    };
-}
+public:
+    MenuState(xy::StateStack&, Context);
+    ~MenuState() = default;
 
-#endif //DC_STATES_HPP_
+    bool handleEvent(const sf::Event&) override;
+    void handleMessage(const xy::Message&) override;
+    bool update(float) override;
+    void draw() override;
+
+    xy::StateID stateID() const override { return States::ID::Menu; }
+
+private:
+
+};
+
+#endif //DC_MENU_STATE_HPP_
