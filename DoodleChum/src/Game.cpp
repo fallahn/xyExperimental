@@ -31,14 +31,32 @@ source distribution.
 #include <MenuState.hpp>
 
 #include <xygine/KeyBinds.hpp>
+#include <xygine/Console.hpp>
 
 #include <SFML/Window/Event.hpp>
+
+namespace
+{
+    float gameSpeed = 1.f;
+}
 
 Game::Game()
     : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
     m_stateStack({ getRenderWindow(), *this })
 {
-
+    xy::Console::addCommand("gametime", [](const std::string& value)
+    {
+        float speed = 1.f;
+        try
+        {
+            speed = std::max(0.f, std::stof(value.c_str()));
+        }
+        catch (...)
+        {
+            xy::Console::print(value + " invalid value.");
+        }
+        gameSpeed = speed;
+    });
 }
 
 //private
@@ -71,6 +89,9 @@ void Game::handleMessage(const xy::Message& msg)
 
 void Game::updateApp(float dt)
 {
+#ifdef _DEBUG_
+    dt *= gameSpeed;
+#endif //_DEBUG_
     m_stateStack.update(dt);
 }
 

@@ -32,6 +32,7 @@ source distribution.
 #include <BudController.hpp>
 #include <MessageIDs.hpp>
 #include <AttributeManager.hpp>
+#include <TabComponent.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -121,7 +122,22 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
             break;
         }
     }
-
+    else if (evt.type == sf::Event::MouseButtonReleased)
+    {
+        switch (evt.mouseButton.button)
+        {
+        case sf::Mouse::Left:
+        {
+            auto worldPos = xy::App::getMouseWorldPosition();
+            auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::MouseClick;
+            msg->positionX = worldPos.x;
+            msg->positionY = worldPos.y;
+        }
+            break;
+        default:break;
+        }
+    }
     return false;
 }
 
@@ -390,10 +406,29 @@ void WorldClientState::initParticles()
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
+namespace
+{
+    const float tabWidth = 450.f;
+    const float tabHeight = 280.f;
+}
+
 void WorldClientState::initUI()
 {
+    //do tabs first so they appear behind
+    auto leftTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
     auto entity = xy::Entity::create(m_messageBus);
-    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf")/*, true*/);
+    entity->addComponent(leftTab);
+    entity->setPosition(-tabWidth, 0.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+    
+    auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight), TabComponent::Direction::Vertical);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(topTab);
+    entity->setPosition(0.f, -tabHeight);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    entity = xy::Entity::create(m_messageBus);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);

@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Controllers">
       <UniqueIdentifier>{87bb5956-171a-4965-a9d7-b939cd4a8f8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{57f0d96e-cd92-477f-bc51-3bcb9003b952}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{03e6aa21-bc2c-4459-b14d-b8e2d08aa054}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -99,6 +105,9 @@
     <ClInclude Include="include\MenuState.hpp">
       <Filter>Header Files\states</Filter>
     </ClInclude>
+    <ClInclude Include="include\TabComponent.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -163,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="src\MenuState.cpp">
       <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TabComponent.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

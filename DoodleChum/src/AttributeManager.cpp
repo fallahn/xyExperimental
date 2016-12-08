@@ -65,7 +65,7 @@ namespace
     };
 
     const int initialIncome = 1000;
-    const int payPerWeek = 1000; //(multiplied by Houshold::Incomerate)
+    const float payPerWeek = 1000; //(multiplied by Houshold::Incomerate)
     const float minIncomeRate = 10.f;
     const int daysPerWeek = 7; //duh, but y'know
 
@@ -166,7 +166,19 @@ void AttribManager::handleMessage(const xy::Message& msg)
         }
     }
 
-    //TODO time based events such as pay day
+    //time based events such as pay day
+    else if (msg.id == Message::DayChanged)
+    {
+        //const auto& data = msg.getData<Message::TODEvent>();
+        m_stats.daysToPayDay--;
+        if (m_stats.daysToPayDay == 0)
+        {
+            m_stats.daysToPayDay = daysPerWeek;
+            auto pay = static_cast<std::int32_t>(payPerWeek * (m_householdAttribs[Household::IncomeRate] / 100.f));
+            m_stats.currentIncome += pay;
+            m_stats.totalIncoming += pay;
+        }
+    }
 }
 
 AttribManager::PersonalAttribs AttribManager::getPersonalAttribs() const
@@ -360,7 +372,7 @@ void AttribManager::save()
     std::memcpy(ptr, m_householdAttribs.data(), sizeof(float) * Household::Count);
 
     ptr += sizeof(float) * Household::Count;
-    std::memcpy(&m_stats, ptr, sizeof(Stats));
+    std::memcpy(ptr, &m_stats, sizeof(Stats));
 
     ptr += sizeof(Stats);
     std::uint64_t tse = std::time(nullptr);
@@ -385,7 +397,7 @@ void AttribManager::addDebugWindow()
 {
     xy::App::addUserWindow([this]() 
     {
-        nim::SetNextWindowSize({ 220.f, 300.f });
+        nim::SetNextWindowSize({ 220.f, 400.f });
         nim::Begin("Stats:");
 
         for (auto i = 0; i < Personal::Count; ++i)
@@ -398,6 +410,13 @@ void AttribManager::addDebugWindow()
         {
             nim::Text(std::string(householdNames[i] + ": " + std::to_string(m_householdAttribs[i])).c_str());
         }
+
+        nim::Separator();
+        nim::Text(std::string("Days to next pay day: " + std::to_string(m_stats.daysToPayDay)).c_str());
+        nim::Text(std::string("Current Income: " + std::to_string(m_stats.currentIncome)).c_str());
+        nim::Text(std::string("Total Income: " + std::to_string(m_stats.totalIncoming)).c_str());
+        nim::Text(std::string("Total Outgoing: " + std::to_string(m_stats.totalOutGoing)).c_str());
+
         nim::End();
     }, this);
 }

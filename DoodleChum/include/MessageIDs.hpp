@@ -45,10 +45,12 @@ namespace Message
     enum ID
     {
         TimeOfDay = xy::Message::Count,
+        DayChanged,
         NewTask,
         TaskCompleted,
         Animation,
-        Particle
+        Particle,
+        Interface
     };
 
     struct TODEvent final
@@ -93,6 +95,16 @@ namespace Message
             Sleep,
             Count
         }id;
+    };
+
+    struct InterfaceEvent
+    {
+        enum
+        {
+            MouseClick
+        }type;
+        float positionX = 0.f;
+        float positionY = 0.f;
     };
 }
 

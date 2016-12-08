@@ -44,6 +44,7 @@ source distribution.
 namespace
 {
     const float totalSeconds = 24.f * 60.f * 60.f;
+    const float midnight = totalSeconds / 2.f;
     const float sunset = xy::Util::Const::PI / 2.f;
     const float sunrise = sunset + xy::Util::Const::PI;
     const float fadeAngle = xy::Util::Const::TAU / 24.f;
@@ -86,7 +87,9 @@ DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, sf:
 
 //public
 void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
-{
+{    
+    const float oldTime = m_time;
+
     m_time += dt/* * 1000.f*/;
     if (m_time > totalSeconds) m_time -= totalSeconds;
 
@@ -128,6 +131,12 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
     auto msg = sendMessage<Message::TODEvent>(Message::TimeOfDay);
     msg->sunIntensity = intensity;
     msg->time = m_time;
+
+    if (oldTime < midnight && m_time >= midnight)
+    {
+        auto dayChangeMsg = sendMessage<float>(Message::DayChanged);
+        *dayChangeMsg = m_time;
+    }
 }
 
 //private
