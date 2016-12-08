@@ -170,6 +170,7 @@ void WorldClientState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.draw(m_scene);
+    rw.setView(getContext().defaultView);
     //rw.draw(m_meshRenderer);
 #ifdef _DEBUG_
     //rw.setView(getContext().defaultView);
@@ -183,6 +184,8 @@ void WorldClientState::initMeshes()
     m_meshRenderer.setView(getContext().defaultView);
     m_meshRenderer.setFOV(45.f);
     
+    //TODO just search the dir for files and attampt to load with corresponding materials
+
     xy::IQMBuilder haus("assets/models/haus.iqm");
     m_meshRenderer.loadModel(Mesh::Haus, haus);
 
@@ -228,13 +231,28 @@ void WorldClientState::initMeshes()
     auto moreFurnitureModel = m_meshRenderer.createModel(Mesh::MoreFurniture, m_messageBus);
     moreFurnitureModel->setBaseMaterial(moreFurnitureMat);
 
+    xy::IQMBuilder thirdFurniture("assets/models/furniture_the_third.iqm");
+    m_meshRenderer.loadModel(Mesh::ThirdFurniture, thirdFurniture);
+
+    auto& thirdFurnitureMat = m_meshRenderer.addMaterial(Material::ThirdFurniture, xy::Material::TexturedBumped, true);
+    thirdFurnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture3_diffuse.png") });
+    thirdFurnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture3_normal.png") });
+    thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+    thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+
+    auto thirdFurnitureModel = m_meshRenderer.createModel(Mesh::ThirdFurniture, m_messageBus);
+    thirdFurnitureModel->setBaseMaterial(thirdFurnitureMat);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(hausModel);
     //entity->addComponent(backgroundModel);
     entity->addComponent(furnitureModel);
     entity->addComponent(moreFurnitureModel);
+    entity->addComponent(thirdFurnitureModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::BackFront);
+
+
 
 
     entity = xy::Entity::create(m_messageBus);

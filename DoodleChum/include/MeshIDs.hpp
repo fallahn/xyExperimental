@@ -38,7 +38,8 @@ namespace Mesh
         Background,
         Bud,
         Furniture,
-        MoreFurniture
+        MoreFurniture,
+        ThirdFurniture
     };
 }
 
@@ -50,7 +51,8 @@ namespace Material
         Background,
         Bud,
         Furniture,
-        MoreFurniture
+        MoreFurniture,
+        ThirdFurniture
     };
 }
 
