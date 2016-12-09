@@ -56,7 +56,7 @@ namespace
     const sf::Uint8 maxAmbience = 80 - minAmbience;
 }
 
-DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, sf::Font& font, bool useSystemTime)
+DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, bool useSystemTime)
     : xy::Component(mb, this),
     m_rotation(0.f),
     m_intensity(1.f),
@@ -73,16 +73,6 @@ DayNightCycle::DayNightCycle(xy::MessageBus& mb, xy::Scene::SkyLight& light, sf:
         auto hours = (tm->tm_hour > 12) ? tm->tm_hour - 12 : tm->tm_hour + 12;
         m_time += hours * 60.f * 60.f;
     }
-    m_text.setFont(font);
-    m_text.setFillColor({ 255, 0, 0, 220 });
-    m_text.setCharacterSize(70);
-
-    m_shadowText = m_text;
-    m_shadowText.move(1.f, 1.f);
-    m_shadowText.setString("00:00");
-    m_shadowText.setFillColor({ 120, 120, 120, 120 });
-
-    updateText();
 }
 
 //public
@@ -126,8 +116,6 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
     m_light.setDirection({ dirX, dirY, -1.2f  - dirY});
     REPORT("Y", std::to_string(dirY));
 
-    updateText();
-
     auto msg = sendMessage<Message::TODEvent>(Message::TimeOfDay);
     msg->sunIntensity = intensity;
     msg->time = m_time;
@@ -140,24 +128,3 @@ void DayNightCycle::entityUpdate(xy::Entity& entity, float dt)
 }
 
 //private
-void DayNightCycle::updateText()
-{
-    //somehow we ended up with 00 as midday..
-    int minutes = int(m_time / 60.f);
-    int hours = minutes / 60;
-    minutes = minutes % 60;
-
-    hours = (hours > 12) ? hours - 12 : hours + 12;
-
-    std::stringstream ss;
-    ss << std::setw(2) << std::setfill('0') << hours % 24 << ":"
-        << std::setw(2) << std::setfill('0') << minutes;
-
-    m_text.setString(ss.str());
-}
-
-void DayNightCycle::draw(sf::RenderTarget& rt, sf::RenderStates states) const
-{
-    rt.draw(m_shadowText, states);
-    rt.draw(m_text, states);
-}

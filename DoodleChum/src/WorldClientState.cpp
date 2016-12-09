@@ -427,8 +427,10 @@ void WorldClientState::initParticles()
 namespace
 {
     const float tabWidth = 450.f;
-    const float tabHeight = 280.f;
+    const float tabHeight = 180.f;
 }
+
+#include <TimeTab.hpp>
 
 void WorldClientState::initUI()
 {
@@ -440,13 +442,23 @@ void WorldClientState::initUI()
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     
     auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight), TabComponent::Direction::Vertical);
+    auto timeInfo = xy::Component::create<TimeTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
     entity = xy::Entity::create(m_messageBus);
+    
     entity->addComponent(topTab);
+    entity->addComponent(timeInfo);
     entity->setPosition(0.f, -tabHeight);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 
+    auto rightTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
     entity = xy::Entity::create(m_messageBus);
-    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), m_fontResource.get("assets/fonts/Clock.ttf"), true);
+    entity->addComponent(rightTab);
+    entity->setPosition(xy::DefaultSceneSize.x + tabWidth, 0.f);
+    entity->setScale(-1.f, 1.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    entity = xy::Entity::create(m_messageBus);
+    auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), true);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);

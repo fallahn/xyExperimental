@@ -31,21 +31,13 @@ source distribution.
 #include <xygine/components/Component.hpp>
 #include <xygine/Scene.hpp>
 
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Text.hpp>
-
-namespace sf
-{
-    class Font;
-}
-
-class DayNightCycle final : public xy::Component, public sf::Drawable
+class DayNightCycle final : public xy::Component
 {
 public:
-    DayNightCycle(xy::MessageBus&, xy::Scene::SkyLight&, sf::Font&, bool = false);
+    DayNightCycle(xy::MessageBus&, xy::Scene::SkyLight&, bool = false);
     ~DayNightCycle() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
+    xy::Component::Type type() const override { return xy::Component::Type::Script; }
     void entityUpdate(xy::Entity&, float) override;
 
 private:
@@ -56,12 +48,6 @@ private:
     
     float m_time; //current time in seconds
     xy::Scene::SkyLight& m_light;
-
-    sf::Text m_text;
-    sf::Text m_shadowText;
-
-    void updateText();
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
 #endif //DC_DAY_NIGHT_HPP_

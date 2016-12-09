@@ -15,10 +15,11 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/PianoTask.cpp
   ${PROJECT_DIR}/PoopTask.cpp
   ${PROJECT_DIR}/RoomLightController.cpp
-  ${PROJECT_DIR}/ThinkTask.cpp
   ${PROJECT_DIR}/ShowerTask.cpp
   ${PROJECT_DIR}/SleepTask.cpp
   ${PROJECT_DIR}/TabComponent.cpp
+  ${PROJECT_DIR}/ThinkTask.cpp
+  ${PROJECT_DIR}/TimeTab.cpp
   ${PROJECT_DIR}/TravelTask.cpp
   ${PROJECT_DIR}/TVTask.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

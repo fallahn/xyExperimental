@@ -50,7 +50,8 @@ namespace Message
         TaskCompleted,
         Animation,
         Particle,
-        Interface
+        Interface,
+        Attribute
     };
 
     struct TODEvent final
@@ -59,7 +60,7 @@ namespace Message
         float sunIntensity = 0.f;
     };
 
-    struct TaskEvent
+    struct TaskEvent final
     {
         enum Name
         {
@@ -77,7 +78,7 @@ namespace Message
         }taskName;
     };
 
-    struct AnimationEvent
+    struct AnimationEvent final
     {
         enum ID
         {
@@ -97,7 +98,7 @@ namespace Message
         }id;
     };
 
-    struct InterfaceEvent
+    struct InterfaceEvent final
     {
         enum
         {
@@ -105,6 +106,15 @@ namespace Message
         }type;
         float positionX = 0.f;
         float positionY = 0.f;
+    };
+
+    struct AttribEvent final
+    {
+        enum
+        {
+            GotPaid
+        }action;
+        std::int32_t value = 0;
     };
 }
 

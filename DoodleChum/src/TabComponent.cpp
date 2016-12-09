@@ -37,6 +37,7 @@ namespace
 {
     const sf::Vector2f tabSize(40.f, 200.f);
     const float moveSpeed = 2500.f;
+    const sf::Color vertColour(255, 255, 255, 230);
 }
 
 TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Direction direction)
@@ -46,10 +47,10 @@ TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Directi
     m_distanceRemaining (0.f),
     m_entity            (nullptr)
 {
-    m_vertices.emplace_back(sf::Vector2f());
-    m_vertices.emplace_back(sf::Vector2f(size.x, 0.f));
-    m_vertices.emplace_back(size);
-    m_vertices.emplace_back(sf::Vector2f(0.f, size.y));
+    m_vertices.emplace_back(sf::Vector2f(), vertColour);
+    m_vertices.emplace_back(sf::Vector2f(size.x, 0.f), vertColour);
+    m_vertices.emplace_back(size, vertColour);
+    m_vertices.emplace_back(sf::Vector2f(0.f, size.y), vertColour);
 
     m_globalBounds.width = size.x;
     m_globalBounds.height = size.y;
@@ -60,10 +61,10 @@ TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Directi
         sf::Vector2f tabOffset = { size.x,  (size.y - tabSize.y) / 2.f };
         float tabDent = tabSize.y / 6.f;
 
-        m_vertices.emplace_back(tabOffset);
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.x, tabOffset.y + tabDent));
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.x, tabOffset.y + (tabSize.y - tabDent)));
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x, tabOffset.y + tabSize.y));
+        m_vertices.emplace_back(tabOffset, vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.x, tabOffset.y + tabDent), vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.x, tabOffset.y + (tabSize.y - tabDent)), vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x, tabOffset.y + tabSize.y), vertColour);
 
         m_globalBounds.width += tabSize.x;
         m_tabBounds = { tabOffset, tabSize };
@@ -75,10 +76,10 @@ TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Directi
         sf::Vector2f tabOffset = { (size.x - tabSize.y) / 2.f,  size.y };
         float tabDent = tabSize.y / 6.f;
 
-        m_vertices.emplace_back(tabOffset);
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.y, tabOffset.y));
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + (tabSize.y - tabDent), tabOffset.y + tabSize.x));
-        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabDent, tabOffset.y + tabSize.x));
+        m_vertices.emplace_back(tabOffset, vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabSize.y, tabOffset.y), vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + (tabSize.y - tabDent), tabOffset.y + tabSize.x), vertColour);
+        m_vertices.emplace_back(sf::Vector2f(tabOffset.x + tabDent, tabOffset.y + tabSize.x), vertColour);
 
         m_globalBounds.height += tabSize.x;
         m_tabBounds = { tabOffset, {tabSize.y, tabSize.x} };
@@ -122,7 +123,7 @@ void TabComponent::entityUpdate(xy::Entity& entity, float dt)
             m_moving = false;
         }
 
-        entity.move(m_velocity * distance);
+        entity.move(m_velocity * entity.getScale() * distance);
     }
 }
 

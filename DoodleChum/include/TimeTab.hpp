@@ -25,53 +25,48 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_TAB_COMPONENT_HPP_
-#define DC_TAB_COMPONENT_HPP_
+#ifndef DC_TIME_TAB_HPP_
+#define DC_TIME_TAB_HPP_
 
 #include <xygine/components/Component.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
-#include <vector>
+namespace xy
+{
+    class FontResource;
+    class TextureResource;
+}
 
-class TabComponent final : public xy::Component, public sf::Drawable
+class AttribManager;
+class TimeTab final : public xy::Component, public sf::Drawable
 {
 public:
-    enum class Direction
-    {
-        Horizontal, Vertical
-    };
+    TimeTab(xy::MessageBus&, xy::FontResource&, xy::TextureResource&, const AttribManager&);
+    ~TimeTab() = default;
 
-    TabComponent(xy::MessageBus&, const sf::Vector2f&, Direction);
-    ~TabComponent() = default;
-
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
+    xy::Component::Type type()const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
-    void onStart(xy::Entity& e) { m_entity = &e; }
-
-    sf::FloatRect globalBounds() const override { return m_globalBounds; }
+    void onStart(xy::Entity& e) override { m_entity = &e; }
 
 private:
-
-
-    bool m_moving;
-
-    sf::Vector2f m_velocity;
-    float m_travelDistance;
-    float m_distanceRemaining;
+    const AttribManager& m_attribManager;
     xy::Entity* m_entity;
 
-    sf::FloatRect m_globalBounds;
-    sf::FloatRect m_tabBounds;
+    sf::Text m_daysText;
+    sf::Text m_balanceText;
 
-    std::vector<sf::Vertex> m_vertices;
+    sf::Text m_clockShadow;
+    sf::Text m_clockText;
+
+    void updateClockText(float);
+
+    sf::Sprite m_calendarSprite;
+    sf::Sprite m_buttonSprite;
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-    template <typename T>
-    sf::Vector2<T> operator * (const sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)
-    {
-        return{ lhs.x * rhs.x , lhs.y * rhs.y };
-    }
-#endif //DC_TAB_COMPONENT_HPP_
+#endif //DC_TIME_TAB_HPP_

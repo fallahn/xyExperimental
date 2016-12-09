@@ -169,7 +169,6 @@ void AttribManager::handleMessage(const xy::Message& msg)
     //time based events such as pay day
     else if (msg.id == Message::DayChanged)
     {
-        //const auto& data = msg.getData<Message::TODEvent>();
         m_stats.daysToPayDay--;
         if (m_stats.daysToPayDay == 0)
         {
@@ -177,6 +176,11 @@ void AttribManager::handleMessage(const xy::Message& msg)
             auto pay = static_cast<std::int32_t>(payPerWeek * (m_householdAttribs[Household::IncomeRate] / 100.f));
             m_stats.currentIncome += pay;
             m_stats.totalIncoming += pay;
+
+            //raise a message saying we got paid $$$
+            auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
+            payMsg->action = Message::AttribEvent::GotPaid;
+            payMsg->value = m_stats.currentIncome;
         }
     }
 }

@@ -81,6 +81,9 @@ public:
     PersonalAttribs getPersonalAttribs() const;
     const HouseholdAttribs& getHouseholdAttribs() const { return m_householdAttribs; }
 
+    std::int32_t getIncome() const { return m_stats.currentIncome; }
+    std::int32_t getDaysToPayDay() const { return m_stats.daysToPayDay; }
+
 private:
     xy::MessageBus& m_messageBus;
     std::array<float, Personal::Count> m_personalAttribs;

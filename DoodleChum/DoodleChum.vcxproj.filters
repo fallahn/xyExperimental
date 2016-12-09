@@ -108,6 +108,9 @@
     <ClInclude Include="include\TabComponent.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\TimeTab.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -174,6 +177,9 @@
       <Filter>Source Files\states</Filter>
     </ClCompile>
     <ClCompile Include="src\TabComponent.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimeTab.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
