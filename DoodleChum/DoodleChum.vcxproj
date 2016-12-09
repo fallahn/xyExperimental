@@ -147,6 +147,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\MessageIDs.hpp" />
     <ClInclude Include="include\MusicTask.hpp" />
     <ClInclude Include="include\PathFinder.hpp" />
+    <ClInclude Include="include\PersonalTab.hpp" />
     <ClInclude Include="include\PianoTask.hpp" />
     <ClInclude Include="include\PoopTask.hpp" />
     <ClInclude Include="include\RoomLightController.hpp" />
@@ -159,6 +160,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\TimeTab.hpp" />
     <ClInclude Include="include\TravelTask.hpp" />
     <ClInclude Include="include\TVTask.hpp" />
+    <ClInclude Include="include\ValueBar.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +176,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\MenuState.cpp" />
     <ClCompile Include="src\MusicTask.cpp" />
     <ClCompile Include="src\PathFinder.cpp" />
+    <ClCompile Include="src\PersonalTab.cpp" />
     <ClCompile Include="src\PianoTask.cpp" />
     <ClCompile Include="src\PoopTask.cpp" />
     <ClCompile Include="src\RoomLightController.cpp" />
@@ -184,7 +187,11 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\TimeTab.cpp" />
     <ClCompile Include="src\TravelTask.cpp" />
     <ClCompile Include="src\TVTask.cpp" />
+    <ClCompile Include="src\ValueBar.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\StringConsts.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

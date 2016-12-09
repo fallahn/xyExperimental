@@ -42,27 +42,7 @@ namespace
     const std::string filename("attrib.ute");
     const std::uint8_t fileVersion = 1;
 
-    std::array<std::string, AttribManager::Personal::Count> personalNames = 
-    {
-        "Health",
-        "Hunger",
-        "Thirst",
-        "Cleanliness",
-        "Tiredness",
-        "Poopiness",
-        "Boredness"
-    };
-
-    std::array<std::string, AttribManager::Household::Count> householdNames =
-    {
-        "Food",
-        "Water",
-        "Music",
-        "SheetMusic",
-        "Games",
-        "Films",
-        "IncomeRate"
-    };
+#include "StringConsts.inl"
 
     const int initialIncome = 1000;
     const float payPerWeek = 1000; //(multiplied by Houshold::Incomerate)

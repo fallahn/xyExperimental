@@ -431,30 +431,32 @@ namespace
 }
 
 #include <TimeTab.hpp>
+#include <PersonalTab.hpp>
 
 void WorldClientState::initUI()
 {
     //do tabs first so they appear behind
     auto leftTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
+    auto personalTab = xy::Component::create<PersonalTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(leftTab);
+    entity->addComponent(personalTab);
     entity->setPosition(-tabWidth, 0.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     
-    auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight), TabComponent::Direction::Vertical);
-    auto timeInfo = xy::Component::create<TimeTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
-    entity = xy::Entity::create(m_messageBus);
-    
-    entity->addComponent(topTab);
-    entity->addComponent(timeInfo);
-    entity->setPosition(0.f, -tabHeight);
-    m_scene.addEntity(entity, xy::Scene::Layer::UI);
-
     auto rightTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(rightTab);
     entity->setPosition(xy::DefaultSceneSize.x + tabWidth, 0.f);
     entity->setScale(-1.f, 1.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight), TabComponent::Direction::Vertical);
+    auto timeInfo = xy::Component::create<TimeTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(topTab);
+    entity->addComponent(timeInfo);
+    entity->setPosition(0.f, -tabHeight);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 
     entity = xy::Entity::create(m_messageBus);

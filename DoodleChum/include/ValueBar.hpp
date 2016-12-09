@@ -25,52 +25,39 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_TAB_COMPONENT_HPP_
-#define DC_TAB_COMPONENT_HPP_
-
-#include <xygine/components/Component.hpp>
+#ifndef DC_VALUE_BAR_HPP_
+#define DC_VALUE_BAR_HPP_
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <vector>
 
-class TabComponent final : public xy::Component, public sf::Drawable
+namespace sf
+{
+    class Font;
+}
+
+class ValueBar final : public sf::Drawable, public sf::Transformable
 {
 public:
-    enum class Direction
-    {
-        Horizontal, Vertical
-    };
+    ValueBar(sf::Font&, const sf::Texture&, const sf::Vector2f&);
+    ~ValueBar() = default;
 
-    TabComponent(xy::MessageBus&, const sf::Vector2f&, Direction);
-    ~TabComponent() = default;
-
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float) override;
-    void onStart(xy::Entity& e) { m_entity = &e; }
-
-    sf::FloatRect globalBounds() const override { return m_globalBounds; }
+    void setValue(float);
+    void setTitle(const std::string&);
 
 private:
+    const sf::Texture& m_texture;
+    sf::Vector2f m_size;
 
-    bool m_moving;
-
-    sf::Vector2f m_velocity;
-    float m_travelDistance;
-    float m_distanceRemaining;
-    xy::Entity* m_entity;
-
-    sf::FloatRect m_globalBounds;
-    sf::FloatRect m_tabBounds;
+    sf::Text m_valueText;
+    sf::Text m_titleText;
 
     std::vector<sf::Vertex> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-    template <typename T>
-    sf::Vector2<T> operator * (const sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)
-    {
-        return{ lhs.x * rhs.x , lhs.y * rhs.y };
-    }
-#endif //DC_TAB_COMPONENT_HPP_
+#endif //DC_VALUE_BAR_HPP_

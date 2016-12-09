@@ -55,6 +55,8 @@ private:
     const AttribManager& m_attribManager;
     xy::Entity* m_entity;
 
+    sf::Text m_titleText;
+
     sf::Text m_daysText;
     sf::Text m_balanceText;
 

@@ -52,6 +52,13 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
 {
     auto& handFont = fr.get("assets/fonts/FallahnHand.ttf");
 
+    m_titleText.setFont(handFont);
+    m_titleText.setString("Info...");
+    m_titleText.setFillColor(sf::Color::Black);
+    m_titleText.setCharacterSize(50u);
+    xy::Util::Position::centreOrigin(m_titleText);
+    m_titleText.setPosition(xy::DefaultSceneSize.x / 2.f, 200.f);
+
     m_daysText.setFont(handFont);
     m_daysText.setString("Days to pay day:");
     m_daysText.setCharacterSize(50u);
@@ -152,6 +159,7 @@ void TimeTab::updateClockText(float time)
 
 void TimeTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    rt.draw(m_titleText, states);
     rt.draw(m_daysText, states);
     rt.draw(m_balanceText, states);
     rt.draw(m_clockShadow, states);

@@ -12,6 +12,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/MenuState.cpp
   ${PROJECT_DIR}/MusicTask.cpp
   ${PROJECT_DIR}/PathFinder.cpp
+  ${PROJECT_DIR}/PersonalTab.cpp
   ${PROJECT_DIR}/PianoTask.cpp
   ${PROJECT_DIR}/PoopTask.cpp
   ${PROJECT_DIR}/RoomLightController.cpp
@@ -22,4 +23,5 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/TimeTab.cpp
   ${PROJECT_DIR}/TravelTask.cpp
   ${PROJECT_DIR}/TVTask.cpp
+  ${PROJECT_DIR}/ValueBar.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

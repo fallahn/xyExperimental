@@ -25,52 +25,43 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_TAB_COMPONENT_HPP_
-#define DC_TAB_COMPONENT_HPP_
+#ifndef DC_PERSONAL_TAB_HPP_
+#define DC_PERSONAL_TAB_HPP_
+
+#include <ValueBar.hpp>
 
 #include <xygine/components/Component.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Text.hpp>
 
-#include <vector>
+#include <memory>
 
-class TabComponent final : public xy::Component, public sf::Drawable
+namespace xy
+{
+    class FontResource;
+    class TextureResource;
+}
+
+class AttribManager;
+class PersonalTab final : public xy::Component, public sf::Drawable
 {
 public:
-    enum class Direction
-    {
-        Horizontal, Vertical
-    };
-
-    TabComponent(xy::MessageBus&, const sf::Vector2f&, Direction);
-    ~TabComponent() = default;
+    PersonalTab(xy::MessageBus&, xy::FontResource&, xy::TextureResource&, const AttribManager&);
+    ~PersonalTab() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float) override;
-    void onStart(xy::Entity& e) { m_entity = &e; }
-
-    sf::FloatRect globalBounds() const override { return m_globalBounds; }
+    void entityUpdate(xy::Entity&, float);
 
 private:
+    const AttribManager& m_attribManager;
 
-    bool m_moving;
+    sf::Text m_titleText;
 
-    sf::Vector2f m_velocity;
-    float m_travelDistance;
-    float m_distanceRemaining;
-    xy::Entity* m_entity;
+    std::vector<std::unique_ptr<ValueBar>> m_bars;
 
-    sf::FloatRect m_globalBounds;
-    sf::FloatRect m_tabBounds;
-
-    std::vector<sf::Vertex> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-    template <typename T>
-    sf::Vector2<T> operator * (const sf::Vector2<T>& lhs, const sf::Vector2<T>& rhs)
-    {
-        return{ lhs.x * rhs.x , lhs.y * rhs.y };
-    }
-#endif //DC_TAB_COMPONENT_HPP_
+#endif //DC_PERSONAL_TAB_HPP_
