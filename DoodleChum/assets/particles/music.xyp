@@ -10,7 +10,7 @@
   "Texture": "assets/images/particles/music.png",
   "Colour": 255,
   "BlendMode": "Alpha",
-  "ParticleSize": "2, 3",
+  "ParticleSize": "3, 3",
   "ParticlePosition": "0, 0",
   "FollowParent": false,
   "Lifetime": 3.0,

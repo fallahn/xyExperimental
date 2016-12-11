@@ -56,7 +56,7 @@ namespace
         14.f, //Left
         14.f, //Right
         1.f, //Idle
-        5.f, //Eat
+        9.f, //Eat
         12.f, //Drink
         1.f, //Poop
         12.f, //TV
