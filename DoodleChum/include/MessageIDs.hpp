@@ -51,7 +51,8 @@ namespace Message
         Animation,
         Particle,
         Interface,
-        Attribute
+        Attribute,
+        Player
     };
 
     struct TODEvent final
@@ -118,6 +119,16 @@ namespace Message
             SpentMoney
         }action;
         std::int32_t value = 0;
+    };
+
+    struct PlayerEvent final
+    {
+        enum
+        {
+            Moved
+        }action;
+        float posX = 0.f;
+        float posY = 0.f;
     };
 }
 

@@ -40,7 +40,8 @@ namespace Mesh
         Furniture,
         MoreFurniture,
         ThirdFurniture,
-        Tree
+        Tree,
+        Lights
     };
 }
 
@@ -53,7 +54,8 @@ namespace Material
         Bud,
         Furniture,
         MoreFurniture,
-        ThirdFurniture
+        ThirdFurniture,
+        Lights
     };
 }
 

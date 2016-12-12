@@ -86,7 +86,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     m_clockShadow.setFillColor({ 160, 160, 160, 160 });
 
     m_buttonSprite.setTexture(tr.get("assets/images/ui/menu_button.png"));
-    m_buttonSprite.setPosition(xy::DefaultSceneSize.x - m_buttonSprite.getLocalBounds().width - 10.f, 100.f);
+    m_buttonSprite.setPosition(xy::DefaultSceneSize.x - m_buttonSprite.getLocalBounds().width - 10.f, 90.f);
 
     m_calendarSprite.setTexture(tr.get("assets/images/ui/calendar.png"));
     xy::Util::Position::centreOrigin(m_calendarSprite);

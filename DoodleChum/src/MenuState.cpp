@@ -51,6 +51,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Escape:
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
+        case sf::Keyboard::BackSpace:
             requestStackPop();
             {
                 auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);

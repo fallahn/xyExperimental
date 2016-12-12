@@ -40,6 +40,7 @@ source distribution.
 #include <xygine/components/MeshDrawable.hpp>
 #include <xygine/mesh/IQMBuilder.hpp>
 #include <xygine/mesh/QuadBuilder.hpp>
+#include <xygine/mesh/SphereBuilder.hpp>
 #include <xygine/mesh/shaders/DeferredRenderer.hpp>
 #include <xygine/components/Model.hpp>
 #include <xygine/tilemap/Map.hpp>
@@ -256,7 +257,18 @@ void WorldClientState::initMeshes()
         treeModel->setBaseMaterial(thirdFurnitureMat);
         entity->addComponent(treeModel);
 
-        //TODO some lights or such
+        xy::IQMBuilder lights("assets/models/lights.iqm");
+        m_meshRenderer.loadModel(Mesh::Lights, lights);
+
+        auto& lightMat = m_meshRenderer.addMaterial(Mesh::Lights, xy::Material::Description::Coloured);
+        lightMat.addProperty({ "u_maskColour", sf::Color::Blue });
+        lightMat.addProperty({ "u_colour", sf::Color(235, 235, 180) });
+        lightMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+
+        auto lightModel = m_meshRenderer.createModel(Mesh::Lights, m_messageBus);
+        lightModel->setBaseMaterial(lightMat);
+
+        entity->addComponent(lightModel);
     }
 
     entity->addComponent(hausModel);

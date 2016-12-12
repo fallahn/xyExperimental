@@ -38,7 +38,7 @@ namespace
 {
     const sf::Vector2f tabSize(40.f, 200.f);
     const float moveSpeed = 2500.f;
-    const sf::Color vertColour(255, 255, 255, 240);
+    const sf::Color vertColour(255, 255, 255, 250);
 }
 
 TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Direction direction, const sf::Texture& texture)

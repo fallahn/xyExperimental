@@ -79,13 +79,19 @@ void TravelTask::update(float dt)
     else //if(distance != 0)
     {
         getEntity().move(xy::Util::Vector::normalise(direction) * m_moveSpeed * dt);
+
+        //broadcast movement
+        auto newPos = getEntity().getWorldPosition();
+        auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+        msg->action = Message::PlayerEvent::Moved;
+        msg->posX = newPos.x;
+        msg->posY = newPos.y;
     }
 }
 
 //private
 void TravelTask::setAnimation(const sf::Vector2f& direction)
 {
-    //TODO switch to emitting messages
     float angle = xy::Util::Vector::rotation(direction);
     REPORT("angle", std::to_string(angle));
 
