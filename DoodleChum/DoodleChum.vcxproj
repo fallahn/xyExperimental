@@ -141,6 +141,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\DrinkTask.hpp" />
     <ClInclude Include="include\EatTask.hpp" />
     <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\HouseholdTab.hpp" />
     <ClInclude Include="include\IntroState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MeshIDs.hpp" />
@@ -171,6 +172,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\DrinkTask.cpp" />
     <ClCompile Include="src\EatTask.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\HouseholdTab.cpp" />
     <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MenuState.cpp" />

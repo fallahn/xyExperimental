@@ -48,6 +48,7 @@ source distribution.
 #include <xygine/components/PointLight.hpp>
 #include <xygine/tilemap/TileLayer.hpp>
 #include <xygine/components/ParticleController.hpp>
+#include <xygine/SysTime.hpp>
 
 #include <xygine/postprocess/Blur.hpp>
 
@@ -182,7 +183,7 @@ void WorldClientState::draw()
 void WorldClientState::initMeshes()
 {
     m_meshRenderer.setView(getContext().defaultView);
-    m_meshRenderer.setFOV(45.f);
+    m_meshRenderer.setFOV(50.f);
     
     //TODO just search the dir for files and attampt to load with corresponding materials
 
@@ -244,6 +245,20 @@ void WorldClientState::initMeshes()
     thirdFurnitureModel->setBaseMaterial(thirdFurnitureMat);
 
     auto entity = xy::Entity::create(m_messageBus);
+
+    //christmas decs
+    if (xy::SysTime::now().months() == 12)
+    {
+        xy::IQMBuilder tree("assets/models/tree.iqm");
+        m_meshRenderer.loadModel(Mesh::Tree, tree);
+
+        auto treeModel = m_meshRenderer.createModel(Mesh::Tree, m_messageBus);
+        treeModel->setBaseMaterial(thirdFurnitureMat);
+        entity->addComponent(treeModel);
+
+        //TODO some lights or such
+    }
+
     entity->addComponent(hausModel);
     //entity->addComponent(backgroundModel);
     entity->addComponent(furnitureModel);
@@ -254,7 +269,7 @@ void WorldClientState::initMeshes()
 
 
 
-
+    //drawable containing mesh renderer output
     entity = xy::Entity::create(m_messageBus);
     auto md = m_meshRenderer.createDrawable(m_messageBus);
     entity->addComponent(md);
@@ -432,11 +447,13 @@ namespace
 
 #include <TimeTab.hpp>
 #include <PersonalTab.hpp>
+#include <HouseholdTab.hpp>
 
 void WorldClientState::initUI()
 {
     //do tabs first so they appear behind
-    auto leftTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
+    auto leftTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y),
+        TabComponent::Direction::Horizontal, m_textureResource.get("assets/images/ui/large_tab.png"));
     auto personalTab = xy::Component::create<PersonalTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(leftTab);
@@ -444,14 +461,18 @@ void WorldClientState::initUI()
     entity->setPosition(-tabWidth, 0.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     
-    auto rightTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y), TabComponent::Direction::Horizontal);
+    auto rightTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(tabWidth, xy::DefaultSceneSize.y),
+        TabComponent::Direction::Horizontal, m_textureResource.get("assets/images/ui/large_tab.png"));
+    auto householdTab = xy::Component::create<HouseholdTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(rightTab);
+    entity->addComponent(householdTab);
     entity->setPosition(xy::DefaultSceneSize.x + tabWidth, 0.f);
     entity->setScale(-1.f, 1.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 
-    auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight), TabComponent::Direction::Vertical);
+    auto topTab = xy::Component::create<TabComponent>(m_messageBus, sf::Vector2f(xy::DefaultSceneSize.x, tabHeight),
+        TabComponent::Direction::Vertical, m_textureResource.get("assets/images/ui/top_tab.png"));
     auto timeInfo = xy::Component::create<TimeTab>(m_messageBus, m_fontResource, m_textureResource, m_attribManager);
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(topTab);

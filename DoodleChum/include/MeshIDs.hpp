@@ -39,7 +39,8 @@ namespace Mesh
         Bud,
         Furniture,
         MoreFurniture,
-        ThirdFurniture
+        ThirdFurniture,
+        Tree
     };
 }
 

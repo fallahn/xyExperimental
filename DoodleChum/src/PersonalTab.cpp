@@ -51,12 +51,12 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
-    m_titleText.setCharacterSize(44u);
+    m_titleText.setCharacterSize(36u);
     m_titleText.setFillColor(sf::Color::Black);
     m_titleText.setString("Personal");
     m_titleText.setFont(font);
     xy::Util::Position::centreOrigin(m_titleText);
-    m_titleText.rotate(-90.f);
+    m_titleText.rotate(-87.f);
     m_titleText.setPosition(466.f, xy::DefaultSceneSize.y / 2.f);
 
     auto& texture = tr.get("assets/images/ui/value_bar.png");
@@ -66,7 +66,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
     {
         m_bars.emplace_back(std::make_unique<ValueBar>(font, texture, barSize));
         m_bars.back()->setPosition(position);
-        m_bars.back()->setValue(a.second);
+        m_bars.back()->setValue((a.first == AttribManager::Personal::Cleanliness) ? 100.f - a.second : a.second);
         m_bars.back()->setTitle(personalNames[a.first]);
 
         position.y += verticalSpacing;
@@ -84,7 +84,13 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
         const auto values = m_attribManager.getPersonalAttribs();
         for (auto i = 0u; i < m_bars.size(); ++i)
         {
-            m_bars[i]->setValue(values[i].second);
+            auto value = values[i].second;
+            //display of cleanliness is inverse
+            if (i == AttribManager::Personal::Cleanliness)
+            {
+                value = 100.f - value;
+            }
+            m_bars[i]->setValue(value);
         }
         timer = 1.f;
     }

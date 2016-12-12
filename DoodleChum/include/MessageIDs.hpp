@@ -102,17 +102,20 @@ namespace Message
     {
         enum
         {
-            MouseClick
+            MouseClick,
+            ButtonClick
         }type;
         float positionX = 0.f;
         float positionY = 0.f;
+        std::int16_t ID = -1;
     };
 
     struct AttribEvent final
     {
         enum
         {
-            GotPaid
+            GotPaid,
+            SpentMoney
         }action;
         std::int32_t value = 0;
     };

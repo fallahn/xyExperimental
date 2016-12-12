@@ -42,7 +42,7 @@ source distribution.
 namespace
 {
     const std::string balanceString("Balance Cr: ");
-    const sf::Vector2i calendarRect(128, 128);
+    const std::string daysString("Days to pay day:  ");
 }
 
 TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& tr, const AttribManager& am)
@@ -55,42 +55,42 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     m_titleText.setFont(handFont);
     m_titleText.setString("Info...");
     m_titleText.setFillColor(sf::Color::Black);
-    m_titleText.setCharacterSize(50u);
+    m_titleText.setCharacterSize(36u);
+    m_titleText.setRotation(3.f);
     xy::Util::Position::centreOrigin(m_titleText);
-    m_titleText.setPosition(xy::DefaultSceneSize.x / 2.f, 200.f);
+    m_titleText.setPosition(xy::DefaultSceneSize.x / 2.f, 196.f);
 
     m_daysText.setFont(handFont);
-    m_daysText.setString("Days to pay day:");
+    m_daysText.setString(daysString + std::to_string(m_attribManager.getDaysToPayDay()));
     m_daysText.setCharacterSize(50u);
     m_daysText.setFillColor(sf::Color::Black);
     xy::Util::Position::centreOrigin(m_daysText);
-    m_daysText.setPosition(220.f, 80.f);
+    m_daysText.setPosition(420.f, 80.f);
 
     m_balanceText = m_daysText;
     m_balanceText.setString(balanceString + std::to_string(am.getIncome()));
     xy::Util::Position::centreOrigin(m_balanceText);
-    m_balanceText.move(1200.f, 0.f);
+    m_balanceText.move(1100.f, 0.f);
 
     auto& clockFont = fr.get("assets/fonts/Clock.ttf");
     m_clockText.setFont(clockFont);
-    m_clockText.setFillColor({ 255, 0, 0, 220 });
-    m_clockText.setCharacterSize(110);
+    m_clockText.setFillColor({ 255, 0, 0, 140 });
+    m_clockText.setCharacterSize(100);
     m_clockText.setString("00:00");
     xy::Util::Position::centreOrigin(m_clockText);
-    m_clockText.setPosition(xy::DefaultSceneSize.x / 2.f, 80.f);
+    m_clockText.setPosition(xy::DefaultSceneSize.x / 2.f, 84.f);
 
     m_clockShadow = m_clockText;
     m_clockShadow.move(1.f, 1.f);
     m_clockShadow.setString("00:00");
-    m_clockShadow.setFillColor({ 120, 120, 120, 120 });
+    m_clockShadow.setFillColor({ 160, 160, 160, 160 });
 
     m_buttonSprite.setTexture(tr.get("assets/images/ui/menu_button.png"));
     m_buttonSprite.setPosition(xy::DefaultSceneSize.x - m_buttonSprite.getLocalBounds().width - 10.f, 100.f);
 
     m_calendarSprite.setTexture(tr.get("assets/images/ui/calendar.png"));
-    m_calendarSprite.setTextureRect({ calendarRect.x * (am.getDaysToPayDay() - 1), 0, calendarRect.x, calendarRect.y });
     xy::Util::Position::centreOrigin(m_calendarSprite);
-    m_calendarSprite.setPosition(460.f, 80.f);
+    m_calendarSprite.setPosition(618.f, 80.f);
 
 
     xy::Component::MessageHandler mh;
@@ -103,10 +103,11 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     addMessageHandler(mh);
 
     mh.id = Message::Attribute;
-    mh.action = [this](xy::Component*, const  xy::Message& msg)
+    mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AttribEvent>();
-        if (data.action == Message::AttribEvent::GotPaid)
+        if (data.action == Message::AttribEvent::GotPaid
+            || data.action == Message::AttribEvent::SpentMoney)
         {
             m_balanceText.setString(balanceString + std::to_string(data.value));
         }
@@ -116,7 +117,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     mh.id = Message::DayChanged;
     mh.action = [this](xy::Component*, const xy::Message&)
     {
-        m_calendarSprite.setTextureRect({ calendarRect.x * (m_attribManager.getDaysToPayDay() - 1), 0, calendarRect.x, calendarRect.y });
+        m_daysText.setString(daysString + std::to_string(m_attribManager.getDaysToPayDay()));
     };
     addMessageHandler(mh);
 
@@ -159,11 +160,11 @@ void TimeTab::updateClockText(float time)
 
 void TimeTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    rt.draw(m_calendarSprite, states);
+    rt.draw(m_buttonSprite, states);    
     rt.draw(m_titleText, states);
     rt.draw(m_daysText, states);
     rt.draw(m_balanceText, states);
     rt.draw(m_clockShadow, states);
     rt.draw(m_clockText, states);
-    rt.draw(m_calendarSprite, states);
-    rt.draw(m_buttonSprite, states);
 }

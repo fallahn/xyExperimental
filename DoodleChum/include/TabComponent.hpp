@@ -43,7 +43,7 @@ public:
         Horizontal, Vertical
     };
 
-    TabComponent(xy::MessageBus&, const sf::Vector2f&, Direction);
+    TabComponent(xy::MessageBus&, const sf::Vector2f&, Direction, const sf::Texture&);
     ~TabComponent() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
@@ -64,6 +64,7 @@ private:
     sf::FloatRect m_globalBounds;
     sf::FloatRect m_tabBounds;
 
+    const sf::Texture& m_texture;
     std::vector<sf::Vertex> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

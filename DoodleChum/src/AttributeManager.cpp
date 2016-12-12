@@ -49,6 +49,17 @@ namespace
     const float minIncomeRate = 10.f;
     const int daysPerWeek = 7; //duh, but y'know
 
+    std::array<int, AttribManager::Household::Count> householdCosts = 
+    {
+        60, //food
+        40, //water
+        100, //music
+        95, //sheet music
+        95, //games
+        80, //films
+        0 //padding
+    };
+
     const float hungerPerSecond = 0.0046f; //approx 100% every 6 hours
     const float thirstPerSecond = 0.028f; //approx 100% every hour
     const float cleanlinessPerSecond = 0.0023f; //approx every 12 hours
@@ -65,7 +76,7 @@ namespace
     const float waterPerShower = 40.f;
     const float foodPerEat = 20.f;
     const float tirednessPerSleep = 75.f;
-    //const float entertainmentValue = 20.f; //a particular entertainment's novelty is reduced by this much
+    const float entertainmentValue = 20.f; //a particular entertainment is increased this much with each purchase
     const float entertainmentReductionMultiplier = 0.2f; // see above
     const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
 }
@@ -143,6 +154,53 @@ void AttribManager::handleMessage(const xy::Message& msg)
         case Message::TaskEvent::Sleep:
             m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - tirednessPerSleep);
             break;
+        }
+    }
+
+    //UI buttons have been clicked
+    else if (msg.id == Message::Interface)
+    {
+        const auto& data = msg.getData<Message::InterfaceEvent>();
+        if (data.type == Message::InterfaceEvent::ButtonClick)
+        {
+            XY_ASSERT(data.ID >= 0, "invalid ID");
+
+            if (m_stats.currentIncome >= householdCosts[data.ID]
+                && m_householdAttribs[data.ID] < 100.f)
+            {
+                m_stats.currentIncome -= householdCosts[data.ID];
+                m_stats.totalOutGoing += householdCosts[data.ID];
+
+                //update the corresponding attribute
+                switch (data.ID)
+                {
+                default: break;
+                case Household::Food:
+                    m_householdAttribs[Household::Food] = std::min(m_householdAttribs[Household::Food] + foodPerEat, 100.f);
+                    break;
+                case Household::Water:
+                    m_householdAttribs[Household::Water] = std::min(m_householdAttribs[Household::Water] + (waterPerDrink + waterPerFlush + waterPerShower), 100.f);
+                    break;
+                case Household::Music:
+                    m_householdAttribs[Household::Music] = std::min(m_householdAttribs[Household::Music] + entertainmentValue, 100.f);
+                    //TODO unlock new music
+                    break;
+                case Household::SheetMusic:
+                    m_householdAttribs[Household::SheetMusic] = std::min(m_householdAttribs[Household::SheetMusic] + entertainmentValue, 100.f);
+                    break;
+                case Household::Films:
+                    m_householdAttribs[Household::Films] = std::min(m_householdAttribs[Household::Films] + entertainmentValue, 100.f);
+                    break;
+                case Household::Games:
+                    m_householdAttribs[Household::Games] = std::min(m_householdAttribs[Household::Games] + entertainmentValue, 100.f);
+                    break;
+                }
+
+                //raise a message saying money went out
+                auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
+                payMsg->action = Message::AttribEvent::SpentMoney;
+                payMsg->value = m_stats.currentIncome;
+            }
         }
     }
 
@@ -324,6 +382,14 @@ bool AttribManager::load()
     }
 
     updateValues(static_cast<float>(diff) / divisor);
+
+    //see how many days passed and update days to pay day
+    auto dayCount = diff / twentyfourHours;
+    for (auto i = 0u; i < dayCount; ++i)
+    {
+        auto dayChangeMsg = m_messageBus.post<float>(Message::DayChanged);
+        *dayChangeMsg = 0.f;
+    }
 
     return true;
 }
