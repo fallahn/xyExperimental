@@ -125,10 +125,13 @@ namespace Message
     {
         enum
         {
-            Moved
+            Moved,
+            TaskFailed,
+            ResourceLow
         }action;
         float posX = 0.f;
         float posY = 0.f;
+        std::int32_t task = -1;
     };
 }
 

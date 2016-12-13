@@ -31,6 +31,7 @@ source distribution.
 
 #include <xygine/Log.hpp>
 #include <xygine/util/Random.hpp>
+#include <xygine/SysTime.hpp>
 
 ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb, const AttribManager& am)
     : Task          (entity, mb),
@@ -96,6 +97,14 @@ void ThinkTask::update(float dt)
                 }
             }
 
+            //raise a message is an entertainment is particularly low
+            if (hhAtt[entertainment] < 25)
+            {
+                auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+                msg->task = entertainment;
+                msg->action = Message::PlayerEvent::ResourceLow;
+            }
+
             switch (entertainment)
             {
             default:
@@ -145,13 +154,33 @@ bool ThinkTask::canDo(std::int32_t attrib)
     case AttribManager::Personal::Boredness:
         return true; //can always do an activity - it may just not alleviate boredness
     case AttribManager::Personal::Hunger:
-        return householdAttribs[AttribManager::Household::Food] > 0;    
+    {
+        bool possible = householdAttribs[AttribManager::Household::Food] > 0;
+        if (!possible)
+        {
+            auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+            msg->action = Message::PlayerEvent::TaskFailed;
+            msg->task = attrib;
+        }
+        return possible;
+    }
     case AttribManager::Personal::Cleanliness:
     case AttribManager::Personal::Poopiness:
     case AttribManager::Personal::Thirst:
-        return householdAttribs[AttribManager::Household::Water] > 0;
-        break;
+    {
+        bool possible = householdAttribs[AttribManager::Household::Water] > 0;
+        if (!possible)
+        {
+            auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+            msg->action = Message::PlayerEvent::TaskFailed;
+            msg->task = attrib;
+        }
+        return possible;
+    }
     case AttribManager::Personal::Tiredness:
-        return true;
+    { //only sleep at night
+        const auto& curTime = xy::SysTime::now();
+        return (curTime.hours() > 20 || curTime.hours() < 8);
+    }
     }
 }

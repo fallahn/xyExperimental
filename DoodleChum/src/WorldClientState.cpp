@@ -33,6 +33,7 @@ source distribution.
 #include <MessageIDs.hpp>
 #include <AttributeManager.hpp>
 #include <TabComponent.hpp>
+#include <TreeLightController.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -267,8 +268,10 @@ void WorldClientState::initMeshes()
 
         auto lightModel = m_meshRenderer.createModel(Mesh::Lights, m_messageBus);
         lightModel->setBaseMaterial(lightMat);
-
         entity->addComponent(lightModel);
+
+        auto lightController = xy::Component::create<TreeLightController>(m_messageBus, lightMat);
+        entity->addComponent(lightController);
     }
 
     entity->addComponent(hausModel);

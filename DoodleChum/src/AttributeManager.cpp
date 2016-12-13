@@ -44,19 +44,20 @@ namespace
 
 #include "StringConsts.inl"
 
-    const int initialIncome = 1000;
-    const float payPerWeek = 1000; //(multiplied by Houshold::Incomerate)
+    const int initialIncome = 10000;
+    const float payPerWeek = 5000; //(multiplied by Houshold::Incomerate)
     const float minIncomeRate = 10.f;
     const int daysPerWeek = 7; //duh, but y'know
 
+    //these are approximate amounts based on a weeks consumption
     std::array<int, AttribManager::Household::Count> householdCosts = 
     {
-        60, //food
-        40, //water
-        100, //music
-        95, //sheet music
-        95, //games
-        80, //films
+        11, //food
+        400, //water
+        120, //music
+        150, //sheet music
+        400, //games
+        120, //films
         0 //padding
     };
 
@@ -71,13 +72,13 @@ namespace
     const std::uint64_t twelveHours = fourHours * 3;
     const std::uint64_t twentyfourHours = twelveHours * 2;
 
-    const float waterPerDrink = 10.f;
-    const float waterPerFlush = 25.f;
-    const float waterPerShower = 40.f;
-    const float foodPerEat = 20.f;
+    const float waterPerDrink = 1.89f;
+    const float waterPerFlush = 22.68f;
+    const float waterPerShower = 45.36f;
+    const float foodPerEat = 3.6f;
     const float tirednessPerSleep = 75.f;
-    const float entertainmentValue = 20.f; //a particular entertainment is increased this much with each purchase
-    const float entertainmentReductionMultiplier = 0.2f; // see above
+    const float entertainmentValue = 4.f; //a particular entertainment is increased this much with each purchase
+    const float entertainmentReductionMultiplier = 0.2f; // entertainment is this much less entertaining each time it's used
     const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
 }
 
@@ -119,11 +120,11 @@ void AttribManager::handleMessage(const xy::Message& msg)
         {
         default: break;
         case Message::TaskEvent::Drink:
-            m_personalAttribs[Personal::Thirst] = std::max(0.f, m_personalAttribs[Personal::Thirst] - (waterPerDrink * 3.f));
+            m_personalAttribs[Personal::Thirst] *= 0.14f;
             m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerDrink);
             break;
         case Message::TaskEvent::Eat:
-            m_personalAttribs[Personal::Hunger] = std::max(0.f, m_personalAttribs[Personal::Hunger] - (foodPerEat* 3.f));
+            m_personalAttribs[Personal::Hunger] *= 0.05f;
             m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (foodPerEat / 2.f));
             m_householdAttribs[Household::Food] = std::max(0.f, m_householdAttribs[Household::Food] - foodPerEat);
             break;
@@ -152,7 +153,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
             m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerShower);
             break;
         case Message::TaskEvent::Sleep:
-            m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - tirednessPerSleep);
+            m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - (tirednessPerSleep * (m_personalAttribs[Personal::Health] / 100.f)));
             break;
         }
     }
@@ -168,8 +169,8 @@ void AttribManager::handleMessage(const xy::Message& msg)
             if (m_stats.currentIncome >= householdCosts[data.ID]
                 && m_householdAttribs[data.ID] < 100.f)
             {
-                m_stats.currentIncome -= householdCosts[data.ID];
-                m_stats.totalOutGoing += householdCosts[data.ID];
+                auto cost = householdCosts[data.ID];
+                
 
                 //update the corresponding attribute
                 switch (data.ID)
@@ -179,7 +180,14 @@ void AttribManager::handleMessage(const xy::Message& msg)
                     m_householdAttribs[Household::Food] = std::min(m_householdAttribs[Household::Food] + foodPerEat, 100.f);
                     break;
                 case Household::Water:
-                    m_householdAttribs[Household::Water] = std::min(m_householdAttribs[Household::Water] + (waterPerDrink + waterPerFlush + waterPerShower), 100.f);
+                    //m_householdAttribs[Household::Water] = std::min(m_householdAttribs[Household::Water] + (waterPerDrink + waterPerFlush + waterPerShower), 100.f);
+                {
+                    const float waterAmount = 100.f - m_householdAttribs[Household::Water];
+                    m_householdAttribs[Household::Water] = std::min(m_householdAttribs[Household::Water] + waterAmount, 100.f);
+                    float tempCost = static_cast<float>(cost);
+                    tempCost *= waterAmount / 100.f;
+                    cost = static_cast<int>(tempCost);
+                }
                     break;
                 case Household::Music:
                     m_householdAttribs[Household::Music] = std::min(m_householdAttribs[Household::Music] + entertainmentValue, 100.f);
@@ -195,6 +203,9 @@ void AttribManager::handleMessage(const xy::Message& msg)
                     m_householdAttribs[Household::Games] = std::min(m_householdAttribs[Household::Games] + entertainmentValue, 100.f);
                     break;
                 }
+
+                m_stats.currentIncome -= cost;
+                m_stats.totalOutGoing += cost;
 
                 //raise a message saying money went out
                 auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
@@ -267,12 +278,15 @@ void AttribManager::initValues()
 
 void AttribManager::updateValues(float dt)
 {
-    m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * dt));
-    m_personalAttribs[Personal::Thirst] = std::min(100.f, m_personalAttribs[Personal::Thirst] + (thirstPerSecond * dt));
-    m_personalAttribs[Personal::Cleanliness] = std::min(100.f, m_personalAttribs[Personal::Cleanliness] + (cleanlinessPerSecond * dt));
-    m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] + (tirednessPerSecond * dt));
-    m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (poopPerSecond * dt));
-    m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (borednessPerSecond * dt));
+    //rate of decline increases as health decreases
+    const float rate = dt * (1.f + (0.1f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
+    
+    m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * rate));
+    m_personalAttribs[Personal::Thirst] = std::min(100.f, m_personalAttribs[Personal::Thirst] + (thirstPerSecond * rate));
+    m_personalAttribs[Personal::Cleanliness] = std::min(100.f, m_personalAttribs[Personal::Cleanliness] + (cleanlinessPerSecond * rate));
+    m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] + (tirednessPerSecond * rate));
+    m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (poopPerSecond * rate));
+    m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (borednessPerSecond * rate));
 }
 
 void AttribManager::updateHealth()
@@ -384,7 +398,11 @@ bool AttribManager::load()
     updateValues(static_cast<float>(diff) / divisor);
 
     //see how many days passed and update days to pay day
-    auto dayCount = diff / twentyfourHours;
+    auto oldTime = std::localtime((std::time_t*)&timeElapsed);
+    auto newTime = std::localtime((std::time_t*)&timeNow);
+
+    auto dayCount = newTime->tm_yday - oldTime->tm_yday;
+    if (dayCount < 0) dayCount = std::abs(dayCount) + newTime->tm_yday;
     for (auto i = 0u; i < dayCount; ++i)
     {
         auto dayChangeMsg = m_messageBus.post<float>(Message::DayChanged);
@@ -448,7 +466,7 @@ void AttribManager::addDebugWindow()
     xy::App::addUserWindow([this]() 
     {
         nim::SetNextWindowSize({ 220.f, 400.f });
-        nim::Begin("Stats:");
+        nim::Begin("Info:");
 
         for (auto i = 0; i < Personal::Count; ++i)
         {

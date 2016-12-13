@@ -147,6 +147,11 @@ void HouseholdTab::entityUpdate(xy::Entity&, float dt)
         }
         timer = 1.f;
     }
+
+    for (auto& b : m_bars)
+    {
+        b->update(dt);
+    }
 }
 
 //private

@@ -36,7 +36,8 @@ source distribution.
 
 ValueBar::ValueBar(sf::Font& font, const sf::Texture& texture, const sf::Vector2f& size)
     : m_texture (texture),
-    m_size      (size)
+    m_size      (size),
+    m_value     (100.f)
 {
     sf::Vector2f texSize = static_cast<sf::Vector2f>(texture.getSize());
     m_vertices =
@@ -67,9 +68,7 @@ void ValueBar::setValue(float value)
     value = std::max(0.f, std::min(value, 100.f));
     XY_ASSERT(m_vertices.size() == 8, "vertex data incorrect");
 
-    const float position = (value / 100.f) * m_size.x;
-    m_vertices[5].position.x = position;
-    m_vertices[6].position.x = position;
+    m_value = value;
 
     std::stringstream ss;
     ss.precision(4);
@@ -80,6 +79,25 @@ void ValueBar::setValue(float value)
 void ValueBar::setTitle(const std::string& str)
 {
     m_titleText.setString(str);
+}
+
+void ValueBar::update(float dt)
+{
+    const float position = (m_value / 100.f) * m_size.x;
+
+    float diff = position - m_vertices[5].position.x;
+
+    if (std::abs(diff) > 2.f)
+    {
+        static const float moveSpeed = 400.f;
+        m_vertices[5].position.x += diff * dt;
+        m_vertices[6].position.x += diff * dt;
+    }
+    else
+    {
+        m_vertices[5].position.x = position;
+        m_vertices[6].position.x = position;
+    }
 }
 
 //private

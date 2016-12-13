@@ -58,8 +58,9 @@ private:
     const AttribManager& m_attribManager;
 
     sf::Text m_titleText;
-
     std::vector<std::unique_ptr<ValueBar>> m_bars;
+
+    std::vector<std::string> m_messageList;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

@@ -25,42 +25,38 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_VALUE_BAR_HPP_
-#define DC_VALUE_BAR_HPP_
+#ifndef DC_TREELIGHT_CONTROLLER_HPP_
+#define DC_TREELIGHT_CONTROLLER_HPP_
 
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Transformable.hpp>
-#include <SFML/Graphics/Vertex.hpp>
-#include <SFML/Graphics/Text.hpp>
+#include <xygine/components/Component.hpp>
 
-#include <vector>
+#include <SFML/Graphics/Color.hpp>
 
-namespace sf
+#include <array>
+
+namespace xy
 {
-    class Font;
+    class Material;
 }
 
-class ValueBar final : public sf::Drawable, public sf::Transformable
+class TreeLightController final : public xy::Component
 {
 public:
-    ValueBar(sf::Font&, const sf::Texture&, const sf::Vector2f&);
-    ~ValueBar() = default;
+    TreeLightController(xy::MessageBus&, xy::Material&);
+    ~TreeLightController() = default;
 
-    void setValue(float);
-    void setTitle(const std::string&);
-
-    void update(float);
+    xy::Component::Type type() const override { return xy::Component::Type::Script; }
+    void entityUpdate(xy::Entity&, float) override;
 
 private:
-    const sf::Texture& m_texture;
-    sf::Vector2f m_size;
-    float m_value;
 
-    sf::Text m_valueText;
-    sf::Text m_titleText;
+    xy::Material& m_material;
 
-    std::vector<sf::Vertex> m_vertices;
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    std::array<float, 3> m_values;
+    std::size_t m_currentIndex;
+    bool m_up;
+    sf::Color m_colour;
 };
 
-#endif //DC_VALUE_BAR_HPP_
+
+#endif //DC_TREELIGHT_CONTROLLER_HPP_

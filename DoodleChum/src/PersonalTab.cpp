@@ -27,6 +27,7 @@ source distribution.
 
 #include <PersonalTab.hpp>
 #include <AttributeManager.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/Resource.hpp>
 #include <xygine/util/Position.hpp>
@@ -71,6 +72,72 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
 
         position.y += verticalSpacing;
     }
+
+    //message handler for low resources
+    xy::Component::MessageHandler mh;
+    mh.id = Message::Player;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::ResourceLow)
+        {
+            //Household enum
+            switch (data.task)
+            {
+            default: break;
+            case AttribManager::Household::Films:
+                m_messageList.emplace_back("I'd quite like a new film to watch.");
+                break;
+            case AttribManager::Household::Music:
+                m_messageList.emplace_back("My music playlist is getting a little repetative.");
+                break;
+            case AttribManager::Household::SheetMusic:
+                m_messageList.emplace_back("I'd love to have a new song to learn on the piano!");
+                break;
+            case AttribManager::Household::Games:
+                m_messageList.emplace_back("Perhaps it would be fun to have some new games to play?");
+                break;
+            }
+        }
+        else if (data.action == Message::PlayerEvent::TaskFailed)
+        {
+            //personal enum
+            switch (data.task)
+            {
+            default: break;
+            case AttribManager::Personal::Cleanliness:
+                m_messageList.emplace_back("I want to shower, but there's no water.");
+                break;
+            case AttribManager::Personal::Hunger:
+                m_messageList.emplace_back("I'm sooo hungry... but there's no food!");
+                break;
+            case AttribManager::Personal::Poopiness:
+                m_messageList.emplace_back("I need to use the bathroom, may I have some water so I can flush?");
+                break;
+            case AttribManager::Personal::Thirst:
+                m_messageList.emplace_back("I'm REALLY thirsty, could you help out with some water?");
+                break;
+            }
+        }
+    };
+    addMessageHandler(mh);
+
+    //print all messages (if any) when using computer
+    mh.id = Message::Animation;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Computer)
+        {
+            for (const auto& str : m_messageList)
+            {
+                //print(str):
+                LOG(str, xy::Logger::Type::Info);
+            }
+            m_messageList.clear();
+        }
+    };
+    addMessageHandler(mh);
 }
 
 //public
@@ -93,6 +160,11 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
             m_bars[i]->setValue(value);
         }
         timer = 1.f;
+    }
+
+    for (auto& b : m_bars)
+    {
+        b->update(dt);
     }
 }
 

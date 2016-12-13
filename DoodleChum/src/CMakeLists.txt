@@ -23,6 +23,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/ThinkTask.cpp
   ${PROJECT_DIR}/TimeTab.cpp
   ${PROJECT_DIR}/TravelTask.cpp
+  ${PROJECT_DIR}/TreeLightController.cpp
   ${PROJECT_DIR}/TVTask.cpp
   ${PROJECT_DIR}/ValueBar.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)
