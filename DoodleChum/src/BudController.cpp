@@ -195,6 +195,16 @@ void BudController::onStart(xy::Entity& entity)
     m_entity = &entity;
 }
 
+void BudController::onDelayedStart(xy::Entity& entity)
+{
+    auto position = entity.getWorldPosition();
+    
+    auto msg = sendMessage<Message::PlayerEvent>(Message::Player);
+    msg->action = Message::PlayerEvent::Moved;
+    msg->posX = position.x;
+    msg->posY = position.y;
+}
+
 //private
 void BudController::initSprite()
 {   

@@ -82,41 +82,50 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
         if (data.action == Message::PlayerEvent::ResourceLow)
         {
             //Household enum
-            switch (data.task)
+            if (std::find(std::begin(m_messageIDs), std::end(m_messageIDs), data.task) == m_messageIDs.end())
             {
-            default: break;
-            case AttribManager::Household::Films:
-                m_messageList.emplace_back("I'd quite like a new film to watch.");
-                break;
-            case AttribManager::Household::Music:
-                m_messageList.emplace_back("My music playlist is getting a little repetative.");
-                break;
-            case AttribManager::Household::SheetMusic:
-                m_messageList.emplace_back("I'd love to have a new song to learn on the piano!");
-                break;
-            case AttribManager::Household::Games:
-                m_messageList.emplace_back("Perhaps it would be fun to have some new games to play?");
-                break;
+                switch (data.task)
+                {
+                default: break;
+                case AttribManager::Household::Films:
+                    m_messageList.emplace_back("I'd quite like a new film to watch.");
+                    break;
+                case AttribManager::Household::Music:
+                    m_messageList.emplace_back("My music playlist is getting a little repetative.");
+                    break;
+                case AttribManager::Household::SheetMusic:
+                    m_messageList.emplace_back("I'd love to have a new song to learn on the piano!");
+                    break;
+                case AttribManager::Household::Games:
+                    m_messageList.emplace_back("Perhaps it would be fun to have some new games to play?");
+                    break;
+                }
+                m_messageIDs.emplace_back(data.task);
             }
         }
         else if (data.action == Message::PlayerEvent::TaskFailed)
         {
             //personal enum
-            switch (data.task)
+            static const std::int32_t IDOffset = 20;
+            if (std::find(std::begin(m_messageIDs), std::end(m_messageIDs), IDOffset + data.task) == m_messageIDs.end())
             {
-            default: break;
-            case AttribManager::Personal::Cleanliness:
-                m_messageList.emplace_back("I want to shower, but there's no water.");
-                break;
-            case AttribManager::Personal::Hunger:
-                m_messageList.emplace_back("I'm sooo hungry... but there's no food!");
-                break;
-            case AttribManager::Personal::Poopiness:
-                m_messageList.emplace_back("I need to use the bathroom, may I have some water so I can flush?");
-                break;
-            case AttribManager::Personal::Thirst:
-                m_messageList.emplace_back("I'm REALLY thirsty, could you help out with some water?");
-                break;
+                switch (data.task)
+                {
+                default: break;
+                case AttribManager::Personal::Cleanliness:
+                    m_messageList.emplace_back("I want to shower, but there's no water.");
+                    break;
+                case AttribManager::Personal::Hunger:
+                    m_messageList.emplace_back("I'm sooo hungry... but there's no food!");
+                    break;
+                case AttribManager::Personal::Poopiness:
+                    m_messageList.emplace_back("I need to use the bathroom, may I have some water so I can flush?");
+                    break;
+                case AttribManager::Personal::Thirst:
+                    m_messageList.emplace_back("I'm REALLY thirsty, could you help out with some water?");
+                    break;
+                }
+                m_messageIDs.emplace_back(IDOffset + data.task);
             }
         }
     };
@@ -135,6 +144,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
                 LOG(str, xy::Logger::Type::Info);
             }
             m_messageList.clear();
+            m_messageIDs.clear();
         }
     };
     addMessageHandler(mh);

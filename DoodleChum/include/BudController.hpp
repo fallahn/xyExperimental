@@ -51,6 +51,7 @@ public:
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
     void onStart(xy::Entity&) override;
+    void onDelayedStart(xy::Entity&) override;
 
     const sf::Texture& getTexture() const { return m_texture.getTexture(); }
 

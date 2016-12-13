@@ -50,6 +50,7 @@ public:
 
 private:
     xy::PointLight* m_light;
+    xy::Entity* m_entity;
 
     float m_intensity;
     sf::FloatRect m_bounds;

@@ -317,14 +317,6 @@ void WorldClientState::initMapData()
         {
             if (l->getType() == xy::tmx::Layer::Type::Tile)
             {
-                //TODO check dwb is not nullptr
-                /*auto dwb = map.getDrawable(m_messageBus, *l, m_textureResource, m_shaderResource);
-                auto entity = xy::Entity::create(m_messageBus);
-                entity->addComponent(dwb);
-                entity->setPosition(mapOffset);
-                m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);*/
-
-
                 xy::tmx::TileLayer* tl = dynamic_cast<xy::tmx::TileLayer*>(l.get());
                 const auto& tiles = tl->getTiles();
                 auto mapSize = map.getTileCount();
@@ -352,9 +344,9 @@ void WorldClientState::initMapData()
                     const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& o : objs)
                     {
-                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 640.f, 20.f, sf::Color(255,240,220));
-                        light->setDepth(260.f);
-                        light->setIntensity(1.f);
+                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 640.f, 20.f, sf::Color(255,250,240));
+                        light->setDepth(200.f);
+                        light->setIntensity(0.f);
                         //light->enableShadowCasting(true);
 
                         auto controller = xy::Component::create<RoomLightController>(m_messageBus);

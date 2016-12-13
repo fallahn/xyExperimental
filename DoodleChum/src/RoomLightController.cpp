@@ -32,18 +32,71 @@ source distribution.
 #include <xygine/Scene.hpp>
 #include <xygine/Assert.hpp>
 #include <xygine/components/PointLight.hpp>
+#include <xygine/util/Vector.hpp>
+#include <xygine/Reports.hpp>
+
+namespace
+{
+    const float minDistance = 80.f;
+    const float maxDistance = 500.f;
+    const float bobOffset = 200.f; //make position near his head
+    const float yInfluence = 200.f;
+}
 
 RoomLightController::RoomLightController(xy::MessageBus& mb)
-    : xy::Component(mb, this),
-    m_light(nullptr),
-    m_intensity(0.f)
+    : xy::Component (mb, this),
+    m_light         (nullptr),
+    m_entity        (nullptr),
+    m_intensity     (0.f)
 {
     xy::Component::MessageHandler mh;
     mh.id = Message::TimeOfDay;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::TODEvent>();
-        m_light->setIntensity(1.f - data.sunIntensity);
+        //m_light->setIntensity(1.f - data.sunIntensity);
+        m_intensity = 1.f - data.sunIntensity;
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::Player;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::Moved)
+        {
+            //if (std::abs(data.posX) > std::abs(data.posY))
+            {
+                sf::Vector2f position(data.posX, data.posY - bobOffset);
+                static const float minDistance2 = minDistance * minDistance;
+                static const float maxDistance2 = maxDistance * maxDistance;
+                static const float diff = maxDistance2 - minDistance2;
+
+                auto direction = position - m_entity->getWorldPosition();
+                float distance2 = xy::Util::Vector::lengthSquared(direction);
+                //artificially skew direction in Y axis so vertical lights seem further away
+                distance2 *= std::max(1.f, std::abs(direction.y) / std::abs(direction.x));
+
+                if (distance2 > maxDistance2)
+                {
+                    m_light->setIntensity(0.f);
+                }
+                else
+                {
+                    if (distance2 > minDistance2)
+                    {
+                        float playerDiff = maxDistance2 - distance2;
+                        playerDiff /= diff;
+                        m_light->setIntensity(m_intensity * playerDiff);
+                        //REPORT("diff", std::to_string(playerDiff));
+                    }
+                    else
+                    {
+                        m_light->setIntensity(m_intensity);
+                    }
+                }
+            }
+        }
     };
     addMessageHandler(mh);
 }
@@ -58,4 +111,6 @@ void RoomLightController::onStart(xy::Entity& entity)
 {
     m_light = entity.getComponent<xy::PointLight>();
     XY_ASSERT(m_light, "Entity has no light component");
+
+    m_entity = &entity;
 }
