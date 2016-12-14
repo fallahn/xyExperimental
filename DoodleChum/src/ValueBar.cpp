@@ -60,6 +60,9 @@ ValueBar::ValueBar(sf::Font& font, const sf::Texture& texture, const sf::Vector2
     m_valueText = m_titleText;
     m_valueText.setString(std::to_string(100));
     m_valueText.setPosition(size.x + 12.f, 6.f);
+
+    m_localBounds.width = size.x;
+    m_localBounds.height = size.y;
 }
 
 //public
@@ -89,7 +92,6 @@ void ValueBar::update(float dt)
 
     if (std::abs(diff) > 2.f)
     {
-        static const float moveSpeed = 400.f;
         m_vertices[5].position.x += diff * dt;
         m_vertices[6].position.x += diff * dt;
     }
@@ -98,6 +100,11 @@ void ValueBar::update(float dt)
         m_vertices[5].position.x = position;
         m_vertices[6].position.x = position;
     }
+}
+
+sf::FloatRect ValueBar::getGlobalBounds() const
+{
+    return getTransform().transformRect(m_localBounds);
 }
 
 //private

@@ -104,7 +104,8 @@ namespace Message
         enum
         {
             MouseClick,
-            ButtonClick
+            ButtonClick,
+            MouseMoved
         }type;
         float positionX = 0.f;
         float positionY = 0.f;

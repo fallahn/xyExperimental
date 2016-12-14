@@ -123,6 +123,9 @@
     <ClInclude Include="include\TreeLightController.hpp">
       <Filter>Header Files\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="include\PriceTag.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -205,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="src\TreeLightController.cpp">
       <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PriceTag.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

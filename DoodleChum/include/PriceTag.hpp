@@ -25,48 +25,31 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_HOUSEHOLD_TAB_HPP_
-#define DC_HOUSEHOLD_TAB_HPP_
-
-#include <ValueBar.hpp>
-#include <PriceTag.hpp>
-
-#include <xygine/components/Component.hpp>
+#ifndef DC_PRICE_TAG_HPP_
+#define DC_PRICE_TAG_HPP_
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
-#include <memory>
+#include <array>
 
-namespace xy
-{
-    class FontResource;
-    class TextureResource;
-}
-
-class AttribManager;
-class HouseholdTab final : public xy::Component, public sf::Drawable
+class PriceTag final : public sf::Drawable, public sf::Transformable
 {
 public:
-    HouseholdTab(xy::MessageBus&, xy::FontResource&, xy::TextureResource&, const AttribManager&);
-    ~HouseholdTab() = default;
+    PriceTag(sf::Font&, const sf::Texture&);
+    ~PriceTag() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float);
-    void onStart(xy::Entity& e) override { m_entity = &e; }
+    void setVisible(bool);
+    void setText(const std::string&);
 
 private:
-    const AttribManager& m_attribManager;
-    xy::Entity* m_entity;
-
-    sf::Text m_titleText;
-    sf::Text m_balanceText;
-
-    std::vector<std::pair<std::unique_ptr<ValueBar>, std::unique_ptr<PriceTag>>> m_bars;
-    std::vector<sf::Sprite> m_buttons;
-
+    sf::Text m_text;
+    bool m_visible;
+    const sf::Texture& m_texture;
+    std::array<sf::Vertex, 4u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //DC_HOUSEHOLD_TAB_HPP_
+#endif //DC_PRICE_TAG_HPP_

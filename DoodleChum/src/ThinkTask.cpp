@@ -147,6 +147,7 @@ void ThinkTask::update(float dt)
 bool ThinkTask::canDo(std::int32_t attrib)
 {
     const auto& householdAttribs = m_attribManager.getHouseholdAttribs();
+    const auto& personalAttribs = m_attribManager.getPersonalAttribs();
     
     switch (attrib)
     {
@@ -155,8 +156,9 @@ bool ThinkTask::canDo(std::int32_t attrib)
         return true; //can always do an activity - it may just not alleviate boredness
     case AttribManager::Personal::Hunger:
     {
-        bool possible = householdAttribs[AttribManager::Household::Food] > 0;
-        if (!possible)
+        bool possible = (householdAttribs[AttribManager::Household::Food] > 0
+            && personalAttribs[AttribManager::Personal::Hunger].second > 50.f);
+        if (householdAttribs[AttribManager::Household::Food] == 0)
         {
             auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
             msg->action = Message::PlayerEvent::TaskFailed;
@@ -164,9 +166,10 @@ bool ThinkTask::canDo(std::int32_t attrib)
         }
         return possible;
     }
+    case AttribManager::Personal::Thirst:
+        if (personalAttribs[AttribManager::Personal::Thirst].second < 50.f) return false;
     case AttribManager::Personal::Cleanliness:
     case AttribManager::Personal::Poopiness:
-    case AttribManager::Personal::Thirst:
     {
         bool possible = householdAttribs[AttribManager::Household::Water] > 0;
         if (!possible)

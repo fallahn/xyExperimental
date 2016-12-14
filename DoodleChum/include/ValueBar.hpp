@@ -51,6 +51,8 @@ public:
 
     void update(float);
 
+    sf::FloatRect getGlobalBounds() const;
+
 private:
     const sf::Texture& m_texture;
     sf::Vector2f m_size;
@@ -58,6 +60,8 @@ private:
 
     sf::Text m_valueText;
     sf::Text m_titleText;
+
+    sf::FloatRect m_localBounds;
 
     std::vector<sf::Vertex> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

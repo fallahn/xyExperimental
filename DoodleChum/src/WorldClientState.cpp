@@ -141,6 +141,14 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
         default:break;
         }
     }
+    else if (evt.type == sf::Event::MouseMoved)
+    {
+        auto worldPos = xy::App::getMouseWorldPosition();
+        auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+        msg->type = Message::InterfaceEvent::MouseMoved;
+        msg->positionX = worldPos.x;
+        msg->positionY = worldPos.y;
+    }
     return false;
 }
 

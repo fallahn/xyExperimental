@@ -245,6 +245,11 @@ AttribManager::PersonalAttribs AttribManager::getPersonalAttribs() const
     return retVal;
 }
 
+const std::array<int, AttribManager::Household::Count>& AttribManager::getCosts() const
+{
+    return householdCosts;
+}
+
 //private
 void AttribManager::initValues()
 {

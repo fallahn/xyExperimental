@@ -84,6 +84,8 @@ public:
     std::int32_t getIncome() const { return m_stats.currentIncome; }
     std::int32_t getDaysToPayDay() const { return m_stats.daysToPayDay; }
 
+    const std::array<int, Household::Count>& getCosts() const;
+
 private:
     xy::MessageBus& m_messageBus;
     std::array<float, Personal::Count> m_personalAttribs;
