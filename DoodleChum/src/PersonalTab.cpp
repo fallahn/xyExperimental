@@ -73,6 +73,12 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
         position.y += verticalSpacing;
     }
 
+    auto& printTex = tr.get("assets/images/ui/printer.png");
+    printTex.setRepeated(true);
+    auto& printFont = fr.get("assets/fonts/Printer.ttf");
+    m_printout = std::make_unique<Printout>(printFont, printTex);
+    m_printout->setPosition(40.f, 720.f);
+
     //message handler for low resources
     xy::Component::MessageHandler mh;
     mh.id = Message::Player;
@@ -138,16 +144,41 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id == Message::AnimationEvent::Computer)
         {
+            m_printout->clear();
             for (const auto& str : m_messageList)
             {
-                //print(str):
-                LOG(str, xy::Logger::Type::Info);
+                m_printout->printLine(str);
             }
             m_messageList.clear();
             m_messageIDs.clear();
         }
     };
     addMessageHandler(mh);
+
+    //update the bounds of the cropping shader in the printer
+    mh.id = Message::Interface;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::InterfaceEvent>();
+        if (data.type == Message::InterfaceEvent::ResizedWindow)
+        {
+            m_printout->updateShaderParams(data.rw);
+        }
+    };
+    addMessageHandler(mh);
+
+#ifdef _DEBUG_
+    xy::Console::addCommand("printer_print", [this](const std::string& str)
+    {
+        m_printout->printLine(str);
+    });
+
+    xy::Console::addCommand("printer_clear", [this](const std::string&)
+    {
+        m_printout->clear();
+    });
+
+#endif
 }
 
 //public
@@ -176,6 +207,7 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
     {
         b->update(dt);
     }
+    m_printout->update(dt);
 }
 
 //private
@@ -187,4 +219,6 @@ void PersonalTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     {
         rt.draw(*bar, states);
     }
+
+    rt.draw(*m_printout, states);
 }

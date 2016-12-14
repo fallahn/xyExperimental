@@ -166,11 +166,12 @@ void WorldClientState::handleMessage(const xy::Message& msg)
         default: break;
         case xy::Message::UIEvent::ResizedWindow:
         {
-            /*auto v = playerCamera->getView();
-            v.setViewport(getContext().defaultView.getViewport());
-            playerCamera->setView(v);*/
             m_scene.setView(getContext().defaultView);
             //m_meshRenderer.setView(getContext().defaultView);
+
+            auto resizeMsg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            resizeMsg->type = Message::InterfaceEvent::ResizedWindow;
+            resizeMsg->rw = &getContext().renderWindow;
         }
         break;
         }
@@ -500,4 +501,9 @@ void WorldClientState::initUI()
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    //used to init the shader params where neccesary
+    auto resizeMsg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+    resizeMsg->type = Message::InterfaceEvent::ResizedWindow;
+    resizeMsg->rw = &getContext().renderWindow;
 }

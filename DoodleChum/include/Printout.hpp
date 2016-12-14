@@ -25,48 +25,53 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_PERSONAL_TAB_HPP_
-#define DC_PERSONAL_TAB_HPP_
-
-#include <ValueBar.hpp>
-#include <Printout.hpp>
-
-#include <xygine/components/Component.hpp>
+#ifndef DC_PRINTOUT_HPP_
+#define DC_PRINTOUT_HPP_
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
-#include <memory>
+#include <array>
+#include <functional>
+#include <list>
 
-namespace xy
+namespace sf
 {
-    class FontResource;
-    class TextureResource;
+    class RenderWindow;
 }
 
-class AttribManager;
-class PersonalTab final : public xy::Component, public sf::Drawable
+class Printout final : public sf::Drawable, public sf::Transformable
 {
 public:
-    PersonalTab(xy::MessageBus&, xy::FontResource&, xy::TextureResource&, const AttribManager&);
-    ~PersonalTab() = default;
+    Printout(sf::Font&, const sf::Texture&);
+    ~Printout() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float);
+    void printLine(const std::string&);
+    void update(float);
+    void clear();
 
-private:
-    const AttribManager& m_attribManager;
+    void updateShaderParams(const sf::RenderWindow*);
 
-    sf::Text m_titleText;
-    std::vector<std::unique_ptr<ValueBar>> m_bars;
+public:
 
-    std::unique_ptr<Printout> m_printout;
+    using Task = std::function<bool(float)>;
+    std::list<Task> m_tasks;
+    std::list<std::string> m_strings;
+    std::size_t m_stringIdx; //char index in to current string
 
-    std::vector<std::string> m_messageList;
-    std::vector<std::int32_t> m_messageIDs;
+    const sf::Texture& m_texture;
+    sf::Text m_text;
+    mutable sf::Shader m_cropShader;
 
+    float m_scrollDistance;
+    void scroll(float);
+
+
+    std::array<sf::Vertex, 8u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //DC_PERSONAL_TAB_HPP_
+#endif //DC_PRINTOUT_HPP_

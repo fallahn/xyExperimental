@@ -126,6 +126,9 @@
     <ClInclude Include="include\PriceTag.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\Printout.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -210,6 +213,9 @@
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="src\PriceTag.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Printout.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
