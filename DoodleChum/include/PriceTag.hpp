@@ -46,8 +46,8 @@ public:
 
 private:
     sf::Text m_text;
-    bool m_visible;
     const sf::Texture& m_texture;
+    bool m_visible;
     std::array<sf::Vertex, 4u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

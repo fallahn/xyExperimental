@@ -204,6 +204,7 @@ void WorldClientState::initMeshes()
     auto& hausMat = m_meshRenderer.addMaterial(Material::Haus, xy::Material::TexturedBumped, true);
     hausMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/haus_diffuse.png") });
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
+    //hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/textures/haus_mask.tga") });
     hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
@@ -353,8 +354,8 @@ void WorldClientState::initMapData()
                     const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& o : objs)
                     {
-                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 640.f, 20.f, sf::Color(255,250,240));
-                        light->setDepth(200.f);
+                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 840.f, 320.f, sf::Color(255,233,240));
+                        light->setDepth(120.f);
                         light->setIntensity(0.f);
                         //light->enableShadowCasting(true);
 

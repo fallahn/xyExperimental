@@ -162,7 +162,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
         const auto& data = msg.getData<Message::InterfaceEvent>();
         if (data.type == Message::InterfaceEvent::ResizedWindow)
         {
-            m_printout->updateShaderParams(data.rw);
+            m_printout->updateView(data.rw);
         }
     };
     addMessageHandler(mh);

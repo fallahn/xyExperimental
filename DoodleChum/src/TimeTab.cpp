@@ -78,7 +78,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     m_clockText.setCharacterSize(100);
     m_clockText.setString("00:00");
     xy::Util::Position::centreOrigin(m_clockText);
-    m_clockText.setPosition(xy::DefaultSceneSize.x / 2.f, 84.f);
+    m_clockText.setPosition(xy::DefaultSceneSize.x / 2.f, 80.f);
 
     m_clockShadow = m_clockText;
     m_clockShadow.move(1.f, 1.f);
@@ -90,7 +90,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
 
     m_calendarSprite.setTexture(tr.get("assets/images/ui/calendar.png"));
     xy::Util::Position::centreOrigin(m_calendarSprite);
-    m_calendarSprite.setPosition(618.f, 80.f);
+    m_calendarSprite.setPosition(606.f, 80.f);
 
 
     xy::Component::MessageHandler mh;

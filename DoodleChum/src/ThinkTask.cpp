@@ -32,6 +32,7 @@ source distribution.
 #include <xygine/Log.hpp>
 #include <xygine/util/Random.hpp>
 #include <xygine/SysTime.hpp>
+#include <xygine/Entity.hpp>
 
 ThinkTask::ThinkTask(xy::Entity& entity, xy::MessageBus& mb, const AttribManager& am)
     : Task          (entity, mb),
@@ -46,10 +47,23 @@ void ThinkTask::onStart()
 {
     auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
     msg->id = Message::AnimationEvent::Idle;
+
+    //auto moveMsg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+    //moveMsg->action = Message::PlayerEvent::Moved;
+    //auto pos = getEntity().getWorldPosition();
+    //moveMsg->posX = pos.x;
+    //moveMsg->posY = pos.y;
 }
 
 void ThinkTask::update(float dt)
 {
+    //kludge to update lighting when spawning in the dark
+    auto moveMsg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+    moveMsg->action = Message::PlayerEvent::Moved;
+    auto pos = getEntity().getWorldPosition();
+    moveMsg->posX = pos.x;
+    moveMsg->posY = pos.y;
+    
     //check for time out, request next task if expired and mark as complete
     m_time -= dt;
     if(m_time <= 0)
@@ -169,6 +183,7 @@ bool ThinkTask::canDo(std::int32_t attrib)
     case AttribManager::Personal::Thirst:
         if (personalAttribs[AttribManager::Personal::Thirst].second < 50.f) return false;
     case AttribManager::Personal::Cleanliness:
+        if (personalAttribs[AttribManager::Personal::Cleanliness].second < 80.f) return false;
     case AttribManager::Personal::Poopiness:
     {
         bool possible = householdAttribs[AttribManager::Household::Water] > 0;

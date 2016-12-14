@@ -32,7 +32,7 @@ source distribution.
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Vertex.hpp>
-#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/View.hpp>
 
 #include <array>
 #include <functional>
@@ -53,7 +53,7 @@ public:
     void update(float);
     void clear();
 
-    void updateShaderParams(const sf::RenderWindow*);
+    void updateView(const sf::RenderWindow*);
 
 public:
 
@@ -64,7 +64,7 @@ public:
 
     const sf::Texture& m_texture;
     sf::Text m_text;
-    mutable sf::Shader m_cropShader;
+    sf::View m_cropView;
 
     float m_scrollDistance;
     void scroll(float);
@@ -73,5 +73,6 @@ public:
     std::array<sf::Vertex, 8u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
+
 
 #endif //DC_PRINTOUT_HPP_

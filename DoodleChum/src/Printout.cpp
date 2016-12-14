@@ -36,27 +36,6 @@ namespace
     const float scrollSpeed = 100.f;
     const sf::Vector2f defaultTextPos(18.f, 230.f);
     const std::size_t charLimit = 26;
-
-    const std::string fragShader = R"(
-        #version 120
-        
-        uniform vec2 u_position = vec2(0.0, 0.0);
-        uniform vec2 u_size = vec2(0.0, 0.0);
-
-        uniform sampler2D u_texture;
-
-        bool contains(vec2 point)
-        {
-            return (point.x > u_position.x && point.x < u_size.x + u_position.x && point.y > u_position.y && point.y < u_position.y + u_size.y);
-        }
-
-        void main()
-        {
-            if(!contains(gl_FragCoord.xy)) discard;           
-            vec4 colour = texture2D(u_texture, gl_TexCoord[0].xy);
-            gl_FragColor = vec4(colour.rgb * gl_Color.rgb, colour.a);
-
-        })";
 }
 
 Printout::Printout(sf::Font& font, const sf::Texture& texture)
@@ -85,7 +64,7 @@ Printout::Printout(sf::Font& font, const sf::Texture& texture)
     m_text.setPosition(defaultTextPos);
     m_text.setCharacterSize(24u);
 
-    m_cropShader.loadFromMemory(fragShader, sf::Shader::Fragment);
+    m_cropView.setSize(m_vertices[2].position);
 }
 
 //public
@@ -129,7 +108,7 @@ void Printout::printLine(const std::string & str)
                     m_strings.pop_front();
                     str += '\n';
                     m_stringIdx = 0;
-                    m_scrollDistance = 30.f; //TODO need to get max text height
+                    m_scrollDistance = m_text.getFont()->getLineSpacing(m_text.getCharacterSize());
                 }
                 m_text.setString(str);
             }
@@ -169,14 +148,22 @@ void Printout::clear()
     m_tasks.emplace_back(std::move(task));
 }
 
-void Printout::updateShaderParams(const sf::RenderWindow* rw)
+void Printout::updateView(const sf::RenderWindow* rw)
 {
-    auto position = rw->mapCoordsToPixel(getPosition(), rw->getDefaultView());
-    //position.y = rw->getSize().y - position.y;
-    auto size = rw->mapCoordsToPixel(m_vertices[2].position, rw->getDefaultView());
-
-    m_cropShader.setUniform("u_position", sf::Vector2f(position));
-    m_cropShader.setUniform("u_size", sf::Vector2f(size));
+    auto pos = getPosition();
+    pos.y += 2.f;
+    auto size = m_cropView.getSize();
+    m_cropView.setCenter(pos + (size / 2.f));
+    m_cropView.move(0.f, 2.f);
+    
+    auto viewPos = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(pos));
+    auto viewSize = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(size));
+    auto windowSize = static_cast<sf::Vector2f>(rw->getSize());
+    viewPos.x /= windowSize.x;
+    viewPos.y /= windowSize.y;
+    viewSize.x /= windowSize.x;
+    viewSize.y /= windowSize.y;
+    m_cropView.setViewport({ viewPos, viewSize });
 }
 
 //private
@@ -199,7 +186,8 @@ void Printout::scroll(float dt)
             m_vertices[1].texCoords.y += m_scrollDistance;
             m_vertices[2].texCoords.y += m_scrollDistance;
             m_vertices[3].texCoords.y += m_scrollDistance;
-            
+            m_text.move(0.f, -m_scrollDistance);
+
             m_scrollDistance = 0;
         }
     }
@@ -213,7 +201,9 @@ void Printout::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 
     states.texture = nullptr;
-    //states.shader = &m_cropShader;
-    m_cropShader.setUniform("u_texture", sf::Shader::CurrentTexture);
+
+    auto oldView = rt.getView();
+    rt.setView(m_cropView);
     rt.draw(m_text, states);
+    rt.setView(oldView);
 }

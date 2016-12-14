@@ -75,7 +75,7 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
                 auto direction = position - m_entity->getWorldPosition();
                 float distance2 = xy::Util::Vector::lengthSquared(direction);
                 //artificially skew direction in Y axis so vertical lights seem further away
-                distance2 *= std::max(1.f, std::abs(direction.y) / std::abs(direction.x));
+                distance2 *= std::max(1.f, std::abs(direction.y) / (std::abs(direction.x) + 0.006f)); //prevents div0
 
                 if (distance2 > maxDistance2)
                 {

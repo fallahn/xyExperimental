@@ -31,8 +31,8 @@ source distribution.
 #include <SFML/Graphics/RenderTarget.hpp>
 
 PriceTag::PriceTag(sf::Font& font, const sf::Texture& texture)
-    : m_texture(texture),
-    m_visible(false)
+    : m_texture (texture),
+    m_visible   (false)
 {
     m_text.setFont(font);
     m_text.setPosition(20.f, -5.f);
