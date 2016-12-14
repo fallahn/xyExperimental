@@ -45,6 +45,8 @@ PriceTag::PriceTag(sf::Font& font, const sf::Texture& texture)
     m_vertices[2].texCoords = size;
     m_vertices[3].position.y = size.y;
     m_vertices[3].texCoords.y = size.y;
+
+    setOrigin(size.x, 0.f);
 }
 
 //public

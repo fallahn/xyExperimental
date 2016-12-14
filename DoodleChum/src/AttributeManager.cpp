@@ -403,10 +403,10 @@ bool AttribManager::load()
     updateValues(static_cast<float>(diff) / divisor);
 
     //see how many days passed and update days to pay day
-    auto oldTime = std::localtime((std::time_t*)&timeElapsed);
+    auto oldTime = std::localtime((std::time_t*)&timeElapsed)->tm_yday;
     auto newTime = std::localtime((std::time_t*)&timeNow);
 
-    auto dayCount = newTime->tm_yday - oldTime->tm_yday;
+    auto dayCount = newTime->tm_yday - oldTime;
     if (dayCount < 0) dayCount = std::abs(dayCount) + newTime->tm_yday;
     for (auto i = 0u; i < dayCount; ++i)
     {

@@ -70,8 +70,8 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_balanceText.setOrigin(0.f, 0.f);
 
     auto& barTexture = tr.get("assets/images/ui/value_bar.png");
-    auto& tagTexture = tr.get("assets/images/ui/price_tag.png");
     auto& buttonTexture = tr.get("assets/images/ui/add_button.png");
+    auto& tagTexture = tr.get("assets/images/ui/price_tag.png");
 
     const auto& values = am.getHouseholdAttribs();
     const auto& costs = am.getCosts();
@@ -80,21 +80,21 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
 
     for (auto i = 0u; i < values.size(); ++i)
     {
-        m_bars.emplace_back(std::make_pair(std::make_unique<ValueBar>(font, barTexture, barSize),
-                                            std::make_unique<PriceTag>(font, tagTexture)));
-        auto& barPair = m_bars.back();
-        barPair.first->setPosition(position);
-        barPair.first->setValue(values[i]);
-        barPair.first->setTitle(householdNames[i]);
-        barPair.first->setScale(-1.f, 1.f);
+        m_bars.emplace_back(std::make_unique<ValueBar>(font, barTexture, barSize));
+        auto& bar = m_bars.back();
+        bar->setPosition(position);
+        bar->setValue(values[i]);
+        bar->setTitle(householdNames[i]);
+        bar->setScale(-1.f, 1.f);
 
-        barPair.second->setPosition(position);
-        const std::string subStr = (i == AttribManager::Household::Water) ? "Cr for refill" : "Cr each";
-        barPair.second->setText("Cost: " + std::to_string(costs[i]) + subStr);
-        barPair.second->setScale(-1.f, 1.f);
+        m_buttons.emplace_back(std::make_pair(sf::Sprite(buttonTexture), PriceTag(font, tagTexture)));
+        auto& buttonPair = m_buttons.back();
+        buttonPair.first.setPosition(14.f, position.y);
 
-        m_buttons.emplace_back(buttonTexture);
-        m_buttons.back().setPosition(14.f, position.y);
+        buttonPair.second.setPosition(position);
+        const std::string subStr = (i == AttribManager::Household::Water) ? "Cr refill" : "Cr each";
+        buttonPair.second.setText("Cost: " + std::to_string(costs[i]) + subStr);
+        buttonPair.second.setScale(-1.f, 1.f);
 
         position.y += verticalSpacing;
     }
@@ -111,7 +111,7 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
             auto clickPos = m_entity->getWorldTransform().getInverse().transformPoint(data.positionX, data.positionY);
             for (auto i = 0u; i < m_buttons.size(); ++i)
             {
-                if (m_buttons[i].getGlobalBounds().contains(clickPos))
+                if (m_buttons[i].first.getGlobalBounds().contains(clickPos))
                 {
                     auto buttonMsg = sendMessage<Message::InterfaceEvent>(Message::Interface);
                     buttonMsg->type = Message::InterfaceEvent::ButtonClick;
@@ -123,16 +123,16 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
         else if (data.type == Message::InterfaceEvent::MouseMoved)
         {
             auto mousePos = m_entity->getWorldTransform().getInverse().transformPoint(data.positionX, data.positionY);
-            for (auto i = 0u; i < m_bars.size(); ++i)
+            for (auto i = 0u; i < m_buttons.size(); ++i)
             {
-                if (m_bars[i].first->getGlobalBounds().contains(mousePos))
+                if (m_buttons[i].first.getGlobalBounds().contains(mousePos))
                 {
-                    m_bars[i].second->setVisible(true);
-                    m_bars[i].second->setPosition(mousePos);
+                    m_buttons[i].second.setVisible(true);
+                    m_buttons[i].second.setPosition(mousePos);
                 }
                 else
                 {
-                    m_bars[i].second->setVisible(false);
+                    m_buttons[i].second.setVisible(false);
                 }
             }
         }
@@ -152,12 +152,12 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
             const auto values = m_attribManager.getHouseholdAttribs();
             for (auto i = 0u; i < m_bars.size(); ++i)
             {
-                m_bars[i].first->setValue(values[i]);
+                m_bars[i]->setValue(values[i]);
 
                 if (i == AttribManager::Household::Water)
                 {
                     int cost = static_cast<int>((1.f - (values[i] / 100.f)) * static_cast<float>(m_attribManager.getCosts()[i]));
-                    m_bars[i].second->setText("Cost: " + std::to_string(cost) + "Cr refill");
+                    m_buttons[i].second.setText("Cost: " + std::to_string(cost) + "Cr refill");
                 }
             }
         }
@@ -176,12 +176,12 @@ void HouseholdTab::entityUpdate(xy::Entity&, float dt)
         const auto values = m_attribManager.getHouseholdAttribs();
         for (auto i = 0u; i < m_bars.size(); ++i)
         {
-            m_bars[i].first->setValue(values[i]);
+            m_bars[i]->setValue(values[i]);
 
             if (i == AttribManager::Household::Water)
             {
                 int cost = static_cast<int>((1.f - (values[i] / 100.f)) * static_cast<float>(m_attribManager.getCosts()[i]));
-                m_bars[i].second->setText("Cost: " + std::to_string(cost) + "Cr refill");
+                m_buttons[i].second.setText("Cost: " + std::to_string(cost) + "Cr refill");
             }
         }
         timer = 1.f;
@@ -189,7 +189,7 @@ void HouseholdTab::entityUpdate(xy::Entity&, float dt)
 
     for (auto& b : m_bars)
     {
-        b.first->update(dt);
+        b->update(dt);
     }
 }
 
@@ -199,14 +199,14 @@ void HouseholdTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.draw(m_titleText, states);
     rt.draw(m_balanceText, states);
 
-    for (const auto& b : m_buttons)
-    {
-        rt.draw(b, states);
-    }
-
     for (const auto& b : m_bars)
     {
-        rt.draw(*b.first, states);
-        rt.draw(*b.second, states);
+        rt.draw(*b, states);
+    }
+
+    for (const auto& b : m_buttons)
+    {
+        rt.draw(b.first, states);
+        rt.draw(b.second, states);
     }
 }

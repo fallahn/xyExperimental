@@ -63,8 +63,8 @@ private:
     sf::Text m_titleText;
     sf::Text m_balanceText;
 
-    std::vector<std::pair<std::unique_ptr<ValueBar>, std::unique_ptr<PriceTag>>> m_bars;
-    std::vector<sf::Sprite> m_buttons;
+    std::vector<std::unique_ptr<ValueBar>> m_bars;
+    std::vector<std::pair<sf::Sprite, PriceTag>> m_buttons;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

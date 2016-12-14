@@ -125,11 +125,14 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::InterfaceEvent>();
-        if (m_buttonSprite.getGlobalBounds().contains(m_entity->getInverseTransform().transformPoint(data.positionX, data.positionY)))
+        if (data.type == Message::InterfaceEvent::MouseClick)
         {
-            auto menuMsg = sendMessage<xy::Message::UIEvent>(xy::Message::UIMessage);
-            menuMsg->type = xy::Message::UIEvent::RequestState;
-            menuMsg->stateID = States::ID::Menu;
+            if (m_buttonSprite.getGlobalBounds().contains(m_entity->getInverseTransform().transformPoint(data.positionX, data.positionY)))
+            {
+                auto menuMsg = sendMessage<xy::Message::UIEvent>(xy::Message::UIMessage);
+                menuMsg->type = xy::Message::UIEvent::RequestState;
+                menuMsg->stateID = States::ID::Menu;
+            }
         }
     };
     addMessageHandler(mh);
