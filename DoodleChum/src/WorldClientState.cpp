@@ -276,6 +276,16 @@ void WorldClientState::initMeshes()
     auto thirdFurnitureModel = m_meshRenderer.createModel(Mesh::ThirdFurniture, m_messageBus);
     thirdFurnitureModel->setBaseMaterial(thirdFurnitureMat);
 
+    xy::IQMBuilder walls("assets/models/walls.iqm");
+    m_meshRenderer.loadModel(Mesh::Walls, walls);
+
+    auto& wallMat = m_meshRenderer.addMaterial(Material::Walls, xy::Material::Textured, true);
+    wallMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/walls_diffuse.png") });
+    wallMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+
+    auto wallModel = m_meshRenderer.createModel(Mesh::Walls, m_messageBus);
+    wallModel->setBaseMaterial(wallMat);
+
     auto entity = xy::Entity::create(m_messageBus);
 
     //christmas decs
@@ -291,7 +301,7 @@ void WorldClientState::initMeshes()
         xy::IQMBuilder lights("assets/models/lights.iqm");
         m_meshRenderer.loadModel(Mesh::Lights, lights);
 
-        auto& lightMat = m_meshRenderer.addMaterial(Mesh::Lights, xy::Material::Description::Coloured);
+        auto& lightMat = m_meshRenderer.addMaterial(Material::Lights, xy::Material::Description::Coloured);
         lightMat.addProperty({ "u_maskColour", sf::Color::Blue });
         lightMat.addProperty({ "u_colour", sf::Color(235, 235, 180) });
         lightMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
@@ -309,6 +319,7 @@ void WorldClientState::initMeshes()
     entity->addComponent(furnitureModel);
     entity->addComponent(moreFurnitureModel);
     entity->addComponent(thirdFurnitureModel);
+    entity->addComponent(wallModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::BackFront);
 

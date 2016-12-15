@@ -41,7 +41,8 @@ namespace Mesh
         MoreFurniture,
         ThirdFurniture,
         Tree,
-        Lights
+        Lights,
+        Walls
     };
 }
 
@@ -55,7 +56,8 @@ namespace Material
         Furniture,
         MoreFurniture,
         ThirdFurniture,
-        Lights
+        Lights,
+        Walls
     };
 }
 

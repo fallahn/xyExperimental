@@ -182,19 +182,40 @@ bool ThinkTask::canDo(std::int32_t attrib)
     }
     case AttribManager::Personal::Thirst:
         if (personalAttribs[AttribManager::Personal::Thirst].second < 50.f) return false;
+        {
+            bool possible = householdAttribs[AttribManager::Household::Water] > 0;
+            if (!possible)
+            {
+                auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+                msg->action = Message::PlayerEvent::TaskFailed;
+                msg->task = attrib;
+            }
+            return possible;
+        }
     case AttribManager::Personal::Cleanliness:
         if (personalAttribs[AttribManager::Personal::Cleanliness].second < 80.f) return false;
-    case AttribManager::Personal::Poopiness:
-    {
-        bool possible = householdAttribs[AttribManager::Household::Water] > 0;
-        if (!possible)
         {
-            auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
-            msg->action = Message::PlayerEvent::TaskFailed;
-            msg->task = attrib;
+            bool possible = householdAttribs[AttribManager::Household::Water] > 0;
+            if (!possible)
+            {
+                auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+                msg->action = Message::PlayerEvent::TaskFailed;
+                msg->task = attrib;
+            }
+            return possible;
         }
-        return possible;
-    }
+    case AttribManager::Personal::Poopiness:
+        if (personalAttribs[AttribManager::Personal::Poopiness].second < 30.f) return false;
+        {
+            bool possible = householdAttribs[AttribManager::Household::Water] > 0;
+            if (!possible)
+            {
+                auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+                msg->action = Message::PlayerEvent::TaskFailed;
+                msg->task = attrib;
+            }
+            return possible;
+        }
     case AttribManager::Personal::Tiredness:
     { //only sleep at night
         const auto& curTime = xy::SysTime::now();
