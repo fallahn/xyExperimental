@@ -34,6 +34,7 @@ source distribution.
 #include <AttributeManager.hpp>
 #include <TabComponent.hpp>
 #include <TreeLightController.hpp>
+#include <GameOverTab.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -175,6 +176,25 @@ void WorldClientState::handleMessage(const xy::Message& msg)
         }
         break;
         }
+    }
+    else if (msg.id == Message::Player)
+    {
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::Died)
+        {
+            //add a menu
+            auto& font = m_fontResource.get("assets/fonts/FallahnHand.ttf");
+            auto tab = xy::Component::create<GameOverTab>(m_messageBus, font, m_textureResource, m_attribManager);
+            auto entity = xy::Entity::create(m_messageBus);
+            entity->setPosition(xy::DefaultSceneSize / 2.f);
+            entity->addComponent(tab);
+            m_scene.addEntity(entity, xy::Scene::Layer::UI);
+        }
+    }
+    else if (msg.id == Message::ResetGame)
+    {
+        requestStackPop();
+        requestStackPush(States::ID::Intro);
     }
 }
 

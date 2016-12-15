@@ -39,6 +39,7 @@ source distribution.
 #include <MusicTask.hpp>
 #include <ComputerTask.hpp>
 #include <MessageIDs.hpp>
+#include <AttributeManager.hpp>
 
 #include <xygine/Entity.hpp>
 #include <xygine/Console.hpp>
@@ -62,7 +63,8 @@ namespace
         12.f, //TV
         12.f, //Piano
         12.f, //Computer
-        0.4f //sleeping
+        0.4f, //sleeping
+        8.f //die
     };
 }
 
@@ -86,6 +88,8 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
     mh.id = Message::NewTask;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
+        if (m_attribManager.dead()) return;
+        
         const auto& data = msg.getData<Message::TaskEvent>();
 
         //lookup task data
@@ -160,6 +164,17 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         m_tasks.emplace_back(std::make_unique<ThinkTask>(*m_entity, getMessageBus(), m_attribManager));
     };
     addMessageHandler(mh);
+
+    mh.id = Message::Player;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::Died)
+        {
+            m_tasks.clear();
+        }
+    };
+    addMessageHandler(mh);
 }
 
 BudController::~BudController()
@@ -188,10 +203,20 @@ void BudController::onStart(xy::Entity& entity)
     entity.setWorldPosition(td.worldPosition);
     m_currentPosition = td.position;
     m_destinationPosition = m_currentPosition;
+    
+    if (m_attribManager.dead())
+    {
+        //set sprite to dead frame
+        m_sprite->play(87, 87); //need a better way to ID frame
 
-    //place a ThinkTask on stack first so bud decides what to do
-    m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus(), m_attribManager));
-
+        //broadcast death
+        auto msg = sendMessage<Message::PlayerEvent>(Message::Player);
+        msg->action = Message::PlayerEvent::Died;
+    }
+    else //place a ThinkTask on stack first so bud decides what to do
+    {
+        m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus(), m_attribManager));
+    }
     m_entity = &entity;
 }
 

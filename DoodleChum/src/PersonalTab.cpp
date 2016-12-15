@@ -31,6 +31,7 @@ source distribution.
 
 #include <xygine/Resource.hpp>
 #include <xygine/util/Position.hpp>
+#include <xygine/util/Random.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -40,6 +41,7 @@ source distribution.
 namespace
 {
 #include "StringConsts.inl"
+#include "BobStrings.inl"
 
     const sf::Vector2f barOffset(40.f, 220.f);
     const sf::Vector2f barSize(260.f, 45.f);
@@ -90,20 +92,21 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
             //Household enum
             if (std::find(std::begin(m_messageIDs), std::end(m_messageIDs), data.task) == m_messageIDs.end())
             {
+                //TODO these should just look up messages, not copy them
                 switch (data.task)
                 {
                 default: break;
                 case AttribManager::Household::Films:
-                    m_messageList.emplace_back("I'd quite like a new film to watch.");
+                    m_messageList.push_back(&filmMessages[xy::Util::Random::value(0, filmMessages.size() -1)]);
                     break;
                 case AttribManager::Household::Music:
-                    m_messageList.emplace_back("My music playlist is getting a little repetative.");
+                    m_messageList.push_back(&musicMessages[xy::Util::Random::value(0, musicMessages.size() - 1)]);
                     break;
                 case AttribManager::Household::SheetMusic:
-                    m_messageList.emplace_back("I'd love to have a new song to learn on the piano!");
+                    m_messageList.push_back(&pianoMessages[xy::Util::Random::value(0, pianoMessages.size() - 1)]);
                     break;
                 case AttribManager::Household::Games:
-                    m_messageList.emplace_back("Perhaps it would be fun to have some new games to play?");
+                    m_messageList.push_back(&gameMessages[xy::Util::Random::value(0, gameMessages.size() - 1)]);
                     break;
                 }
                 m_messageIDs.emplace_back(data.task);
@@ -119,16 +122,16 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
                 {
                 default: break;
                 case AttribManager::Personal::Cleanliness:
-                    m_messageList.emplace_back("I want to shower, but there's no water.");
+                    m_messageList.push_back(&failedMessages[0]);
                     break;
                 case AttribManager::Personal::Hunger:
-                    m_messageList.emplace_back("I'm sooo hungry... but there's no food!");
+                    m_messageList.push_back(&failedMessages[1]);
                     break;
                 case AttribManager::Personal::Poopiness:
-                    m_messageList.emplace_back("I need to use the bathroom, may I have some water so I can flush?");
+                    m_messageList.push_back(&failedMessages[2]);
                     break;
                 case AttribManager::Personal::Thirst:
-                    m_messageList.emplace_back("I'm REALLY thirsty, could you help out with some water?");
+                    m_messageList.push_back(&failedMessages[3]);
                     break;
                 }
                 m_messageIDs.emplace_back(IDOffset + data.task);
@@ -145,9 +148,15 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
         if (data.id == Message::AnimationEvent::Computer)
         {
             m_printout->clear();
+
+            if (m_messageList.empty())
+            {
+                m_printout->printLine(randomMessages[0, xy::Util::Random::value(0, randomMessages.size() - 1)]);
+            }
+
             for (const auto& str : m_messageList)
             {
-                m_printout->printLine(str);
+                m_printout->printLine(*str);
             }
             m_messageList.clear();
             m_messageIDs.clear();

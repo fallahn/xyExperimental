@@ -141,6 +141,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\DrinkTask.hpp" />
     <ClInclude Include="include\EatTask.hpp" />
     <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\GameOverTab.hpp" />
     <ClInclude Include="include\HouseholdTab.hpp" />
     <ClInclude Include="include\IntroState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
@@ -175,6 +176,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\DrinkTask.cpp" />
     <ClCompile Include="src\EatTask.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameOverTab.cpp" />
     <ClCompile Include="src\HouseholdTab.cpp" />
     <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -199,6 +201,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\BobStrings.inl" />
     <None Include="src\StringConsts.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

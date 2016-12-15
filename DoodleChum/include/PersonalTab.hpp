@@ -63,7 +63,7 @@ private:
 
     std::unique_ptr<Printout> m_printout;
 
-    std::vector<std::string> m_messageList;
+    std::vector<const std::string*> m_messageList;
     std::vector<std::int32_t> m_messageIDs;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

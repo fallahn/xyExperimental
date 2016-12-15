@@ -163,6 +163,18 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
         }
     };
     addMessageHandler(mh);
+
+    //remove all buttons when player dies
+    mh.id = Message::Player;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::Died)
+        {
+            m_buttons.clear();
+        }
+    };
+    addMessageHandler(mh);
 }
 
 //public
@@ -178,7 +190,7 @@ void HouseholdTab::entityUpdate(xy::Entity&, float dt)
         {
             m_bars[i]->setValue(values[i]);
 
-            if (i == AttribManager::Household::Water)
+            if (i == AttribManager::Household::Water && !m_buttons.empty())
             {
                 int cost = static_cast<int>((1.f - (values[i] / 100.f)) * static_cast<float>(m_attribManager.getCosts()[i]));
                 m_buttons[i].second.setText("Cost: " + std::to_string(cost) + "Cr refill");

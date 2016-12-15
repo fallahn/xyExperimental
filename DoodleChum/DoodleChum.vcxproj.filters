@@ -129,6 +129,9 @@
     <ClInclude Include="include\Printout.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameOverTab.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -218,9 +221,15 @@
     <ClCompile Include="src\Printout.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameOverTab.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\StringConsts.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\BobStrings.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

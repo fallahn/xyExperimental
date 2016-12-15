@@ -40,7 +40,7 @@ source distribution.
 namespace
 {
     const std::string filename("attrib.ute");
-    const std::uint8_t fileVersion = 1;
+    const std::uint8_t fileVersion = 2;
 
 #include "StringConsts.inl"
 
@@ -85,10 +85,26 @@ namespace
 AttribManager::AttribManager(xy::MessageBus& mb)
     : m_messageBus(mb)
 {
-    initValues();
-    
+    if (!load())
+    {
+        initValues();
+    }
+
 #ifdef _DEBUG_
-    addDebugWindow();
+    //addDebugWindow();
+
+    xy::Console::addCommand("kill", [this](const std::string&)
+    {
+        m_stats.dead = true;
+        m_stats.gameEndTime = std::time(nullptr);
+
+        auto msg = m_messageBus.post<Message::PlayerEvent>(Message::Player);
+        msg->action = Message::PlayerEvent::Died;
+
+        //request dying animation
+        auto msg2 = m_messageBus.post<Message::AnimationEvent>(Message::Animation);
+        msg2->id = Message::AnimationEvent::Die;
+    }, this);
 #endif //_DEBUG_
 }
 
@@ -130,18 +146,22 @@ void AttribManager::handleMessage(const xy::Message& msg)
             break;
         case Message::TaskEvent::PlayComputer:
             m_householdAttribs[Household::Games] = std::max(0.f, m_householdAttribs[Household::Games] - (m_householdAttribs[Household::Games] * entertainmentReductionMultiplier));
+            m_householdAttribs[Household::Games] += xy::Util::Random::value(0.001f, 0.003f); //so never really reaches 0
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Games] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::PlayMusic:
             m_householdAttribs[Household::Music] = std::max(0.f, m_householdAttribs[Household::Music] - (m_householdAttribs[Household::Music] * entertainmentReductionMultiplier));
+            m_householdAttribs[Household::Music] += xy::Util::Random::value(0.001f, 0.003f); //so never really reaches 0
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Music] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::PlayPiano:
             m_householdAttribs[Household::SheetMusic] = std::max(0.f, m_householdAttribs[Household::SheetMusic] - (m_householdAttribs[Household::SheetMusic] * entertainmentReductionMultiplier));
+            m_householdAttribs[Household::SheetMusic] += xy::Util::Random::value(0.001f, 0.003f); //so never really reaches 0
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::SheetMusic] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::WatchTV:
             m_householdAttribs[Household::Films] = std::max(0.f, m_householdAttribs[Household::Films] - (m_householdAttribs[Household::Films] * entertainmentReductionMultiplier));
+            m_householdAttribs[Household::Films] += xy::Util::Random::value(0.001f, 0.003f); //so never really reaches 0
             m_personalAttribs[Personal::Boredness] = std::max(0.f, m_personalAttribs[Personal::Boredness] - ((m_householdAttribs[Household::Films] / 100.f) * boredomReduction));
             break;
         case Message::TaskEvent::Poop:
@@ -250,16 +270,41 @@ const std::array<int, AttribManager::Household::Count>& AttribManager::getCosts(
     return householdCosts;
 }
 
+std::string AttribManager::getBirthdates() const
+{
+    std::tm born = *std::localtime((std::time_t*)&m_stats.gameStartTime);
+    std::tm died = *std::localtime((std::time_t*)&m_stats.gameEndTime);
+
+    std::stringstream ss;
+    ss << born.tm_mday << "/" << born.tm_mon + 1 << "/" << born.tm_year + 1900 << " - "
+        << died.tm_mday << "/" << died.tm_mon + 1 << "/" << died.tm_year + 1900;
+
+    return ss.str();
+}
+
+std::string AttribManager::getIncomeStats() const
+{
+    std::string retVal = "Total Earnings: " + std::to_string(m_stats.totalIncoming) + "    Total Spending: " + std::to_string(m_stats.totalOutGoing);
+    return std::move(retVal);
+}
+
+void AttribManager::reset()
+{
+    initValues();
+}
+
 //private
 void AttribManager::initValues()
 {
-    if (!load())
+    //if (!load())
     {
         m_stats.currentIncome = initialIncome;
         m_stats.daysToPayDay = daysPerWeek;
         m_stats.gameStartTime = std::time(nullptr);
+        m_stats.gameEndTime = 0;
         m_stats.totalIncoming = 0;
         m_stats.totalOutGoing = 0;
+        m_stats.dead = false;
         
         m_personalAttribs[Personal::Health] = 100.f;
         m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(10.f, 25.f);
@@ -284,7 +329,7 @@ void AttribManager::initValues()
 void AttribManager::updateValues(float dt)
 {
     //rate of decline increases as health decreases
-    const float rate = dt * (1.f + (0.1f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
+    const float rate = dt * (1.f + (0.15f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
     
     m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * rate));
     m_personalAttribs[Personal::Thirst] = std::min(100.f, m_personalAttribs[Personal::Thirst] + (thirstPerSecond * rate));
@@ -305,9 +350,19 @@ void AttribManager::updateHealth()
         m_personalAttribs[Personal::Boredness];
     m_personalAttribs[Personal::Health] = 100.f - (average / (Personal::Count - 1));
 
-    if (m_personalAttribs[Personal::Health] < 10)
+    if (m_personalAttribs[Personal::Health] < 10 && !m_stats.dead)
     {
-        //DIED :(
+        m_stats.dead = true;
+        m_stats.gameEndTime = std::time(nullptr);
+
+        auto msg = m_messageBus.post<Message::PlayerEvent>(Message::Player);
+        msg->action = Message::PlayerEvent::Died;
+
+        //request dying animation
+        auto msg2 = m_messageBus.post<Message::AnimationEvent>(Message::Animation);
+        msg2->id = Message::AnimationEvent::Die;
+
+        //TODO set all values to 0
     }
 
     //income rate drops with health

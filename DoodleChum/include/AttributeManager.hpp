@@ -85,6 +85,12 @@ public:
     std::int32_t getDaysToPayDay() const { return m_stats.daysToPayDay; }
 
     const std::array<int, Household::Count>& getCosts() const;
+    bool dead() const { return m_stats.dead; }
+
+    std::string getBirthdates() const;
+    std::string getIncomeStats() const;
+
+    void reset();
 
 private:
     xy::MessageBus& m_messageBus;
@@ -99,6 +105,8 @@ private:
         std::int64_t totalIncoming = 0;
         std::int64_t totalOutGoing = 0;
         std::uint64_t gameStartTime = 0;
+        std::uint64_t gameEndTime = 0;
+        bool dead = false;
     }m_stats;
 
     void initValues();

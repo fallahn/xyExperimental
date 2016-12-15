@@ -57,7 +57,8 @@ namespace Message
         Particle,
         Interface,
         Attribute,
-        Player
+        Player,
+        ResetGame
     };
 
     struct TODEvent final
@@ -100,6 +101,7 @@ namespace Message
             Piano,
             Computer,
             Sleep,
+            Die,
             Count
         }id;
     };
@@ -135,7 +137,8 @@ namespace Message
         {
             Moved,
             TaskFailed,
-            ResourceLow
+            ResourceLow,
+            Died
         }action;
         float posX = 0.f;
         float posY = 0.f;

@@ -7,6 +7,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/DrinkTask.cpp
   ${PROJECT_DIR}/EatTask.cpp
   ${PROJECT_DIR}/Game.cpp
+  ${PROJECT_DIR}/GameOverTab.cpp
   ${PROJECT_DIR}/HouseholdTab.cpp
   ${PROJECT_DIR}/IntroState.cpp
   ${PROJECT_DIR}/main.cpp

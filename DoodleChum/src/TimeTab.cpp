@@ -90,7 +90,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
 
     m_calendarSprite.setTexture(tr.get("assets/images/ui/calendar.png"));
     xy::Util::Position::centreOrigin(m_calendarSprite);
-    m_calendarSprite.setPosition(606.f, 80.f);
+    m_calendarSprite.setPosition(606.f, 74.f);
 
 
     xy::Component::MessageHandler mh;
