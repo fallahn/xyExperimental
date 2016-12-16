@@ -25,51 +25,33 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_HOUSEHOLD_TAB_HPP_
-#define DC_HOUSEHOLD_TAB_HPP_
-
-#include <ValueBar.hpp>
-#include <PriceTag.hpp>
-#include <CurrentActivity.hpp>
-
-#include <xygine/components/Component.hpp>
+#ifndef DC_CURRENT_ACTIVITY_HPP_
+#define DC_CURRENT_ACTIVITY_HPP_
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
-#include <memory>
+#include <array>
 
-namespace xy
-{
-    class FontResource;
-    class TextureResource;
-}
-
-class AttribManager;
-class HouseholdTab final : public xy::Component, public sf::Drawable
+class CurrentActivity final : public sf::Drawable, public sf::Transformable
 {
 public:
-    HouseholdTab(xy::MessageBus&, xy::FontResource&, xy::TextureResource&, const AttribManager&);
-    ~HouseholdTab() = default;
+    explicit CurrentActivity(const sf::Texture&);
+    ~CurrentActivity() = default;
+    CurrentActivity(const CurrentActivity&) = delete;
+    CurrentActivity& operator = (const CurrentActivity&) = delete;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float);
-    void onStart(xy::Entity& e) override { m_entity = &e; }
+    void update(float);
+    void setIndex(std::size_t);
 
 private:
-    const AttribManager& m_attribManager;
-    xy::Entity* m_entity;
+    const sf::Texture& m_texture;
+    float m_width;
+    float m_travelDest;
 
-    sf::Text m_titleText;
-    sf::Text m_balanceText;
-
-    std::vector<std::unique_ptr<ValueBar>> m_bars;
-    std::vector<std::pair<sf::Sprite, PriceTag>> m_buttons;
-
-    CurrentActivity m_currentActivity;
-
+    std::array<sf::Vertex, 4u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //DC_HOUSEHOLD_TAB_HPP_
+#endif //DC_CURRENT_ACTIVITY_HPP_

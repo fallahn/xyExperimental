@@ -144,6 +144,9 @@
     <ClInclude Include="include\TVAnimator.hpp">
       <Filter>Header Files\Texture Animations</Filter>
     </ClInclude>
+    <ClInclude Include="include\CurrentActivity.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -241,6 +244,9 @@
     </ClCompile>
     <ClCompile Include="src\TVAnimator.cpp">
       <Filter>Source Files\Texture Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CurrentActivity.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

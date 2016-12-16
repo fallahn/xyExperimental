@@ -48,6 +48,8 @@ class Printout final : public sf::Drawable, public sf::Transformable
 public:
     Printout(sf::Font&, const sf::Texture&);
     ~Printout() = default;
+    Printout(const Printout&) = delete;
+    Printout& operator = (const Printout&) = delete;
 
     void printLine(const std::string&);
     void update(float);

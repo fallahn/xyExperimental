@@ -137,6 +137,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\AttributeManager.hpp" />
     <ClInclude Include="include\BudController.hpp" />
     <ClInclude Include="include\ComputerTask.hpp" />
+    <ClInclude Include="include\CurrentActivity.hpp" />
     <ClInclude Include="include\DayNightCycle.hpp" />
     <ClInclude Include="include\DrinkTask.hpp" />
     <ClInclude Include="include\EatTask.hpp" />
@@ -174,6 +175,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\AttributeManager.cpp" />
     <ClCompile Include="src\BudController.cpp" />
     <ClCompile Include="src\ComputerTask.cpp" />
+    <ClCompile Include="src\CurrentActivity.cpp" />
     <ClCompile Include="src\DayNightCycle.cpp" />
     <ClCompile Include="src\DrinkTask.cpp" />
     <ClCompile Include="src\EatTask.cpp" />

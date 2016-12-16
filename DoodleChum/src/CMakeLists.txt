@@ -3,6 +3,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/AttributeManager.cpp
   ${PROJECT_DIR}/BudController.cpp
   ${PROJECT_DIR}/ComputerTask.cpp
+  ${PROJECT_DIR}/CurrentActivity.cpp
   ${PROJECT_DIR}/DayNightCycle.cpp
   ${PROJECT_DIR}/DrinkTask.cpp
   ${PROJECT_DIR}/EatTask.cpp

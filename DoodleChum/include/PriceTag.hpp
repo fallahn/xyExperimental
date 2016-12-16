@@ -40,6 +40,8 @@ class PriceTag final : public sf::Drawable, public sf::Transformable
 public:
     PriceTag(sf::Font&, const sf::Texture&);
     ~PriceTag() = default;
+    //PriceTag(const PriceTag&) = delete;
+    //PriceTag& operator = (const PriceTag&) = delete;
 
     void setVisible(bool);
     void setText(const std::string&);

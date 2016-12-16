@@ -154,15 +154,16 @@ void Printout::updateView(const sf::RenderWindow* rw)
     pos.y += 2.f;
     auto size = m_cropView.getSize();
     m_cropView.setCenter(pos + (size / 2.f));
-    m_cropView.move(0.f, 2.f);
     
     auto viewPos = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(pos));
     auto viewSize = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(size));
     auto windowSize = static_cast<sf::Vector2f>(rw->getSize());
-    viewPos.x /= windowSize.x;
-    viewPos.y /= windowSize.y;
-    viewSize.x /= windowSize.x;
-    viewSize.y /= windowSize.y;
+    auto windowView = rw->getView().getViewport();
+    //TODO pos.x should be offset by current view top offset
+    viewPos.x /= (windowSize.x /** windowView.width*/);
+    viewPos.y /= (windowSize.y /** windowView.height*/);
+    viewSize.x /= (windowSize.x /** windowView.width*/);
+    viewSize.y /= (windowSize.y /** windowView.height*/);
     m_cropView.setViewport({ viewPos, viewSize });
 }
 

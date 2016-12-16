@@ -45,6 +45,8 @@ class ValueBar final : public sf::Drawable, public sf::Transformable
 public:
     ValueBar(sf::Font&, const sf::Texture&, const sf::Vector2f&);
     ~ValueBar() = default;
+    ValueBar(const ValueBar&) = delete;
+    ValueBar& operator = (const ValueBar&) = delete;
 
     void setValue(float);
     void setTitle(const std::string&);

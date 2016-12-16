@@ -165,7 +165,7 @@ bool ThinkTask::canDo(std::int32_t attrib)
     case AttribManager::Personal::Hunger:
     {
         bool possible = (householdAttribs[AttribManager::Household::Food] > 0
-            && personalAttribs[AttribManager::Personal::Hunger].second > 50.f);
+            && personalAttribs[AttribManager::Personal::Hunger].second > 35.f);
         if (householdAttribs[AttribManager::Household::Food] == 0)
         {
             auto msg = getMessageBus().post<Message::PlayerEvent>(Message::Player);

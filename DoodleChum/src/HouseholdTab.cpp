@@ -47,9 +47,10 @@ namespace
 }
 
 HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& tr, const AttribManager& am)
-    : xy::Component (mb, this),
-    m_attribManager (am),
-    m_entity        (nullptr)
+    : xy::Component     (mb, this),
+    m_attribManager     (am),
+    m_entity            (nullptr),
+    m_currentActivity   (tr.get("assets/images/ui/current_task.png"))
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
@@ -68,6 +69,9 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_balanceText.setPosition(400.f, 700.f);
     m_balanceText.setCharacterSize(52u);
     m_balanceText.setOrigin(0.f, 0.f);
+
+    m_currentActivity.setPosition(350.f, 780.f);
+    m_currentActivity.setScale(-2.f, 2.f);
 
     auto& barTexture = tr.get("assets/images/ui/value_bar.png");
     auto& buttonTexture = tr.get("assets/images/ui/add_button.png");
@@ -175,6 +179,23 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
         }
     };
     addMessageHandler(mh);
+
+    //set the current activity
+    mh.id = Message::NewTask;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+        switch (data.taskName)
+        {
+        default: 
+            m_currentActivity.setIndex(data.taskName);
+            break;
+        case Message::TaskEvent::Think:
+        case Message::TaskEvent::Travel:
+            break;
+        }
+    };
+    addMessageHandler(mh);
 }
 
 //public
@@ -203,6 +224,7 @@ void HouseholdTab::entityUpdate(xy::Entity&, float dt)
     {
         b->update(dt);
     }
+    m_currentActivity.update(dt);
 }
 
 //private
@@ -210,6 +232,7 @@ void HouseholdTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     rt.draw(m_titleText, states);
     rt.draw(m_balanceText, states);
+    rt.draw(m_currentActivity, states);
 
     for (const auto& b : m_bars)
     {
