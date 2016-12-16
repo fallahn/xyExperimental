@@ -47,12 +47,6 @@ void ThinkTask::onStart()
 {
     auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
     msg->id = Message::AnimationEvent::Idle;
-
-    //auto moveMsg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
-    //moveMsg->action = Message::PlayerEvent::Moved;
-    //auto pos = getEntity().getWorldPosition();
-    //moveMsg->posX = pos.x;
-    //moveMsg->posY = pos.y;
 }
 
 void ThinkTask::update(float dt)

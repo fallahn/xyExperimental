@@ -23,6 +23,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/ShowerTask.cpp
   ${PROJECT_DIR}/SleepTask.cpp
   ${PROJECT_DIR}/TabComponent.cpp
+  ${PROJECT_DIR}/ThinkBubble.cpp
   ${PROJECT_DIR}/ThinkTask.cpp
   ${PROJECT_DIR}/TimeTab.cpp
   ${PROJECT_DIR}/TravelTask.cpp

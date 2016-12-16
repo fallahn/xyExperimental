@@ -65,7 +65,7 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_balanceText = m_titleText;
     m_balanceText.setString(balanceString + std::to_string(am.getIncome()));
     m_balanceText.setRotation(-2.f);
-    m_balanceText.setPosition(400.f, 800.f);
+    m_balanceText.setPosition(400.f, 700.f);
     m_balanceText.setCharacterSize(52u);
     m_balanceText.setOrigin(0.f, 0.f);
 

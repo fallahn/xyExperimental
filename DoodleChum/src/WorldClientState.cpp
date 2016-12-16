@@ -35,6 +35,7 @@ source distribution.
 #include <TabComponent.hpp>
 #include <TreeLightController.hpp>
 #include <GameOverTab.hpp>
+#include <ThinkBubble.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -452,9 +453,13 @@ void WorldClientState::initBud()
     dwb->setBaseMaterial(material);
     dwb->setPosition({ 0.f, -((budSize.y / 2.f) - 6.f), 4.f });
 
+    const auto& thinkTex = m_textureResource.get("assets/images/ui/think_bubble.png");
+    auto thinkBubble = xy::Component::create<ThinkBubble>(m_messageBus, thinkTex);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
     entity->addComponent(controller);
+    entity->addComponent(thinkBubble);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
