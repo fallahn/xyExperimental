@@ -31,6 +31,12 @@
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{03e6aa21-bc2c-4459-b14d-b8e2d08aa054}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Texture Animations">
+      <UniqueIdentifier>{c5f0a120-1e23-4a25-9ce2-edd7db424708}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Texture Animations">
+      <UniqueIdentifier>{d14188f6-66cd-4482-911d-1fd5c8455ec7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -135,6 +141,9 @@
     <ClInclude Include="include\ThinkBubble.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\TVAnimator.hpp">
+      <Filter>Header Files\Texture Animations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -229,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="src\ThinkBubble.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TVAnimator.cpp">
+      <Filter>Source Files\Texture Animations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -78,7 +78,7 @@ namespace
     const float foodPerEat = 3.6f;
     const float tirednessPerSleep = 75.f;
     const float entertainmentValue = 4.f; //a particular entertainment is increased this much with each purchase
-    const float entertainmentReductionMultiplier = 0.2f; // entertainment is this much less entertaining each time it's used
+    const float entertainmentReductionMultiplier = 0.1f; // entertainment is this much less entertaining each time it's used
     const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
 }
 

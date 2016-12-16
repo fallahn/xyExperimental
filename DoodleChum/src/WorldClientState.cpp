@@ -36,6 +36,7 @@ source distribution.
 #include <TreeLightController.hpp>
 #include <GameOverTab.hpp>
 #include <ThinkBubble.hpp>
+#include <TVAnimator.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -217,7 +218,9 @@ void WorldClientState::initMeshes()
     m_meshRenderer.setView(getContext().defaultView);
     m_meshRenderer.setFOV(50.f);
     
-    //TODO just search the dir for files and attampt to load with corresponding materials
+    //TODO just search the dir for files and attempt to load with corresponding materials
+    m_textureResource.setFallbackColour(sf::Color::Black);
+    const auto& maskTex = m_textureResource.get("fallback_mask");
 
     xy::IQMBuilder haus("assets/models/haus.iqm");
     m_meshRenderer.loadModel(Mesh::Haus, haus);
@@ -225,7 +228,7 @@ void WorldClientState::initMeshes()
     auto& hausMat = m_meshRenderer.addMaterial(Material::Haus, xy::Material::TexturedBumped, true);
     hausMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/haus_diffuse.png") });
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
-    //hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/textures/haus_mask.tga") });
+    hausMat.addProperty({ "u_maskMap", maskTex });
     hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
@@ -247,6 +250,7 @@ void WorldClientState::initMeshes()
     auto& furnitureMat = m_meshRenderer.addMaterial(Material::Furniture, xy::Material::TexturedBumped, true);
     furnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture_diffuse.png") });
     furnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture_normal.png") });
+    furnitureMat.addProperty({ "u_maskMap", maskTex });
     furnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
     furnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
 
@@ -259,6 +263,7 @@ void WorldClientState::initMeshes()
     auto& moreFurnitureMat = m_meshRenderer.addMaterial(Material::MoreFurniture, xy::Material::TexturedBumped, true);
     moreFurnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture2_diffuse.png") });
     moreFurnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture2_normal.png") });
+    moreFurnitureMat.addProperty({ "u_maskMap", maskTex });
     moreFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
     moreFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
 
@@ -268,9 +273,12 @@ void WorldClientState::initMeshes()
     xy::IQMBuilder thirdFurniture("assets/models/furniture_the_third.iqm");
     m_meshRenderer.loadModel(Mesh::ThirdFurniture, thirdFurniture);
 
+    auto tvAnimator = xy::Component::create<TVAnimator>(m_messageBus);
+
     auto& thirdFurnitureMat = m_meshRenderer.addMaterial(Material::ThirdFurniture, xy::Material::TexturedBumped, true);
     thirdFurnitureMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/furniture3_diffuse.png") });
     thirdFurnitureMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/furniture3_normal.png") });
+    thirdFurnitureMat.addProperty({ "u_maskMap", tvAnimator->getMaskTexture() });
     thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
     thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
 
@@ -319,6 +327,7 @@ void WorldClientState::initMeshes()
     //entity->addComponent(backgroundModel);
     entity->addComponent(furnitureModel);
     entity->addComponent(moreFurnitureModel);
+    entity->addComponent(tvAnimator);
     entity->addComponent(thirdFurnitureModel);
     entity->addComponent(wallModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
