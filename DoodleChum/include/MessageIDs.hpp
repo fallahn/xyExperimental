@@ -112,13 +112,11 @@ namespace Message
         {
             MouseClick,
             ButtonClick,
-            MouseMoved,
-            ResizedWindow
+            MouseMoved
         }type;
         float positionX = 0.f;
         float positionY = 0.f;
         std::int16_t ID = -1;
-        const sf::RenderWindow* rw = nullptr;
     };
 
     struct AttribEvent final

@@ -54,12 +54,12 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
-    m_titleText.setCharacterSize(36u);
+    m_titleText.setCharacterSize(32u);
     m_titleText.setFillColor(sf::Color::Black);
     m_titleText.setString("Household");
     m_titleText.setFont(font);
     xy::Util::Position::centreOrigin(m_titleText);
-    m_titleText.rotate(-92.f);
+    m_titleText.rotate(-91.f);
     m_titleText.setPosition(466.f, xy::DefaultSceneSize.y / 2.f);
     m_titleText.setScale(-1.f, 1.f);
 

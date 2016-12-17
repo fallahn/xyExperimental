@@ -35,8 +35,9 @@ PriceTag::PriceTag(sf::Font& font, const sf::Texture& texture)
     m_visible   (false)
 {
     m_text.setFont(font);
-    m_text.setPosition(20.f, -5.f);
+    m_text.setPosition(20.f, -2.f);
     m_text.setFillColor(sf::Color::Black);
+    m_text.setCharacterSize(26u);
 
     sf::Vector2f size = static_cast<sf::Vector2f>(texture.getSize());
     m_vertices[1].position.x = size.x;

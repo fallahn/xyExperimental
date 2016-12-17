@@ -37,6 +37,7 @@ source distribution.
 #include <GameOverTab.hpp>
 #include <ThinkBubble.hpp>
 #include <TVAnimator.hpp>
+#include <Background.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -171,10 +172,6 @@ void WorldClientState::handleMessage(const xy::Message& msg)
         {
             m_scene.setView(getContext().defaultView);
             //m_meshRenderer.setView(getContext().defaultView);
-
-            auto resizeMsg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
-            resizeMsg->type = Message::InterfaceEvent::ResizedWindow;
-            resizeMsg->rw = &getContext().renderWindow;
         }
         break;
         }
@@ -216,7 +213,7 @@ void WorldClientState::draw()
 void WorldClientState::initMeshes()
 {
     m_meshRenderer.setView(getContext().defaultView);
-    m_meshRenderer.setFOV(50.f);
+    m_meshRenderer.setFOV(25.f);
     
     //TODO just search the dir for files and attempt to load with corresponding materials
     m_textureResource.setFallbackColour(sf::Color::Black);
@@ -228,7 +225,7 @@ void WorldClientState::initMeshes()
     auto& hausMat = m_meshRenderer.addMaterial(Material::Haus, xy::Material::TexturedBumped, true);
     hausMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/haus_diffuse.png") });
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
-    hausMat.addProperty({ "u_maskMap", maskTex });
+    hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/textures/haus_mask.png") });
     hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
@@ -449,6 +446,15 @@ void WorldClientState::initMapData()
     {
         xy::Logger::log("Failed to open map data", xy::Logger::Type::Error, xy::Logger::Output::All);
     }
+
+    //draws background
+    auto& bgTex = m_textureResource.get("assets/images/textures/background.png");
+    bgTex.setRepeated(true);
+    bgTex.setSmooth(true);
+    auto bg = xy::Component::create<Background>(m_messageBus, bgTex);
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(bg);
+    m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 }
 
 void WorldClientState::initBud()
@@ -547,9 +553,4 @@ void WorldClientState::initUI()
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
-
-    //used to init the shader params where neccesary
-    auto resizeMsg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
-    resizeMsg->type = Message::InterfaceEvent::ResizedWindow;
-    resizeMsg->rw = &getContext().renderWindow;
 }

@@ -50,26 +50,26 @@ GameOverTab::GameOverTab(xy::MessageBus& mb, sf::Font& font, xy::TextureResource
 
     m_dateText = m_titleText;
 
-    m_titleText.setCharacterSize(96u);
+    m_titleText.setCharacterSize(90u);
     m_titleText.setString("DoodleBob has expired...");
     xy::Util::Position::centreOrigin(m_titleText);
-    m_titleText.setPosition(0.f, -190.f);
+    m_titleText.setPosition(-16.f, -202.f);
 
     m_dateText.setString(am.getBirthdates());
-    m_dateText.setPosition(0.f, -110.f);
+    m_dateText.setPosition(-240.f, -140.f);
     m_dateText.setCharacterSize(40u);
     xy::Util::Position::centreOrigin(m_dateText);
 
     m_statText = m_dateText;
     m_statText.setString(am.getIncomeStats());
     xy::Util::Position::centreOrigin(m_statText);
-    m_statText.setPosition(0.f, 200.f);
+    m_statText.setPosition(0.f, 220.f);
 
     //TODO random headstone message
 
     m_buttonSprite.setTexture(tr.get("assets/images/ui/new_game_button.png"));
     xy::Util::Position::centreOrigin(m_buttonSprite);
-    m_buttonSprite.setPosition(0.f, 130.f);
+    m_buttonSprite.setPosition(0.f, 330.f);
 
     //call back for new game button
     xy::Component::MessageHandler mh;

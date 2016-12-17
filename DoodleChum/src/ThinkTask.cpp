@@ -213,7 +213,7 @@ bool ThinkTask::canDo(std::int32_t attrib)
     case AttribManager::Personal::Tiredness:
     { //only sleep at night
         const auto& curTime = xy::SysTime::now();
-        return (curTime.hours() > 20 || curTime.hours() < 8);
+        return ((curTime.hours() > 20 || curTime.hours() < 8) && personalAttribs[AttribManager::Personal::Tiredness].second > 30.f);
     }
     }
 }

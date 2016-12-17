@@ -284,7 +284,7 @@ std::string AttribManager::getBirthdates() const
 
 std::string AttribManager::getIncomeStats() const
 {
-    std::string retVal = "Total Earnings: " + std::to_string(m_stats.totalIncoming) + "    Total Spending: " + std::to_string(m_stats.totalOutGoing);
+    std::string retVal = "Total Earned: " + std::to_string(m_stats.totalIncoming) + "    Total Spent: " + std::to_string(m_stats.totalOutGoing);
     return std::move(retVal);
 }
 

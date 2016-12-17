@@ -151,7 +151,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
 
             if (m_messageList.empty())
             {
-                m_printout->printLine(randomMessages[0, xy::Util::Random::value(0, randomMessages.size() - 1)]);
+                m_printout->printLine(randomMessages[xy::Util::Random::value(0, randomMessages.size() - 1)]);
             }
 
             for (const auto& str : m_messageList)
@@ -164,17 +164,6 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
     };
     addMessageHandler(mh);
 
-    //update the bounds of the cropping shader in the printer
-    mh.id = Message::Interface;
-    mh.action = [this](xy::Component*, const xy::Message& msg)
-    {
-        const auto& data = msg.getData<Message::InterfaceEvent>();
-        if (data.type == Message::InterfaceEvent::ResizedWindow)
-        {
-            m_printout->updateView(data.rw);
-        }
-    };
-    addMessageHandler(mh);
 
 #ifdef _DEBUG_
     xy::Console::addCommand("printer_print", [this](const std::string& str)

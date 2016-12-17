@@ -1,6 +1,7 @@
 #add source files used by your project here
 set(PROJECT_SRC
   ${PROJECT_DIR}/AttributeManager.cpp
+  ${PROJECT_DIR}/Background.cpp
   ${PROJECT_DIR}/BudController.cpp
   ${PROJECT_DIR}/ComputerTask.cpp
   ${PROJECT_DIR}/CurrentActivity.cpp

@@ -64,7 +64,8 @@ Printout::Printout(sf::Font& font, const sf::Texture& texture)
     m_text.setPosition(defaultTextPos);
     m_text.setCharacterSize(24u);
 
-    m_cropView.setSize(m_vertices[2].position);
+    m_textTexture.create(texture.getSize().x / 2, texture.getSize().y);
+    m_textSprite.setTexture(m_textTexture.getTexture());
 }
 
 //public
@@ -148,25 +149,6 @@ void Printout::clear()
     m_tasks.emplace_back(std::move(task));
 }
 
-void Printout::updateView(const sf::RenderWindow* rw)
-{
-    auto pos = getPosition();
-    pos.y += 2.f;
-    auto size = m_cropView.getSize();
-    m_cropView.setCenter(pos + (size / 2.f));
-    
-    auto viewPos = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(pos));
-    auto viewSize = static_cast<sf::Vector2f>(rw->mapCoordsToPixel(size));
-    auto windowSize = static_cast<sf::Vector2f>(rw->getSize());
-    auto windowView = rw->getView().getViewport();
-    //TODO pos.x should be offset by current view top offset
-    viewPos.x /= (windowSize.x /** windowView.width*/);
-    viewPos.y /= (windowSize.y /** windowView.height*/);
-    viewSize.x /= (windowSize.x /** windowView.width*/);
-    viewSize.y /= (windowSize.y /** windowView.height*/);
-    m_cropView.setViewport({ viewPos, viewSize });
-}
-
 //private
 void Printout::scroll(float dt)
 {
@@ -196,6 +178,10 @@ void Printout::scroll(float dt)
 
 void Printout::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
+    m_textTexture.clear(sf::Color::Transparent);
+    m_textTexture.draw(m_text);
+    m_textTexture.display();
+    
     states.transform *= getTransform();
     states.texture = &m_texture;
 
@@ -203,8 +189,5 @@ void Printout::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 
     states.texture = nullptr;
 
-    auto oldView = rt.getView();
-    rt.setView(m_cropView);
-    rt.draw(m_text, states);
-    rt.setView(oldView);
+    rt.draw(m_textSprite, states);
 }

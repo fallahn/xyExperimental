@@ -33,6 +33,8 @@ source distribution.
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include <array>
 #include <functional>
@@ -55,8 +57,6 @@ public:
     void update(float);
     void clear();
 
-    void updateView(const sf::RenderWindow*);
-
 public:
 
     using Task = std::function<bool(float)>;
@@ -66,11 +66,12 @@ public:
 
     const sf::Texture& m_texture;
     sf::Text m_text;
-    sf::View m_cropView;
 
     float m_scrollDistance;
     void scroll(float);
 
+    mutable sf::RenderTexture m_textTexture;
+    sf::Sprite m_textSprite;
 
     std::array<sf::Vertex, 8u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

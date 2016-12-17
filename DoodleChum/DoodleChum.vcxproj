@@ -135,6 +135,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\AttributeManager.hpp" />
+    <ClInclude Include="include\Background.hpp" />
     <ClInclude Include="include\BudController.hpp" />
     <ClInclude Include="include\ComputerTask.hpp" />
     <ClInclude Include="include\CurrentActivity.hpp" />
@@ -173,6 +174,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AttributeManager.cpp" />
+    <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\BudController.cpp" />
     <ClCompile Include="src\ComputerTask.cpp" />
     <ClCompile Include="src\CurrentActivity.cpp" />
