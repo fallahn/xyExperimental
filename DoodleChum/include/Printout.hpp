@@ -40,15 +40,15 @@ source distribution.
 #include <functional>
 #include <list>
 
-namespace sf
+namespace xy
 {
-    class RenderWindow;
+    class TextureResource;
 }
 
 class Printout final : public sf::Drawable, public sf::Transformable
 {
 public:
-    Printout(sf::Font&, const sf::Texture&);
+    Printout(sf::Font&, xy::TextureResource&);
     ~Printout() = default;
     Printout(const Printout&) = delete;
     Printout& operator = (const Printout&) = delete;
@@ -64,7 +64,7 @@ public:
     std::list<std::string> m_strings;
     std::size_t m_stringIdx; //char index in to current string
 
-    const sf::Texture& m_texture;
+    sf::Texture* m_texture;
     sf::Text m_text;
 
     float m_scrollDistance;
@@ -72,6 +72,8 @@ public:
 
     mutable sf::RenderTexture m_textTexture;
     sf::Sprite m_textSprite;
+
+    sf::Sprite m_borderSprite;
 
     std::array<sf::Vertex, 8u> m_vertices;
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

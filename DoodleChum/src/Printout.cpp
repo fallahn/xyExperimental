@@ -27,6 +27,8 @@ source distribution.
 
 #include <Printout.hpp>
 
+#include <xygine/Resource.hpp>
+
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -38,12 +40,15 @@ namespace
     const std::size_t charLimit = 26;
 }
 
-Printout::Printout(sf::Font& font, const sf::Texture& texture)
+Printout::Printout(sf::Font& font, xy::TextureResource& tr)
     : m_stringIdx   (0),
-    m_texture       (texture),
+    m_texture       (nullptr),
     m_scrollDistance(0.f)
 {
-    sf::Vector2f textureSize = static_cast<sf::Vector2f>(texture.getSize());
+    m_texture = &tr.get("assets/images/ui/printer.png");
+    m_texture->setRepeated(true);
+
+    sf::Vector2f textureSize = static_cast<sf::Vector2f>(m_texture->getSize());
     m_vertices[1].position.x = textureSize.x / 2.f;
     m_vertices[1].texCoords.x = textureSize.x / 2.f;
     m_vertices[2].position = { textureSize.x / 2.f, textureSize.y };
@@ -64,8 +69,11 @@ Printout::Printout(sf::Font& font, const sf::Texture& texture)
     m_text.setPosition(defaultTextPos);
     m_text.setCharacterSize(24u);
 
-    m_textTexture.create(texture.getSize().x / 2, texture.getSize().y);
+    m_textTexture.create(m_texture->getSize().x / 2, m_texture->getSize().y);
     m_textSprite.setTexture(m_textTexture.getTexture());
+
+    m_borderSprite.setTexture(tr.get("assets/images/ui/pen_border.png"));
+    m_borderSprite.setPosition(-8.f, -8.f);
 }
 
 //public
@@ -183,11 +191,12 @@ void Printout::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     m_textTexture.display();
     
     states.transform *= getTransform();
-    states.texture = &m_texture;
+    states.texture = m_texture;
 
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
 
     states.texture = nullptr;
 
     rt.draw(m_textSprite, states);
+    rt.draw(m_borderSprite, states);
 }

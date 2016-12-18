@@ -52,6 +52,8 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_entity            (nullptr),
     m_currentActivity   (tr.get("assets/images/ui/current_task.png"))
 {
+    //tr.get("assets/images/ui/current_task.png").setSmooth(true);
+
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
     m_titleText.setCharacterSize(32u);
@@ -66,12 +68,15 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_balanceText = m_titleText;
     m_balanceText.setString(balanceString + std::to_string(am.getIncome()));
     m_balanceText.setRotation(-2.f);
-    m_balanceText.setPosition(400.f, 700.f);
+    m_balanceText.setPosition(400.f, 960.f);
     m_balanceText.setCharacterSize(52u);
     m_balanceText.setOrigin(0.f, 0.f);
 
-    m_currentActivity.setPosition(350.f, 780.f);
-    m_currentActivity.setScale(-2.f, 2.f);
+    m_currentActivity.setPosition(290.f, 720.f);
+    m_currentActivity.setScale(-1.f, 1.f);
+    m_activityBorder.setTexture(tr.get("assets/images/ui/pen_border_small.png"));
+    m_activityBorder.setPosition(m_currentActivity.getPosition());
+    m_activityBorder.setScale(-1.f, 1.f);
 
     auto& barTexture = tr.get("assets/images/ui/value_bar.png");
     auto& buttonTexture = tr.get("assets/images/ui/add_button.png");
@@ -233,6 +238,7 @@ void HouseholdTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.draw(m_titleText, states);
     rt.draw(m_balanceText, states);
     rt.draw(m_currentActivity, states);
+    rt.draw(m_activityBorder, states);
 
     for (const auto& b : m_bars)
     {

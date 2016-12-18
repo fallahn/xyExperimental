@@ -68,6 +68,7 @@ private:
     std::vector<std::pair<sf::Sprite, PriceTag>> m_buttons;
 
     CurrentActivity m_currentActivity;
+    sf::Sprite m_activityBorder;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
