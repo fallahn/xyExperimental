@@ -47,6 +47,7 @@ public:
 
     void setBounds(const sf::FloatRect& bounds) { m_bounds = bounds; }
     sf::FloatRect globalBounds() const override { return m_bounds; }
+    void toggleShadowMap();
 
 private:
     xy::PointLight* m_light;

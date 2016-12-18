@@ -190,10 +190,22 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             m_scene.addEntity(entity, xy::Scene::Layer::UI);
         }
     }
-    else if (msg.id == Message::ResetGame)
+    else if (msg.id == Message::System)
     {
-        requestStackPop();
-        requestStackPush(States::ID::Intro);
+        const auto& data = msg.getData<Message::SystemEvent>();
+        switch (data.action)
+        {
+        default: break;
+        case Message::SystemEvent::ResetGame:
+            requestStackPop();
+            requestStackPush(States::ID::Intro);
+            break;
+        case Message::SystemEvent::ToggleShadowMapping:
+        {
+
+        }
+            break;
+        }
     }
 }
 
@@ -392,10 +404,10 @@ void WorldClientState::initMapData()
                     const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& o : objs)
                     {
-                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 840.f, 320.f, sf::Color(255,233,240));
-                        light->setDepth(120.f);
+                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 440.f, 270.f, sf::Color(255,233,240));
+                        light->setDepth(160.f);
                         light->setIntensity(0.f);
-                        //light->enableShadowCasting(true);
+                        light->enableShadowCasting(true);
 
                         auto controller = xy::Component::create<RoomLightController>(m_messageBus);
 

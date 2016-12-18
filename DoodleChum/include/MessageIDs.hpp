@@ -58,7 +58,7 @@ namespace Message
         Interface,
         Attribute,
         Player,
-        ResetGame
+        System
     };
 
     struct TODEvent final
@@ -141,6 +141,15 @@ namespace Message
         float posX = 0.f;
         float posY = 0.f;
         std::int32_t task = -1;
+    };
+
+    struct SystemEvent final
+    {
+        enum
+        {
+            ResetGame,
+            ToggleShadowMapping
+        }action;
     };
 }
 

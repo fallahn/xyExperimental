@@ -41,6 +41,8 @@ namespace
     const float maxDistance = 500.f;
     const float bobOffset = 200.f; //make position near his head
     const float yInfluence = 200.f;
+
+    float intensityMultiplier = 9.f; //this is used to increase brightness of lights when shadow maps are enabled
 }
 
 RoomLightController::RoomLightController(xy::MessageBus& mb)
@@ -49,16 +51,17 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
     m_entity        (nullptr),
     m_intensity     (0.f)
 {
+    //change intensity with day time
     xy::Component::MessageHandler mh;
     mh.id = Message::TimeOfDay;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::TODEvent>();
-        //m_light->setIntensity(1.f - data.sunIntensity);
-        m_intensity = 1.f - data.sunIntensity;
+        m_intensity = (1.f - data.sunIntensity) * intensityMultiplier;
     };
     addMessageHandler(mh);
 
+    //change intensity with proximity of player
     mh.id = Message::Player;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
@@ -99,12 +102,21 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
         }
     };
     addMessageHandler(mh);
+
+    //toggle shadow mapping if requested
+    mh.id = Message::System;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::SystemEvent>();
+        if(data.action == Message::SystemEvent::ToggleShadowMapping) toggleShadowMap();
+    };
+    addMessageHandler(mh);
 }
 
 //public
 void RoomLightController::entityUpdate(xy::Entity& entity, float)
 {
-
+    //REPORT("light intens", std::to_string(m_light->getIntensity()));
 }
 
 void RoomLightController::onStart(xy::Entity& entity)
@@ -113,4 +125,19 @@ void RoomLightController::onStart(xy::Entity& entity)
     XY_ASSERT(m_light, "Entity has no light component");
 
     m_entity = &entity;
+}
+
+void RoomLightController::toggleShadowMap()
+{
+    XY_ASSERT(m_light, "controller not init yet");
+    if (!m_light->castShadows())
+    {
+        intensityMultiplier = 9.f;
+        m_light->enableShadowCasting(true);
+    }
+    else
+    {
+        intensityMultiplier = 1.f;
+        m_light->enableShadowCasting(false);
+    }
 }

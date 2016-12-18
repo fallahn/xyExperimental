@@ -84,8 +84,8 @@ GameOverTab::GameOverTab(xy::MessageBus& mb, sf::Font& font, xy::TextureResource
             {
                 am.reset();
                 //request stack clear / new game state
-                auto newMsg = sendMessage<float>(Message::ResetGame);
-                *newMsg = 0.f;
+                auto newMsg = sendMessage<Message::SystemEvent>(Message::System);
+                newMsg->action = Message::SystemEvent::ResetGame;
             }
         }
     };
