@@ -77,9 +77,21 @@
       "End": 87,
       "Loop":false,
       "Name": "die"
+    },
+    {
+      "Start": 88,
+      "End": 95,
+      "Loop": true,
+      "Name": "scratch"
+    },
+    {
+      "Start": 96,
+      "End": 111,
+      "Loop": true,
+      "Name": "water"
     }
   ],
-  "FrameCount": 88,
+  "FrameCount": 128,
   "FrameSize": "32, 64",
   "FrameRate": 14.0,
   "Texture": "bud.png",

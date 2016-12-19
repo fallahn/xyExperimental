@@ -107,6 +107,8 @@ namespace Message
             Computer,
             Sleep,
             Die,
+            Scratch,
+            Water,
             Count
         }id;
     };

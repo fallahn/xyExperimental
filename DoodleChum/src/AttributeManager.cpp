@@ -347,7 +347,7 @@ void AttribManager::updateHealth()
         m_personalAttribs[Personal::Boredness];
     m_personalAttribs[Personal::Health] = 100.f - (average / (Personal::Count - 1));
 
-    if (m_personalAttribs[Personal::Health] < 10 && !m_stats.dead)
+    if (m_personalAttribs[Personal::Health] < 4 && !m_stats.dead)
     {
         m_stats.dead = true;
         m_stats.gameEndTime = std::time(nullptr);
@@ -359,7 +359,7 @@ void AttribManager::updateHealth()
         auto msg2 = m_messageBus.post<Message::AnimationEvent>(Message::Animation);
         msg2->id = Message::AnimationEvent::Die;
 
-        //TODO set all values to 0
+        //TODO set all values to 0?
     }
 
     //income rate drops with health
