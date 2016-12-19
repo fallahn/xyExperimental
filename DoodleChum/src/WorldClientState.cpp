@@ -442,6 +442,10 @@ void WorldClientState::initMapData()
                                 {
                                     task.id = prop.getIntValue();
                                 }
+                                else if (propName == "animation")
+                                {
+                                    task.animationID = prop.getIntValue();
+                                }
                             }
                         }
                     }

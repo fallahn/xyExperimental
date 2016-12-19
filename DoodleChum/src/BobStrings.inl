@@ -8,7 +8,7 @@ const std::vector<std::string> filmMessages =
 
 const std::vector<std::string> musicMessages =
 {
-    "My music playlist is getting a little repetative.",
+    "My music playlist is getting a little repetitive.",
     "I'd like to get that new album. You know, the one which goes 'doodah doody dum dadada'?",
     "Could you perhaps expand my record collection a little?",
     "I've heard all my music too many times. I'd like something new."
@@ -28,6 +28,7 @@ const std::vector<std::string> gameMessages =
     "There's a game on itch.io I'd like to get - Pseuthe I think it's called?",
     "I wouldn't mind having a go at that game, Dispersio",
     "My game collection is boring, could I have something new?"
+    "I don't suppose you could grab me a copy of Re:Creation?"
 };
 
 const std::vector<std::string> randomMessages = 

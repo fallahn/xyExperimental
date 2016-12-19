@@ -25,23 +25,41 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_SLEEP_TASK_HPP_
-#define DC_SLEEP_TASK_HPP_
+#include <IdleTask.hpp>
+#include <MessageIDs.hpp>
 
-#include <Task.hpp>
+#include <xygine/util/Random.hpp>
 
-class SleepTask final : public Task
+IdleTask::IdleTask(xy::Entity& e, xy::MessageBus& mb, std::int32_t animID, std::int32_t taskID)
+    : Task      (e, mb),
+    m_animID    (animID),
+    m_taskID    (taskID),
+    m_time      (xy::Util::Random::value(2.f, 6.f))
 {
-public:
-    SleepTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&, float);
-    ~SleepTask() = default;
 
-    void onStart() override;
-    void update(float) override;
+}
 
-private:
-    float m_time;
-    sf::Vector2f m_position;
-};
+//public
+void IdleTask::onStart()
+{
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    if (m_animID != -1 && m_animID < Message::AnimationEvent::Count)
+    {       
+        msg->id = static_cast<Message::AnimationEvent::ID>(m_animID);
+    }
+    else
+    {
+        msg->id = Message::AnimationEvent::Idle;
+    }
+}
 
-#endif //DC_SLEEP_TASK_HPP_
+void IdleTask::update(float dt)
+{
+    //TODO random animation triggers?
+    
+    m_time -= dt;
+    if (m_time <= 0)
+    {
+        setCompleted(static_cast<Message::TaskEvent::Name>(m_taskID));
+    }
+}

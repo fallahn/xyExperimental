@@ -48,6 +48,8 @@ public:
 
     explicit Task(xy::Entity& e, xy::MessageBus& mb) : m_entity(e), m_messageBus(mb), m_completed(false) {}
     virtual ~Task() = default;
+    Task(const Task&) = delete;
+    const Task& operator = (const Task&) = delete;
 
     virtual void onStart() {}
     virtual void update(float) = 0;
@@ -72,6 +74,7 @@ struct TaskData final
 {
     std::string name;
     std::int32_t id = -1;
+    std::int32_t animationID = -1;
     sf::Vector2u position;
     sf::Vector2f worldPosition;
 };

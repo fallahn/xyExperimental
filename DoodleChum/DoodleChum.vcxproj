@@ -145,6 +145,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\GameOverTab.hpp" />
     <ClInclude Include="include\HouseholdTab.hpp" />
+    <ClInclude Include="include\IdleTask.hpp" />
     <ClInclude Include="include\IntroState.hpp" />
     <ClInclude Include="include\MenuState.hpp" />
     <ClInclude Include="include\MeshIDs.hpp" />
@@ -184,6 +185,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameOverTab.cpp" />
     <ClCompile Include="src\HouseholdTab.cpp" />
+    <ClCompile Include="src\IdleTask.cpp" />
     <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MenuState.cpp" />

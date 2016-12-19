@@ -66,19 +66,19 @@ namespace
     const float cleanlinessPerSecond = 0.0023f; //approx every 12 hours
     const float tirednessPerSecond = 0.00154f; //approx 18 hours
     const float poopPerSecond = 0.00115f; //approx every 24 hours
-    const float borednessPerSecond = 0.056667f; //approx every 30 minutes
+    const float borednessPerSecond = 0.0092f; //approx every 3 hours
 
     const std::uint64_t fourHours = 60 * 60 * 4;
     const std::uint64_t twelveHours = fourHours * 3;
     const std::uint64_t twentyfourHours = twelveHours * 2;
 
     const float waterPerDrink = 1.89f;
-    const float waterPerFlush = 22.68f;
-    const float waterPerShower = 45.36f;
+    const float waterPerFlush = 12.68f;
+    const float waterPerShower = 25.36f;
     const float foodPerEat = 3.6f;
     const float tirednessPerSleep = 75.f;
-    const float entertainmentValue = 4.f; //a particular entertainment is increased this much with each purchase
-    const float entertainmentReductionMultiplier = 0.1f; // entertainment is this much less entertaining each time it's used
+    const float entertainmentValue = 10.f; //a particular entertainment is increased this much with each purchase
+    const float entertainmentReductionMultiplier = 0.01f; // entertainment is this much less entertaining each time it's used
     const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
 }
 
@@ -296,34 +296,31 @@ void AttribManager::reset()
 //private
 void AttribManager::initValues()
 {
-    //if (!load())
-    {
-        m_stats.currentIncome = initialIncome;
-        m_stats.daysToPayDay = daysPerWeek;
-        m_stats.gameStartTime = std::time(nullptr);
-        m_stats.gameEndTime = 0;
-        m_stats.totalIncoming = 0;
-        m_stats.totalOutGoing = 0;
-        m_stats.dead = false;
+    m_stats.currentIncome = initialIncome;
+    m_stats.daysToPayDay = daysPerWeek;
+    m_stats.gameStartTime = std::time(nullptr);
+    m_stats.gameEndTime = 0;
+    m_stats.totalIncoming = initialIncome;
+    m_stats.totalOutGoing = 0;
+    m_stats.dead = false;
         
-        m_personalAttribs[Personal::Health] = 100.f;
-        m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(10.f, 25.f);
-        m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(15.f, 30.f);
-        m_personalAttribs[Personal::Tiredness] = xy::Util::Random::value(12.f, 28.f);
-        m_personalAttribs[Personal::Poopiness] = xy::Util::Random::value(10.f, 20.f);
-        m_personalAttribs[Personal::Cleanliness] = 0.f;
-        m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(50.f, 70.f);
+    m_personalAttribs[Personal::Health] = 100.f;
+    m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(10.f, 25.f);
+    m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(15.f, 30.f);
+    m_personalAttribs[Personal::Tiredness] = xy::Util::Random::value(12.f, 28.f);
+    m_personalAttribs[Personal::Poopiness] = xy::Util::Random::value(10.f, 20.f);
+    m_personalAttribs[Personal::Cleanliness] = 0.f;
+    m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(50.f, 70.f);
 
-        m_householdAttribs[Household::Food] = 100.f;
-        m_householdAttribs[Household::Water] = 100.f;
-        m_householdAttribs[Household::Games] = 100.f;
-        m_householdAttribs[Household::Music] = 100.f;
-        m_householdAttribs[Household::SheetMusic] = 100.f;
-        m_householdAttribs[Household::Films] = 100.f;
-        m_householdAttribs[Household::IncomeRate] = 100.f;
+    m_householdAttribs[Household::Food] = 100.f;
+    m_householdAttribs[Household::Water] = 100.f;
+    m_householdAttribs[Household::Games] = 100.f;
+    m_householdAttribs[Household::Music] = 100.f;
+    m_householdAttribs[Household::SheetMusic] = 100.f;
+    m_householdAttribs[Household::Films] = 100.f;
+    m_householdAttribs[Household::IncomeRate] = 100.f;
 
-        save();
-    }
+    save();
 }
 
 void AttribManager::updateValues(float dt)

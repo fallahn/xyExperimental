@@ -190,6 +190,9 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::TaskEvent>();
+        //don't display idle tasks
+        if (data.taskName >= Message::TaskEvent::Idle01) return;
+
         switch (data.taskName)
         {
         default: 

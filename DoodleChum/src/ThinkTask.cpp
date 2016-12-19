@@ -72,17 +72,23 @@ void ThinkTask::update(float dt)
         
         //make sure we ignore the health attrib
         std::int32_t attrib = -1;
-        std::size_t idx = 0;
-        do
+        for (const auto& pa : personalAttribs)
         {
-            attrib = personalAttribs[idx++].first;
-        } while (attrib == AttribManager::Personal::Health || !canDo(attrib));
-        
+            if (canDo(pa.first))
+            {
+                attrib = pa.first;
+                break;
+            }
+        }
 
         //perform task based on most dire attrib
         Message::TaskEvent::Name task = Message::TaskEvent::Sleep;
         switch (attrib)
         {
+        case -1:
+            //we want to do an idle animation
+            task = static_cast<Message::TaskEvent::Name>(xy::Util::Random::value(Message::TaskEvent::Idle01, Message::TaskEvent::IdleEnd));
+            break;
         case AttribManager::Personal::Tiredness:
         default: break;
         case AttribManager::Personal::Boredness:
@@ -161,7 +167,7 @@ bool ThinkTask::canDo(std::int32_t attrib)
     {
     default: return false;
     case AttribManager::Personal::Boredness:
-        return true; //can always do an activity - it may just not alleviate boredness
+        return personalAttribs[AttribManager::Personal::Boredness].second > 38.f;
     case AttribManager::Personal::Hunger:
     {
         bool possible = (householdAttribs[AttribManager::Household::Food] > 0

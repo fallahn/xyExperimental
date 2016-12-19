@@ -41,9 +41,9 @@ namespace
     const sf::Vector2f movement(24.f, -24.f);
 }
 
-SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
+SleepTask::SleepTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position, float time)
     : Task      (e, mb),
-    m_time      (120.f),
+    m_time      (time),
     m_position  (position + offset)
 {
 

@@ -81,7 +81,12 @@ namespace Message
             PlayMusic,
             PlayComputer,
             Think,
-            Travel
+            Travel,
+            Idle01 = 100,
+            Idle02,
+            Idle03,
+            Idle04,
+            IdleEnd
         }taskName;
     };
 

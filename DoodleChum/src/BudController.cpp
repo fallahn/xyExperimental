@@ -38,6 +38,7 @@ source distribution.
 #include <PianoTask.hpp>
 #include <MusicTask.hpp>
 #include <ComputerTask.hpp>
+#include <IdleTask.hpp>
 #include <MessageIDs.hpp>
 #include <AttributeManager.hpp>
 
@@ -66,6 +67,8 @@ namespace
         0.4f, //sleeping
         8.f //die
     };
+
+    const float maxSleepTime = 180.f;
 }
 
 BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
@@ -115,7 +118,10 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         //add the requested task
         switch (data.taskName)
         {
-        default: break;
+        default: 
+            //perform an idle task
+            m_tasks.emplace_back(std::make_unique<IdleTask>(*m_entity, getMessageBus(), result->animationID, data.taskName));
+            break;
         case Message::TaskEvent::Eat:
             LOG("Bud decided to eat!", xy::Logger::Type::Info);
             m_tasks.emplace_back(std::make_unique<EatTask>(*m_entity, getMessageBus()));
@@ -126,7 +132,6 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             break;
         case Message::TaskEvent::Poop:
             LOG("Bud decided to poop!", xy::Logger::Type::Info);
-            //one frame?
             m_tasks.emplace_back(std::make_unique<PoopTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Shower:
@@ -136,8 +141,10 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             break;
         case Message::TaskEvent::Sleep:
             LOG("Bud decided to sleep!", xy::Logger::Type::Info);
-            //scale 0, ZZzz particle effect
-            m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus(), particlePos));
+            {
+                float time = (m_attribManager.getPersonalAttribs()[AttribManager::Personal::Tiredness].first / 100.f) * maxSleepTime;
+                m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus(), particlePos, time));
+            }
             break;
         case Message::TaskEvent::WatchTV:
             LOG("Bud decided to watch TV!", xy::Logger::Type::Info);

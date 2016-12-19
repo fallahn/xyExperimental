@@ -11,6 +11,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/Game.cpp
   ${PROJECT_DIR}/GameOverTab.cpp
   ${PROJECT_DIR}/HouseholdTab.cpp
+  ${PROJECT_DIR}/IdleTask.cpp
   ${PROJECT_DIR}/IntroState.cpp
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/MenuState.cpp

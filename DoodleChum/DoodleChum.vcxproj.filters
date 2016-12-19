@@ -150,6 +150,9 @@
     <ClInclude Include="include\Background.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\IdleTask.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -253,6 +256,9 @@
     </ClCompile>
     <ClCompile Include="src\Background.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IdleTask.cpp">
+      <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

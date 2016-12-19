@@ -25,23 +25,24 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_SLEEP_TASK_HPP_
-#define DC_SLEEP_TASK_HPP_
+#ifndef DC_IDLE_TASK_HPP_
+#define DC_IDLE_TASK_HPP_
 
 #include <Task.hpp>
 
-class SleepTask final : public Task
+class IdleTask final : public Task
 {
 public:
-    SleepTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&, float);
-    ~SleepTask() = default;
+    IdleTask(xy::Entity&, xy::MessageBus&, std::int32_t, std::int32_t);
+    ~IdleTask() = default;
 
     void onStart() override;
     void update(float) override;
 
 private:
+    std::int32_t m_animID;
+    std::int32_t m_taskID;
     float m_time;
-    sf::Vector2f m_position;
 };
 
-#endif //DC_SLEEP_TASK_HPP_
+#endif //DC_IDLE_TASK_HPP_
