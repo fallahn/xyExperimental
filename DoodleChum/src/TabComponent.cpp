@@ -39,6 +39,7 @@ namespace
     const sf::Vector2f tabSize(40.f, 200.f);
     const float moveSpeed = 2500.f;
     const sf::Color vertColour(255, 255, 255, 250);
+    const float easeDistance = 260.f;
 }
 
 TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Direction direction, const sf::Texture& texture)
@@ -138,6 +139,13 @@ void TabComponent::entityUpdate(xy::Entity& entity, float dt)
     if (m_moving)
     {
         float distance = moveSpeed * dt;
+
+        //easing near end
+        if (m_distanceRemaining < easeDistance)
+        {
+            distance *= (m_distanceRemaining / easeDistance);
+        }
+
         m_distanceRemaining -= distance;
 
         if (m_distanceRemaining < 1)

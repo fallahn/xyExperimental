@@ -48,7 +48,7 @@ private:
 
     const sf::Texture& m_texture;
 
-    std::array<sf::Vertex, 4u> m_vertices;
+    std::array<sf::Vertex, 8u> m_vertices;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };

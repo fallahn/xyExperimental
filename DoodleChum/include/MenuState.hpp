@@ -31,6 +31,10 @@ source distribution.
 #include <StateIDs.hpp>
 
 #include <xygine/State.hpp>
+#include <xygine/Resource.hpp>
+#include <xygine/ui/Container.hpp>
+
+#include <SFML/Graphics/Font.hpp>
 
 class MenuState final : public xy::State
 {
@@ -46,7 +50,15 @@ public:
     xy::StateID stateID() const override { return States::ID::Menu; }
 
 private:
+    xy::MessageBus& m_messageBus;
 
+    //xy::UI::Container m_helpContainer;
+    xy::UI::Container m_optionContainer;
+    //xy::UI::Container m_creditsContainer;
+
+    sf::Font m_font;
+    xy::TextureResource m_textureResource;
+    void buildOptions();
 };
 
 #endif //DC_MENU_STATE_HPP_

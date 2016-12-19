@@ -38,6 +38,8 @@ namespace
 {
     const sf::Uint8 minColour = 23;
     const float moveSpeed = 1.f;
+    const float splitPoint = 3.f;
+    const float cloudSplit = xy::DefaultSceneSize.y / splitPoint;
 }
 
 Background::Background(xy::MessageBus& mb, const sf::Texture& texture)
@@ -45,14 +47,25 @@ Background::Background(xy::MessageBus& mb, const sf::Texture& texture)
     m_texture(texture)
 {
     m_vertices[1].position.x = xy::DefaultSceneSize.x;
-    m_vertices[2].position = xy::DefaultSceneSize;
-    m_vertices[3].position.y = xy::DefaultSceneSize.y;
+    m_vertices[2].position = { xy::DefaultSceneSize.x, cloudSplit };
+    m_vertices[3].position.y = cloudSplit;
+
+    m_vertices[4].position.y = cloudSplit;
+    m_vertices[5].position = { xy::DefaultSceneSize.x, cloudSplit };
+    m_vertices[6].position = xy::DefaultSceneSize;
+    m_vertices[7].position.y = xy::DefaultSceneSize.y;
 
     //tex coords
     auto texSize = static_cast<sf::Vector2f>(texture.getSize());
+    const float texSplit = texSize.y / splitPoint;
     m_vertices[1].texCoords.x = texSize.x;
-    m_vertices[2].texCoords = texSize;
-    m_vertices[3].texCoords.y = texSize.y;
+    m_vertices[2].texCoords = { texSize.x, texSplit };
+    m_vertices[3].texCoords.y = texSplit;
+
+    m_vertices[4].texCoords.y = texSplit;
+    m_vertices[5].texCoords = { texSize.x, texSplit };
+    m_vertices[6].texCoords = texSize;
+    m_vertices[7].texCoords.y = texSize.y;
 
     xy::Component::MessageHandler mh;
     mh.id = Message::TimeOfDay;
@@ -75,9 +88,9 @@ Background::Background(xy::MessageBus& mb, const sf::Texture& texture)
 void Background::entityUpdate(xy::Entity&, float dt)
 {
     float amount = moveSpeed * dt;
-    for (auto& v : m_vertices)
+    for (auto i = 0; i < 4; ++i)
     {
-        v.texCoords.x += amount;
+        m_vertices[i].texCoords.x += amount;
     }
 }
 
