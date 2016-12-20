@@ -26,6 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <MenuState.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/MessageBus.hpp>
@@ -34,6 +35,7 @@ source distribution.
 #include <xygine/ui/ComboBox.hpp>
 #include <xygine/ui/Slider.hpp>
 #include <xygine/ui/Selection.hpp>
+#include <xygine/ui/Label.hpp>
 
 #include <SFML/Window/Event.hpp>
 
@@ -41,19 +43,34 @@ source distribution.
 MenuState::MenuState(xy::StateStack& stack, Context context)
     : State             (stack, context),
     m_messageBus        (context.appInstance.getMessageBus()),
-    m_optionContainer   (m_messageBus)
+    m_helpContainer     (m_messageBus),
+    m_optionContainer   (m_messageBus),
+    m_creditsContainer  (m_messageBus),
+    m_currentContainer  (&m_helpContainer),
+    m_in                (true),
+    m_scale             (0.f)
 {
     auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
     msg->stateID = States::ID::Menu;
     msg->type = xy::Message::UIEvent::MenuOpened;
 
+    m_background.setTexture(m_textureResource.get("assets/images/ui/menu_background.png"));
+    m_background.setOrigin(xy::DefaultSceneSize / 2.f);
+    m_background.setPosition(xy::DefaultSceneSize / 2.f);
+    m_background.setScale(0.f, 0.f);
+
+    m_font.loadFromFile("assets/fonts/FallahnHand.ttf");
+    buildHelp();
     buildOptions();
+    buildCredits();
+
+    m_currentContainer->setScale(0.f, 0.f);
 }
 
 //public
 bool MenuState::handleEvent(const sf::Event& evt)
 { 
-    m_optionContainer.handleEvent(evt, getContext().appInstance.getMouseWorldPosition());
+    m_currentContainer->handleEvent(evt, getContext().appInstance.getMouseWorldPosition());
     
     if (evt.type == sf::Event::KeyReleased)
     {
@@ -64,12 +81,7 @@ bool MenuState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
         case sf::Keyboard::BackSpace:
-            requestStackPop();
-            {
-                auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
-                msg->stateID = States::ID::Menu;
-                msg->type = xy::Message::UIEvent::MenuClosed;
-            }
+            m_in = false;
             break;
         }
     }
@@ -83,8 +95,28 @@ void MenuState::handleMessage(const xy::Message&)
 
 bool MenuState::update(float dt)
 {
-    m_optionContainer.update(dt);
+    m_currentContainer->update(dt);
     
+    dt *= 2.f;
+    if (m_in)
+    {
+        m_scale = std::min(1.f, m_scale + dt);
+    }
+    else
+    {
+        m_scale = std::max(0.f, m_scale - dt);
+        if (m_scale == 0)
+        {
+            requestStackPop();
+
+            auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
+            msg->stateID = States::ID::Menu;
+            msg->type = xy::Message::UIEvent::MenuClosed;
+        }
+    }
+    m_background.setScale(m_scale, m_scale);
+    m_currentContainer->setScale(m_scale, m_scale);
+
     return true;
 }
 
@@ -92,17 +124,79 @@ void MenuState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.setView(getContext().defaultView);
-    rw.draw(m_optionContainer);
+    rw.draw(m_background);
+    rw.draw(*m_currentContainer);
 }
 
 //private
-void MenuState::buildOptions()
+void MenuState::buildHelp()
 {
-    m_font.loadFromFile("assets/fonts/FallahnHand.ttf");
+    m_helpContainer.setOrigin(xy::DefaultSceneSize / 2.f);
+    m_helpContainer.setPosition(xy::DefaultSceneSize / 2.f);
+    
+    auto text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("DoodleBob!");
+    text->setCharacterSize(80u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 480.f);
+    text->setColour(sf::Color::Black);
+    m_helpContainer.addControl(text);
+    
+    auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/start_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(xy::DefaultSceneSize.x / 2.f, 640.f);
+    button->setText("Continue...");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        requestStackPop();
+        
+        auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
+        msg->stateID = States::ID::Menu;
+        msg->type = xy::Message::UIEvent::MenuClosed;
+    });
+    m_helpContainer.addControl(button);
+
+    button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(720.f, 820.f);
+    button->setText("Quit");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        xy::App::quit();
+    });
+    m_helpContainer.addControl(button);
+
+    button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(1200.f, 820.f);
+    button->setText("Options");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        m_currentContainer = &m_optionContainer;
+    });
+    m_helpContainer.addControl(button);
+}
+
+void MenuState::buildOptions()
+{   
+    m_optionContainer.setOrigin(xy::DefaultSceneSize / 2.f);
+    m_optionContainer.setPosition(xy::DefaultSceneSize / 2.f);
+
+    auto text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("Options");
+    text->setCharacterSize(80u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 420.f);
+    text->setColour(sf::Color::Black);
+    m_optionContainer.addControl(text);
     
     auto soundSlider = std::make_shared<xy::UI::Slider>(m_font, m_textureResource.get("assets/images/ui/slider_handle.png"), 375.f);
-    soundSlider->setPosition(640.f, 314.f);
+    soundSlider->setPosition(640.f, 604.f);
     soundSlider->setText("Volume");
+    soundSlider->setTextColour(sf::Color::Black);
     soundSlider->setMaxValue(1.f);
     soundSlider->addCallback([this](const xy::UI::Slider* slider)
     {
@@ -116,8 +210,9 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(soundSlider);
 
     auto muteCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
-    muteCheckbox->setPosition(1110.f, 274.f);
+    muteCheckbox->setPosition(1110.f, 534.f);
     muteCheckbox->setText("Mute");
+    muteCheckbox->setTextColour(sf::Color::Black);
     muteCheckbox->addCallback([this](const xy::UI::CheckBox* checkBox)
     {
         auto msg = m_messageBus.post<xy::Message::UIEvent>(xy::Message::UIMessage);
@@ -127,7 +222,8 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(muteCheckbox);
 
     auto resolutionBox = std::make_shared<xy::UI::Selection>(m_font, m_textureResource.get("assets/images/ui/scroll_arrow.png"), 375.f);
-    resolutionBox->setPosition(640.f, 354.f);
+    resolutionBox->setPosition(640.f, 654.f);
+    resolutionBox->setTextColour(sf::Color::Black);
 
     const auto& modes = getContext().appInstance.getVideoSettings().AvailableVideoModes;
     auto i = 0u;
@@ -148,20 +244,30 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(resolutionBox);
 
     auto fullscreenCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
-    fullscreenCheckbox->setPosition(1110.f, 354.f);
+    fullscreenCheckbox->setPosition(1110.f, 604.f);
     fullscreenCheckbox->setText("Full Screen");
-    fullscreenCheckbox->addCallback([this](const xy::UI::CheckBox*)
-    {
-
-    }, xy::UI::CheckBox::Event::CheckChanged);
+    fullscreenCheckbox->setTextColour(sf::Color::Black);
     fullscreenCheckbox->check((getContext().appInstance.getVideoSettings().WindowStyle & sf::Style::Fullscreen) != 0);
     m_optionContainer.addControl(fullscreenCheckbox);
 
+    auto shadowCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
+    shadowCheckbox->setPosition(1110.f, 684.f);
+    shadowCheckbox->setText("Shadow Maps");
+    shadowCheckbox->setTextColour(sf::Color::Black);
+    shadowCheckbox->addCallback([this](const xy::UI::CheckBox*)
+    {
+        auto msg = m_messageBus.post<Message::SystemEvent>(Message::System);
+        msg->action = Message::SystemEvent::ToggleShadowMapping;
+    }, xy::UI::CheckBox::Event::CheckChanged);
+    shadowCheckbox->check(true);
+    m_optionContainer.addControl(shadowCheckbox);
 
-    auto applyButton = std::make_shared<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/start_button.png"));
+
+    auto applyButton = std::make_shared<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     applyButton->setText("Apply");
+    applyButton->setTextColour(sf::Color::Black);
     applyButton->setAlignment(xy::UI::Alignment::Centre);
-    applyButton->setPosition(xy::DefaultSceneSize.x / 2.f, 580.f);
+    applyButton->setPosition(xy::DefaultSceneSize.x / 2.f, 820.f);
     applyButton->addCallback([fullscreenCheckbox, resolutionBox, this]()
     {
         auto res = resolutionBox->getSelectedValue();
@@ -171,10 +277,85 @@ void MenuState::buildOptions()
         settings.VideoMode.height = res & 0xFFFF;
         settings.WindowStyle = (fullscreenCheckbox->checked()) ? sf::Style::Fullscreen : sf::Style::Close;
         getContext().appInstance.applyVideoSettings(settings);
-        xy::App::setMouseCursorVisible(false);
-
-        auto msg = m_messageBus.post<xy::Message::UIEvent>(xy::Message::UIMessage);
-        msg->type = xy::Message::UIEvent::ResizedWindow;
     });
     m_optionContainer.addControl(applyButton);
+
+    auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(720.f, 820.f);
+    button->setText("Back");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        m_currentContainer = &m_helpContainer;
+    });
+    m_optionContainer.addControl(button);
+
+    button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(1200.f, 820.f);
+    button->setText("Credits");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        m_currentContainer = &m_creditsContainer;
+    });
+    m_optionContainer.addControl(button);
+}
+
+void MenuState::buildCredits()
+{
+    m_creditsContainer.setOrigin(xy::DefaultSceneSize / 2.f);
+    m_creditsContainer.setPosition(xy::DefaultSceneSize / 2.f);
+
+    auto text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("Credits");
+    text->setCharacterSize(80u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 420.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("Josh Mercier - 3D models and artwork");
+    text->setCharacterSize(40u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 500.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("Matt Marchant - programming and doodles");
+    text->setCharacterSize(40u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 560.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("SFML Community - join us in #sfml on irc.boxbox.org!");
+    text->setCharacterSize(36u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 620.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("Proudly powered by xygine");
+    text->setCharacterSize(30u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(1160.f, 820.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
+    button->setAlignment(xy::UI::Alignment::Centre);
+    button->setPosition(720.f, 820.f);
+    button->setText("Back");
+    button->setTextColour(sf::Color::Black);
+    button->addCallback([this]()
+    {
+        m_currentContainer = &m_optionContainer;
+    });
+    m_creditsContainer.addControl(button);
 }

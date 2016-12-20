@@ -103,6 +103,10 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     pp->addMessageHandler(mh);
     m_scene.addPostProcess(pp);
     
+    auto msg = m_messageBus.post<xy::Message::UIEvent>(xy::Message::UIMessage);
+    msg->type = xy::Message::UIEvent::RequestState;
+    msg->stateID = States::ID::Menu;
+
     quitLoadingScreen();
 }
 

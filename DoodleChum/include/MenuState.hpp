@@ -35,6 +35,7 @@ source distribution.
 #include <xygine/ui/Container.hpp>
 
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 class MenuState final : public xy::State
 {
@@ -52,13 +53,21 @@ public:
 private:
     xy::MessageBus& m_messageBus;
 
-    //xy::UI::Container m_helpContainer;
+    xy::UI::Container m_helpContainer;
     xy::UI::Container m_optionContainer;
-    //xy::UI::Container m_creditsContainer;
+    xy::UI::Container m_creditsContainer;
+    xy::UI::Container* m_currentContainer;
 
     sf::Font m_font;
     xy::TextureResource m_textureResource;
+    sf::Sprite m_background;
+
+    bool m_in;
+    float m_scale;
+
+    void buildHelp();
     void buildOptions();
+    void buildCredits();
 };
 
 #endif //DC_MENU_STATE_HPP_
