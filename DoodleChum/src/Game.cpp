@@ -102,6 +102,14 @@ void Game::draw()
 
 void Game::initialise()
 {    
+    //preload the resources for the menu
+    m_textureResource.get("assets/images/ui/menu_background.png");
+    m_textureResource.get("assets/images/ui/menu_tabs.png");
+    m_textureResource.get("assets/images/ui/start_button.png");
+    m_textureResource.get("assets/images/ui/small_button.png");
+    m_textureResource.get("assets/images/ui/checkbox.png");
+    m_textureResource.get("assets/images/ui/scroll_arrow.png");
+
     registerStates();
 #ifdef _DEBUG_
     m_stateStack.pushState(States::WorldClient);
@@ -123,5 +131,5 @@ void Game::registerStates()
 {
     m_stateStack.registerState<IntroState>(States::ID::Intro);
     m_stateStack.registerState<WorldClientState>(States::ID::WorldClient);
-    m_stateStack.registerState<MenuState>(States::ID::Menu);
+    m_stateStack.registerState<MenuState>(States::ID::Menu, m_fontResource.get("assets/fonts/FallahnHand.ttf"), m_textureResource);
 }

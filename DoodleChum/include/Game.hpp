@@ -30,6 +30,8 @@ source distribution.
 
 #include <xygine/App.hpp>
 
+#include <xygine/Resource.hpp>
+
 class Game final : public xy::App
 {
 public:
@@ -41,6 +43,10 @@ public:
 private:
 
     xy::StateStack m_stateStack;
+
+    //load the resources for the menu in here so pushing menu state loads reasonably quickly
+    xy::TextureResource m_textureResource;
+    xy::FontResource m_fontResource;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

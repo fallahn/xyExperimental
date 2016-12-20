@@ -40,9 +40,11 @@ source distribution.
 #include <SFML/Window/Event.hpp>
 
 
-MenuState::MenuState(xy::StateStack& stack, Context context)
+MenuState::MenuState(xy::StateStack& stack, Context context, const sf::Font& font, xy::TextureResource& tr)
     : State             (stack, context),
     m_messageBus        (context.appInstance.getMessageBus()),
+    m_textureResource   (tr),
+    m_font              (font),
     m_helpContainer     (m_messageBus),
     m_optionContainer   (m_messageBus),
     m_creditsContainer  (m_messageBus),
@@ -59,7 +61,13 @@ MenuState::MenuState(xy::StateStack& stack, Context context)
     m_background.setPosition(xy::DefaultSceneSize / 2.f);
     m_background.setScale(0.f, 0.f);
 
-    m_font.loadFromFile("assets/fonts/FallahnHand.ttf");
+    m_tabs.setColor(sf::Color::Transparent);
+    auto& tex = m_textureResource.get("assets/images/ui/menu_tabs.png");
+    tex.setSmooth(true);
+    m_tabs.setTexture(tex);
+    m_tabs.setScale(2.f, 2.f);
+
+
     buildHelp();
     buildOptions();
     buildCredits();
@@ -97,10 +105,12 @@ bool MenuState::update(float dt)
 {
     m_currentContainer->update(dt);
     
+  
     dt *= 2.f;
     if (m_in)
     {
         m_scale = std::min(1.f, m_scale + dt);
+        
     }
     else
     {
@@ -117,6 +127,10 @@ bool MenuState::update(float dt)
     m_background.setScale(m_scale, m_scale);
     m_currentContainer->setScale(m_scale, m_scale);
 
+    sf::Color c = sf::Color::White;
+    c.a = static_cast<sf::Uint8>(m_scale * 255.f);
+    m_tabs.setColor(c);
+
     return true;
 }
 
@@ -124,6 +138,7 @@ void MenuState::draw()
 {
     auto& rw = getContext().renderWindow;
     rw.setView(getContext().defaultView);
+    rw.draw(m_tabs);
     rw.draw(m_background);
     rw.draw(*m_currentContainer);
 }
@@ -149,11 +164,7 @@ void MenuState::buildHelp()
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
-        requestStackPop();
-        
-        auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
-        msg->stateID = States::ID::Menu;
-        msg->type = xy::Message::UIEvent::MenuClosed;
+        m_in = false;
     });
     m_helpContainer.addControl(button);
 

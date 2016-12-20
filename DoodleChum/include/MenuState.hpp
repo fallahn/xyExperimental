@@ -40,7 +40,7 @@ source distribution.
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, Context);
+    MenuState(xy::StateStack&, Context, const sf::Font&, xy::TextureResource&);
     ~MenuState() = default;
 
     bool handleEvent(const sf::Event&) override;
@@ -52,15 +52,16 @@ public:
 
 private:
     xy::MessageBus& m_messageBus;
+    xy::TextureResource& m_textureResource;
+    const sf::Font& m_font;
 
     xy::UI::Container m_helpContainer;
     xy::UI::Container m_optionContainer;
     xy::UI::Container m_creditsContainer;
     xy::UI::Container* m_currentContainer;
-
-    sf::Font m_font;
-    xy::TextureResource m_textureResource;
+    
     sf::Sprite m_background;
+    sf::Sprite m_tabs;
 
     bool m_in;
     float m_scale;

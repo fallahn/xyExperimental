@@ -57,7 +57,6 @@ void MusicTask::onStart()
         entity.getComponent<xy::ParticleSystem>()->start();
     };
     getEntity().getScene()->sendCommand(cmd);
-    getEntity().setScale(-1.f, 1.f);
 
     auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
     msg->id = Message::AnimationEvent::TV;
@@ -85,6 +84,5 @@ void MusicTask::update(float dt)
             entity.getComponent<xy::ParticleSystem>()->stop();
         };
         getEntity().getScene()->sendCommand(cmd);
-        getEntity().setScale(1.f, 1.f);
     }
 }

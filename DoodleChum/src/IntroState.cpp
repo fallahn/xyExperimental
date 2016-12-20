@@ -65,7 +65,7 @@ IntroState::IntroState(xy::StateStack& stack, Context context)
     m_sprite.setTexture(m_texture);
     m_rectangleShape.setSize(xy::DefaultSceneSize);
 
-    m_noiseShader.loadFromMemory(xy::Shader::PostChromeAb::fragment, sf::Shader::Fragment);
+    m_noiseShader.loadFromMemory("#version 120\n" + xy::Shader::PostChromeAb::fragment, sf::Shader::Fragment);
     m_noiseShader.setUniform("u_lineCount", m_windowRatio * scanlineCount);
     m_noiseShader.setUniform("u_sourceTexture", m_texture);
 
