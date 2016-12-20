@@ -34,4 +34,5 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/TVAnimator.cpp
   ${PROJECT_DIR}/TVTask.cpp
   ${PROJECT_DIR}/ValueBar.cpp
+  ${PROJECT_DIR}/WallClock.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

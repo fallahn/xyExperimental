@@ -38,6 +38,7 @@ source distribution.
 #include <ThinkBubble.hpp>
 #include <TVAnimator.hpp>
 #include <Background.hpp>
+#include <WallClock.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -475,6 +476,13 @@ void WorldClientState::initMapData()
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(bg);
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
+
+    //draws the hands of the wall clock
+    auto wc = xy::Component::create<WallClock>(m_messageBus);
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(wc);
+    entity->setPosition(660.f, 490.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
 }
 
 void WorldClientState::initBud()

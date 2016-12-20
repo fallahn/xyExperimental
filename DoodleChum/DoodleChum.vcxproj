@@ -171,6 +171,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\TVAnimator.hpp" />
     <ClInclude Include="include\TVTask.hpp" />
     <ClInclude Include="include\ValueBar.hpp" />
+    <ClInclude Include="include\WallClock.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +209,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\TVAnimator.cpp" />
     <ClCompile Include="src\TVTask.cpp" />
     <ClCompile Include="src\ValueBar.cpp" />
+    <ClCompile Include="src\WallClock.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />
   </ItemGroup>
   <ItemGroup>
