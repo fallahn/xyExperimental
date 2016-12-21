@@ -25,42 +25,32 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESH_IDS_HPP_
-#define DC_MESH_IDS_HPP_
+#ifndef DC_CAT_ANIM_TASK_HPP_
+#define DC_CAT_ANIM_TASK_HPP_
 
-#include <xygine/shaders/Default.hpp>
+#include <Task.hpp>
 
-namespace Mesh
+class CatAnim final : public Task
 {
-    enum ID
+public:
+    enum class Action
     {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Tree,
-        Lights,
-        Walls,
-        Cat
+        Sleep,
+        Sit,
+        Eat,
+        Poop
     };
-}
 
-namespace Material
-{
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Lights,
-        Walls,
-        Cat
-    };
-}
+    CatAnim(xy::Entity&, xy::MessageBus&, Action = Action::Sit);
+    ~CatAnim() = default;
 
-#endif //DC_MESH_IDS_HPP_
+    void onStart() override;
+    void update(float) override;
+
+private:
+    Action m_action;
+    float m_time;
+
+};
+
+#endif //DC_CAT_ANIM_TASK_HPP_

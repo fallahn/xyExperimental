@@ -42,11 +42,11 @@ namespace
 }
 
 TravelTask::TravelTask(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vector2f>& points)
-    : Task(entity, mb),
-    m_points(std::move(points)),
-    m_currentAnimation(Message::AnimationEvent::Idle),
-    m_moveSpeed(moveSpeedX),
-    m_startDirection(m_points.back() - getEntity().getWorldPosition())
+    : Task              (entity, mb),
+    m_points            (std::move(points)),
+    m_currentAnimation  (Message::AnimationEvent::Idle),
+    m_moveSpeed         (moveSpeedX),
+    m_startDirection    (m_points.back() - getEntity().getWorldPosition())
 {
 
 }

@@ -167,7 +167,7 @@ bool ThinkTask::canDo(std::int32_t attrib)
     {
     default: return false;
     case AttribManager::Personal::Boredness:
-        return personalAttribs[AttribManager::Personal::Boredness].second > 38.f;
+        return personalAttribs[AttribManager::Personal::Boredness].second > 30.f;
     case AttribManager::Personal::Hunger:
     {
         bool possible = (householdAttribs[AttribManager::Household::Food] > 0

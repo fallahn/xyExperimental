@@ -25,42 +25,30 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESH_IDS_HPP_
-#define DC_MESH_IDS_HPP_
+#ifndef DC_CAT_TRAVEL_TASK_HPP_
+#define DC_CAT_TRAVEL_TASK_HPP_
 
-#include <xygine/shaders/Default.hpp>
+#include <Task.hpp>
 
-namespace Mesh
+#include <SFML/System/Vector2.hpp>
+
+#include <vector>
+
+class CatTravel final : public Task
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Tree,
-        Lights,
-        Walls,
-        Cat
-    };
-}
+public:
+    CatTravel(xy::Entity&, xy::MessageBus&, std::vector<sf::Vector2f>&);
+    ~CatTravel() = default;
 
-namespace Material
-{
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Lights,
-        Walls,
-        Cat
-    };
-}
+    void onStart() override;
+    void update(float) override;
 
-#endif //DC_MESH_IDS_HPP_
+private:
+    std::vector<sf::Vector2f> m_points;
+    float m_moveSpeed;
+    sf::Vector2f m_startDirection;
+
+
+};
+
+#endif //DC_CAT_TRAVEL_TASK_HPP_

@@ -39,14 +39,16 @@ namespace
     const float degsPerMinute = 360.f / 60.f;
     const sf::Vector2f bigHand(0.f, -40.f);
     const sf::Vector2f smallHand(0.f, -25.f);
+    const sf::Vector2f midPoint(3.f, 0.f);
 }
 
 WallClock::WallClock(xy::MessageBus& mb)
     : xy::Component(mb, this)
 {
+    sf::Color c(45, 43, 46);
     for (auto& v : m_vertices)
     {
-        v.color = sf::Color::Black;
+        v.color = c;
     }
 
     updateHands();
@@ -71,11 +73,18 @@ void WallClock::entityUpdate(xy::Entity&, float)
 void WallClock::updateHands()
 {
     const auto& time = xy::SysTime::now();
-    m_vertices[0].position = xy::Util::Vector::rotate(smallHand, degsPerHour * time.hours());
-    m_vertices[2].position = xy::Util::Vector::rotate(bigHand, degsPerMinute * time.minutes());
+    float rotation = (degsPerHour * time.hours()) + ((static_cast<float>(time.minutes()) / 60.f) * degsPerHour);
+    m_vertices[1].position = xy::Util::Vector::rotate(smallHand, rotation);
+    m_vertices[2].position = xy::Util::Vector::rotate(midPoint, rotation);
+    m_vertices[0].position = -m_vertices[2].position;
+    
+    rotation = degsPerMinute * time.minutes();
+    m_vertices[4].position = xy::Util::Vector::rotate(bigHand, rotation);
+    m_vertices[5].position = xy::Util::Vector::rotate(midPoint, rotation);
+    m_vertices[3].position = -m_vertices[5].position;
 }
 
 void WallClock::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.draw(m_vertices.data(), m_vertices.size(), sf::LineStrip, states);
+    rt.draw(m_vertices.data(), m_vertices.size(), sf::Triangles, states);
 }

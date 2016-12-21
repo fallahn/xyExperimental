@@ -39,6 +39,7 @@ source distribution.
 #include <TVAnimator.hpp>
 #include <Background.hpp>
 #include <WallClock.hpp>
+#include <CatController.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -64,7 +65,8 @@ source distribution.
 
 namespace
 {
-    sf::Vector2f budSize(100.f, 200.f);
+    const sf::Vector2f budSize(100.f, 200.f);
+    const sf::Vector2f catSize(50.f, 50.f);
 }
 
 using namespace std::placeholders;
@@ -82,6 +84,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initMeshes();
     initMapData();
     initBud();
+    initCat();
     initParticles();
     initUI();
 
@@ -361,8 +364,14 @@ void WorldClientState::initMeshes()
     
     m_textureResource.setFallbackColour({ 127, 127, 255 });
 
-    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::TexturedBumped, true, true);
-    budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
+    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
+    //budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
+
+    //quad for cat
+    xy::QuadBuilder cq(catSize);
+    m_meshRenderer.loadModel(Mesh::Cat, cq);
+
+    auto& catMat = m_meshRenderer.addMaterial(Material::Cat, xy::Material::Textured, true, true);
 }
 
 void WorldClientState::initMapData()
@@ -455,6 +464,21 @@ void WorldClientState::initMapData()
                         }
                     }
                 }
+                else if (name == "cat")
+                {
+                    const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
+                    for (const auto& obj : objs)
+                    {
+                        m_catTasks.emplace_back();
+                        auto& task = m_catTasks.back();
+                        task.name = obj.getName();
+                        task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
+                        task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
+                        task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
+                        task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
+                        task.worldPosition += mapOffset;
+                    }
+                }
             }
         }
 
@@ -503,6 +527,27 @@ void WorldClientState::initBud()
     entity->addComponent(dwb);
     entity->addComponent(controller);
     entity->addComponent(thinkBubble);
+
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+}
+
+void WorldClientState::initCat()
+{
+    auto controller = xy::Component::create<CatController>(m_messageBus, m_pathFinder, m_catTasks);
+    
+    auto& material = m_meshRenderer.getMaterial(Material::Cat);
+    //TODO add texture from controller
+    material.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/ui/think_bubble.png") });
+
+    auto dwb = m_meshRenderer.createModel(Mesh::Cat, m_messageBus);
+    dwb->setBaseMaterial(material);
+    dwb->setPosition({ 0.f, -catSize.y / 2.f, 5.f });
+
+    //TODO attach sleep particle system
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(controller);
+    entity->addComponent(dwb);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }

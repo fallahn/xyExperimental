@@ -25,34 +25,46 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_WALL_CLOCK_HPP_
-#define DC_WALL_CLOCK_HPP_
+#ifndef DC_CAT_CONTROLLER_HPP_
+#define DC_CAT_CONTROLLER_HPP_
+
+#include <Task.hpp>
 
 #include <xygine/components/Component.hpp>
+#include <xygine/components/AnimatedDrawable.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
-#include <SFML/System/Clock.hpp>
+#include <list>
 
-#include <array>
-
-class WallClock final : public xy::Component, public sf::Drawable
+class PathFinder;
+struct TaskData;
+class CatController final : public xy::Component, public sf::Drawable
 {
 public:
-    explicit WallClock(xy::MessageBus&);
-    ~WallClock() = default;
+    CatController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&);
+    ~CatController() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
-    sf::FloatRect globalBounds() const override { return m_globalBounds; }
+    void onStart(xy::Entity&) override;
+
+    //const sf::Texture& getTexture() const;
 
 private:
-    sf::FloatRect m_globalBounds;
-    sf::Clock m_clock;
-    std::array<sf::Vertex, 6u> m_vertices;
-    void updateHands();
-    void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    xy::Entity* m_entity;
+    const PathFinder& m_pathFinder;
+    const std::vector<TaskData>& m_taskData;
+
+    sf::Vector2u m_currentPosition;
+    sf::Vector2u m_destinationPosition;
+
+    std::list<Task::Ptr> m_tasks;
+
+    void fillTaskStack();
+    void draw(sf::RenderTarget&, sf::RenderStates) const override {}
 };
 
-#endif //DC_WALL_CLOCK_HPP_
+#endif //DC_CAT_CONTROLLER_HPP_

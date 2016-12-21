@@ -64,12 +64,14 @@ private:
 
     PathFinder m_pathFinder;
     std::vector<TaskData> m_tasks;
+    std::vector<TaskData> m_catTasks;
 
     AttribManager m_attribManager;
 
     void initMeshes();
     void initMapData();
     void initBud();
+    void initCat();
     void initParticles();
     void initUI();
 };

@@ -66,7 +66,7 @@ namespace
     const float cleanlinessPerSecond = 0.0023f; //approx every 12 hours
     const float tirednessPerSecond = 0.00154f; //approx 18 hours
     const float poopPerSecond = 0.00115f; //approx every 24 hours
-    const float borednessPerSecond = 0.0092f; //approx every 3 hours
+    const float borednessPerSecond = 0.0184f; //approx every 1.5 hours
 
     const std::uint64_t fourHours = 60 * 60 * 4;
     const std::uint64_t twelveHours = fourHours * 3;

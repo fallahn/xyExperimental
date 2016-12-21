@@ -137,6 +137,9 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\AttributeManager.hpp" />
     <ClInclude Include="include\Background.hpp" />
     <ClInclude Include="include\BudController.hpp" />
+    <ClInclude Include="include\CatAnimationTask.hpp" />
+    <ClInclude Include="include\CatController.hpp" />
+    <ClInclude Include="include\CatTravelTask.hpp" />
     <ClInclude Include="include\ComputerTask.hpp" />
     <ClInclude Include="include\CurrentActivity.hpp" />
     <ClInclude Include="include\DayNightCycle.hpp" />
@@ -178,6 +181,9 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\AttributeManager.cpp" />
     <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\BudController.cpp" />
+    <ClCompile Include="src\CatAnimationTask.cpp" />
+    <ClCompile Include="src\CatController.cpp" />
+    <ClCompile Include="src\CatTravelTask.cpp" />
     <ClCompile Include="src\ComputerTask.cpp" />
     <ClCompile Include="src\CurrentActivity.cpp" />
     <ClCompile Include="src\DayNightCycle.cpp" />

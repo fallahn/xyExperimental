@@ -82,6 +82,7 @@ namespace Message
             PlayComputer,
             Think,
             Travel,
+            CatTask,
             Idle01 = 100,
             Idle02,
             Idle03,

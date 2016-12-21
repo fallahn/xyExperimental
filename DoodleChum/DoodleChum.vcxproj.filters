@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Texture Animations">
       <UniqueIdentifier>{d14188f6-66cd-4482-911d-1fd5c8455ec7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Controllers\cat">
+      <UniqueIdentifier>{5283e309-c119-430d-870e-b2094aaf8b33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Controllers\cat">
+      <UniqueIdentifier>{4706b565-646e-4aa9-a288-26b1630b784a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -156,6 +162,15 @@
     <ClInclude Include="include\WallClock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\CatController.hpp">
+      <Filter>Header Files\Controllers\cat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CatTravelTask.hpp">
+      <Filter>Header Files\Controllers\cat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CatAnimationTask.hpp">
+      <Filter>Header Files\Controllers\cat</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -265,6 +280,15 @@
     </ClCompile>
     <ClCompile Include="src\WallClock.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CatController.cpp">
+      <Filter>Source Files\Controllers\cat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CatTravelTask.cpp">
+      <Filter>Source Files\Controllers\cat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CatAnimationTask.cpp">
+      <Filter>Source Files\Controllers\cat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
