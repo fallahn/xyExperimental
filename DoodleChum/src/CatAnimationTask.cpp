@@ -29,7 +29,7 @@ source distribution.
 
 #include <xygine/util/Random.hpp>
 #include <xygine/Entity.hpp>
-#include <xygine/Components/ParticleSystem.hpp>
+#include <xygine/components/ParticleSystem.hpp>
 
 namespace
 {
