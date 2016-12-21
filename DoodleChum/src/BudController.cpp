@@ -70,7 +70,7 @@ namespace
         10.f //water
     };
 
-    const float maxSleepTime = 180.f;
+    const float maxSleepTime = 300.f;
 }
 
 BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
@@ -244,7 +244,7 @@ void BudController::initSprite()
 {   
     m_sprite = xy::Component::create<xy::AnimatedDrawable>(getMessageBus(), m_spriteSheet);
     m_sprite->loadAnimationData("assets/images/sprites/bud.xya");
-    m_sprite->playAnimation(2);
+
     auto frameSize = m_sprite->getFrameSize();
     m_sprite->setScale(1.f, -1.f);
     m_sprite->setOrigin(0.f, static_cast<float>(frameSize.y));

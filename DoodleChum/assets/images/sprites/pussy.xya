@@ -1,0 +1,33 @@
+{
+  "Animations": [
+    {
+      "Start": 0,
+      "End": 3,
+      "Loop": true,
+      "Name": "up"
+    },
+    {
+      "Start": 4,
+      "End": 7,
+      "Loop": true,
+      "Name": "down"
+    },
+    {
+      "Start": 8,
+      "End": 11,
+      "Loop": true,
+      "Name": "right"
+    },
+    {
+      "Start": 13,
+      "End": 15,
+      "Loop": true,
+      "Name": "left"
+    }
+  ],
+  "FrameCount": 16,
+  "FrameSize": "128, 128",
+  "FrameRate": 11.0,
+  "Texture": "pussy.png",
+  "NormalMap": "none.png"
+}

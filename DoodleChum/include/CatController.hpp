@@ -44,14 +44,14 @@ struct TaskData;
 class CatController final : public xy::Component, public sf::Drawable
 {
 public:
-    CatController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&);
+    CatController(xy::MessageBus&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
     ~CatController() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
     void onStart(xy::Entity&) override;
 
-    //const sf::Texture& getTexture() const;
+    const sf::Texture& getTexture() const { return m_texture.getTexture(); }
 
 private:
     xy::Entity* m_entity;
@@ -62,9 +62,13 @@ private:
     sf::Vector2u m_destinationPosition;
 
     std::list<Task::Ptr> m_tasks;
-
     void fillTaskStack();
-    void draw(sf::RenderTarget&, sf::RenderStates) const override {}
+
+    const sf::Texture& m_spriteSheet;
+    xy::AnimatedDrawable::Ptr m_sprite;
+    void initSprite();
+    mutable sf::RenderTexture m_texture;
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
 #endif //DC_CAT_CONTROLLER_HPP_

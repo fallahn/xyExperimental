@@ -28,13 +28,15 @@ source distribution.
 #include <CatAnimationTask.hpp>
 
 #include <xygine/util/Random.hpp>
+#include <xygine/Entity.hpp>
+#include <xygine/Components/ParticleSystem.hpp>
 
 namespace
 {
-    const float minSleep = 110.f;
-    const float maxSleep = 240.f;
-    const float minSit = 102.f;
-    const float maxSit = 190.f;
+    const float minSleep = 210.f;
+    const float maxSleep = 440.f;
+    const float minSit = 302.f;
+    const float maxSit = 590.f;
     const float poop = 6.f;
     const float eat = 45.f;
 }
@@ -64,7 +66,7 @@ void CatAnim::onStart()
         break;
     case Action::Sleep:
         m_time = xy::Util::Random::value(minSleep, maxSleep);
-        //TODO start particle system
+        getEntity().getComponent<xy::ParticleSystem>()->start();
         break;
     }
 }
@@ -77,7 +79,8 @@ void CatAnim::update(float dt)
         setCompleted(Message::TaskEvent::CatTask);
         if (m_action == Action::Sleep)
         {
-            //TODO stop particles
+            //stop particles
+            getEntity().getComponent<xy::ParticleSystem>()->stop();
         }
     }
 }

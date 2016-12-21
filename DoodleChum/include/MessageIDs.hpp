@@ -155,8 +155,8 @@ namespace Message
     {
         enum
         {
-            ResetGame,
-            ToggleShadowMapping
+            ToggleShadowMapping,
+            ResetGame
         }action;
     };
 }

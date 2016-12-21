@@ -66,7 +66,7 @@ source distribution.
 namespace
 {
     const sf::Vector2f budSize(100.f, 200.f);
-    const sf::Vector2f catSize(50.f, 50.f);
+    const sf::Vector2f catSize(80.f, 80.f);
 }
 
 using namespace std::placeholders;
@@ -533,21 +533,23 @@ void WorldClientState::initBud()
 
 void WorldClientState::initCat()
 {
-    auto controller = xy::Component::create<CatController>(m_messageBus, m_pathFinder, m_catTasks);
+    auto controller = xy::Component::create<CatController>(m_messageBus, m_pathFinder, m_catTasks, m_textureResource.get("assets/images/sprites/pussy.png"));
     
     auto& material = m_meshRenderer.getMaterial(Material::Cat);
-    //TODO add texture from controller
-    material.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/ui/think_bubble.png") });
+    material.addProperty({ "u_diffuseMap", controller->getTexture() });
 
     auto dwb = m_meshRenderer.createModel(Mesh::Cat, m_messageBus);
     dwb->setBaseMaterial(material);
-    dwb->setPosition({ 0.f, -catSize.y / 2.f, 5.f });
+    dwb->setPosition({ 0.f, (-catSize.y / 2.f) + 6.f, 3.f });
 
-    //TODO attach sleep particle system
+    xy::ParticleSystem::Definition zz;
+    zz.loadFromFile("assets/particles/zz_small.xyp", m_textureResource);
+    auto ps = zz.createSystem(m_messageBus);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(controller);
     entity->addComponent(dwb);
+    entity->addComponent(ps);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }

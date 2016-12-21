@@ -108,7 +108,7 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::SystemEvent>();
-        if(data.action == Message::SystemEvent::ToggleShadowMapping) toggleShadowMap();
+        if (data.action == Message::SystemEvent::ToggleShadowMapping) toggleShadowMap();
     };
     addMessageHandler(mh);
 }

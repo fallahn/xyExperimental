@@ -10,25 +10,25 @@
   "Texture": "assets/images/particles/zz.png",
   "Colour": 255,
   "BlendMode": "Alpha",
-  "ParticleSize": "2, 3",
+  "ParticleSize": "3, 5",
   "ParticlePosition": "0, 0",
   "FollowParent": false,
-  "Lifetime": 2.0,
-  "InitialVelocity": "9, -60",
+  "Lifetime": 1.2,
+  "InitialVelocity": "9, -40",
   "RandomInitialVelocities": [],
-  "EmitRate": 1.8,
+  "EmitRate": 2.8,
   "RandomInitialPositions": [
-    "2, 2",
-    "-3, -3",
-    "-2, 1",
-    "1, 0"
+    "-2, -25",
+    "-3, -30",
+    "1, -27",
+    "3, -34"
   ],
   "Affectors": [
     {
       "Type": "Force",
       "Data": [
-        50.0,
-        20.0
+        28.0,
+        10.0
       ]
     },
     {
@@ -42,8 +42,8 @@
     {
       "Type": "Scale",
       "Data": [
-        4.0,
-        4.0
+        1.7,
+        1.7
       ]
     }
   ]

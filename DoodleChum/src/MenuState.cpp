@@ -265,12 +265,13 @@ void MenuState::buildOptions()
     shadowCheckbox->setPosition(1110.f, 684.f);
     shadowCheckbox->setText("Shadow Maps");
     shadowCheckbox->setTextColour(sf::Color::Black);
+    shadowCheckbox->check(true);
     shadowCheckbox->addCallback([this](const xy::UI::CheckBox*)
     {
         auto msg = m_messageBus.post<Message::SystemEvent>(Message::System);
         msg->action = Message::SystemEvent::ToggleShadowMapping;
     }, xy::UI::CheckBox::Event::CheckChanged);
-    shadowCheckbox->check(true);
+    
     m_optionContainer.addControl(shadowCheckbox);
 
 
