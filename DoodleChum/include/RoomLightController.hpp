@@ -53,6 +53,9 @@ private:
     xy::PointLight* m_light;
     xy::Entity* m_entity;
 
+    bool m_up;
+    float m_fade;
+
     float m_intensity;
     sf::FloatRect m_bounds;
 };

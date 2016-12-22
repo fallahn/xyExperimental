@@ -37,18 +37,25 @@ source distribution.
 
 namespace
 {
-    const float minDistance = 80.f;
-    const float maxDistance = 500.f;
-    const float bobOffset = 200.f; //make position near his head
-    const float yInfluence = 200.f;
+    const float bobOffset = 180.f; //make position near his head
 
     float intensityMultiplier = 9.f; //this is used to increase brightness of lights when shadow maps are enabled
+
+    const sf::Vector2f radius(400.f, 128.f);
+    bool contains(sf::Vector2f point, sf::Vector2f ellipse)
+    {
+        float sX = point.x / ellipse.x;
+        float sY = point.y / ellipse.y;
+        return ((sX * sX) + (sY * sY)) < 1.f;
+    };
 }
 
 RoomLightController::RoomLightController(xy::MessageBus& mb)
     : xy::Component (mb, this),
     m_light         (nullptr),
     m_entity        (nullptr),
+    m_up            (false),
+    m_fade          (0.f),
     m_intensity     (0.f)
 {
     //change intensity with day time
@@ -68,37 +75,7 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
         const auto& data = msg.getData<Message::PlayerEvent>();
         if (data.action == Message::PlayerEvent::Moved)
         {
-            //if (std::abs(data.posX) > std::abs(data.posY))
-            {
-                sf::Vector2f position(data.posX, data.posY - bobOffset);
-                static const float minDistance2 = minDistance * minDistance;
-                static const float maxDistance2 = maxDistance * maxDistance;
-                static const float diff = maxDistance2 - minDistance2;
-
-                auto direction = position - m_entity->getWorldPosition();
-                float distance2 = xy::Util::Vector::lengthSquared(direction);
-                //artificially skew direction in Y axis so vertical lights seem further away
-                distance2 *= std::max(1.f, std::abs(direction.y) / (std::abs(direction.x) + 0.006f)); //prevents div0
-
-                if (distance2 > maxDistance2)
-                {
-                    m_light->setIntensity(0.f);
-                }
-                else
-                {
-                    if (distance2 > minDistance2)
-                    {
-                        float playerDiff = maxDistance2 - distance2;
-                        playerDiff /= diff;
-                        m_light->setIntensity(m_intensity * playerDiff);
-                        //REPORT("diff", std::to_string(playerDiff));
-                    }
-                    else
-                    {
-                        m_light->setIntensity(m_intensity);
-                    }
-                }
-            }
+            m_up = contains(sf::Vector2f(data.posX, data.posY - bobOffset) - m_entity->getWorldPosition(), radius);
         }
     };
     addMessageHandler(mh);
@@ -114,9 +91,19 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
 }
 
 //public
-void RoomLightController::entityUpdate(xy::Entity& entity, float)
+void RoomLightController::entityUpdate(xy::Entity& entity, float dt)
 {
     //REPORT("light intens", std::to_string(m_light->getIntensity()));
+    dt *= 2.f;
+    if (m_up)
+    {
+        m_fade = std::min(1.f, m_fade + dt);
+    }
+    else
+    {
+        m_fade = std::max(0.f, m_fade - dt);
+    }
+    m_light->setIntensity(m_intensity * m_fade);
 }
 
 void RoomLightController::onStart(xy::Entity& entity)
