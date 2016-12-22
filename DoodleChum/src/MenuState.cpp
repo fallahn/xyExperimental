@@ -150,10 +150,10 @@ void MenuState::buildHelp()
     m_helpContainer.setPosition(xy::DefaultSceneSize / 2.f);
     
     auto text = xy::UI::create<xy::UI::Label>(m_font);
-    text->setString("DoodleBob!");
+    text->setString("Welcome to DoodleBob!");
     text->setCharacterSize(80u);
     text->setAlignment(xy::UI::Alignment::Centre);
-    text->setPosition(xy::DefaultSceneSize.x / 2.f, 480.f);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 420.f);
     text->setColour(sf::Color::Black);
     m_helpContainer.addControl(text);
     

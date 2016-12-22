@@ -258,6 +258,7 @@ void BudController::initSprite()
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & 0xf0) return; //this is a cat anim
         m_sprite->setFrameRate(frameRates[data.id]);
         m_sprite->playAnimation(data.id);
     };

@@ -93,7 +93,7 @@ void TravelTask::update(float dt)
 void TravelTask::setAnimation(const sf::Vector2f& direction)
 {
     float angle = xy::Util::Vector::rotation(direction);
-    REPORT("angle", std::to_string(angle));
+    //REPORT("angle", std::to_string(angle));
 
     Message::AnimationEvent::ID anim = Message::AnimationEvent::Idle;
     if (angle > -80 && angle < 80) anim = Message::AnimationEvent::Right;

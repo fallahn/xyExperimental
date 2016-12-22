@@ -47,8 +47,9 @@ private:
     std::vector<sf::Vector2f> m_points;
     float m_moveSpeed;
     sf::Vector2f m_startDirection;
+    std::int32_t m_currentAnimation;
 
-
+    void setAnimation(sf::Vector2f);
 };
 
 #endif //DC_CAT_TRAVEL_TASK_HPP_

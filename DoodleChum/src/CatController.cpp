@@ -83,6 +83,9 @@ void CatController::fillTaskStack()
     const auto& task = m_taskData[xy::Util::Random::value(0, m_taskData.size() - 1)];
     m_destinationPosition = task.position;
 
+    auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+    m_tasks.emplace_back(std::make_unique<CatTravel>(*m_entity, getMessageBus(), points));
+
     //if no specific task (such as eat or poop) pick sit or sleep at random
     switch (task.id)
     {
@@ -93,15 +96,11 @@ void CatController::fillTaskStack()
     case 0:
         m_tasks.emplace_back(std::make_unique<CatAnim>(*m_entity, getMessageBus(), CatAnim::Action::Eat));
         break;
-    case 1:
-        m_tasks.emplace_back(std::make_unique<CatAnim>(*m_entity, getMessageBus(), CatAnim::Action::Poop));
-        break;
+    //case 1:
+    //    m_tasks.emplace_back(std::make_unique<CatAnim>(*m_entity, getMessageBus(), CatAnim::Action::Poop));
+    //    break;
         //TODO other cases
     }
-
-    auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
-    m_tasks.emplace_back(std::make_unique<CatTravel>(*m_entity, getMessageBus(), points));
-
 
     m_currentPosition = m_destinationPosition;
 }
@@ -123,10 +122,12 @@ void CatController::initSprite()
     mh.id = Message::Animation;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
-        //const auto& data = msg.getData<Message::AnimationEvent>();
+        const auto& data = msg.getData<Message::AnimationEvent>();
         //m_sprite->setFrameRate(frameRates[data.id]);
-        //m_sprite->playAnimation(data.id);
-        //TODO check id mask
+        if (data.id & 0xF0)
+        {
+            m_sprite->playAnimation((data.id & 0x0f));
+        }
     };
     addMessageHandler(mh);
 }

@@ -38,10 +38,11 @@ namespace
 }
 
 CatTravel::CatTravel(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vector2f>& points)
-    : Task          (entity, mb),
-    m_points        (std::move(points)),
-    m_moveSpeed     (moveSpeedX),
-    m_startDirection(m_points.back() - getEntity().getWorldPosition())
+    : Task              (entity, mb),
+    m_points            (std::move(points)),
+    m_moveSpeed         (moveSpeedX),
+    m_startDirection    (m_points.back() - getEntity().getWorldPosition()),
+    m_currentAnimation  (Message::AnimationEvent::Idle)
 {
 
 }
@@ -49,7 +50,7 @@ CatTravel::CatTravel(xy::Entity& entity, xy::MessageBus& mb, std::vector<sf::Vec
 //public
 void CatTravel::onStart()
 {
-
+    setAnimation(m_startDirection);
 }
 
 void CatTravel::update(float dt)
@@ -66,11 +67,40 @@ void CatTravel::update(float dt)
         }
         else
         {
-            //setAnimation(m_points.back() - getEntity().getWorldPosition());
+            setAnimation(m_points.back() - getEntity().getWorldPosition());
         }
     }
     else
     {
         getEntity().move(xy::Util::Vector::normalise(direction) * m_moveSpeed * dt);
+    }
+}
+
+//private
+void CatTravel::setAnimation(sf::Vector2f direction)
+{
+    float angle = xy::Util::Vector::rotation(direction);
+
+    Message::AnimationEvent::ID anim = Message::AnimationEvent::Idle;
+    if (angle > -80 && angle < 80) anim = Message::AnimationEvent::Right;
+    else if (angle > 81 && angle < 100) anim = Message::AnimationEvent::Down;
+    else if (angle > -120 && angle < -80) anim = Message::AnimationEvent::Up;
+    else anim = Message::AnimationEvent::Left;
+
+    if (anim != m_currentAnimation)
+    {
+        if (anim == Message::AnimationEvent::Left || anim == Message::AnimationEvent::Right)
+        {
+            m_moveSpeed = moveSpeedX;
+        }
+        else
+        {
+            m_moveSpeed = moveSpeedY;
+        }
+
+        m_currentAnimation = anim;
+
+        auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+        msg->id = static_cast<Message::AnimationEvent::ID>(anim | 0xF0);
     }
 }

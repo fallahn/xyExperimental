@@ -37,8 +37,8 @@ public:
     {
         Sleep,
         Sit,
-        Eat,
-        Poop
+        Eat/*,
+        Poop*/
     };
 
     CatAnim(xy::Entity&, xy::MessageBus&, Action = Action::Sit);

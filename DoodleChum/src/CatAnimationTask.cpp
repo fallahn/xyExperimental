@@ -52,15 +52,18 @@ CatAnim::CatAnim(xy::Entity& e, xy::MessageBus& mb, Action action)
 //public
 void CatAnim::onStart()
 {
+    auto anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | 0xF0);
+
     switch (m_action)
     {
     default:
     case Action::Eat:
         m_time = eat;
+        //anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Eat | 0xF0);
         break;
-    case Action::Poop:
-        m_time = poop;
-        break;
+    //case Action::Poop:
+    //    m_time = poop;
+    //    break;
     case Action::Sit:
         m_time = xy::Util::Random::value(minSit, maxSit);
         break;
@@ -69,6 +72,9 @@ void CatAnim::onStart()
         getEntity().getComponent<xy::ParticleSystem>()->start();
         break;
     }
+
+    auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+    msg->id = anim;
 }
 
 void CatAnim::update(float dt)
@@ -82,5 +88,10 @@ void CatAnim::update(float dt)
             //stop particles
             getEntity().getComponent<xy::ParticleSystem>()->stop();
         }
+    }
+
+    if (m_action != Action::Eat)
+    {
+        //TODO occasionally play idle anim to flick tail
     }
 }
