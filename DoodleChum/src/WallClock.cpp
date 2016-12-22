@@ -42,11 +42,11 @@ namespace
     const sf::Vector2f midPoint(3.f, 0.f);
 }
 
-WallClock::WallClock(xy::MessageBus& mb)
+WallClock::WallClock(xy::MessageBus& mb, const sf::Texture& texture)
     : xy::Component(mb, this)
 {
     sf::Color c(45, 43, 46);
-    for (auto& v : m_vertices)
+    for (auto& v : m_handVertices)
     {
         v.color = c;
     }
@@ -57,16 +57,22 @@ WallClock::WallClock(xy::MessageBus& mb)
     m_globalBounds.top = bigHand.y;
     m_globalBounds.width = -bigHand.y * 2.f;
     m_globalBounds.height = -bigHand.y * 2.f;
+
+    setPosition(40.f, 120.f);
+    setScale(1.f, -1.f);
+
+    initSprite(texture);
 }
 
 //public
-void WallClock::entityUpdate(xy::Entity&, float)
+void WallClock::entityUpdate(xy::Entity& e, float dt)
 {
     if (m_clock.getElapsedTime().asSeconds() > 120.f)
     {
         updateHands();
         m_clock.restart();
     }
+    m_sprite->entityUpdate(e, dt);
 }
 
 //private
@@ -74,17 +80,33 @@ void WallClock::updateHands()
 {
     const auto& time = xy::SysTime::now();
     float rotation = (degsPerHour * time.hours()) + ((static_cast<float>(time.minutes()) / 60.f) * degsPerHour);
-    m_vertices[1].position = xy::Util::Vector::rotate(smallHand, rotation);
-    m_vertices[2].position = xy::Util::Vector::rotate(midPoint, rotation);
-    m_vertices[0].position = -m_vertices[2].position;
+    m_handVertices[1].position = xy::Util::Vector::rotate(smallHand, rotation);
+    m_handVertices[2].position = xy::Util::Vector::rotate(midPoint, rotation);
+    m_handVertices[0].position = -m_handVertices[2].position;
     
     rotation = degsPerMinute * time.minutes();
-    m_vertices[4].position = xy::Util::Vector::rotate(bigHand, rotation);
-    m_vertices[5].position = xy::Util::Vector::rotate(midPoint, rotation);
-    m_vertices[3].position = -m_vertices[5].position;
+    m_handVertices[4].position = xy::Util::Vector::rotate(bigHand, rotation);
+    m_handVertices[5].position = xy::Util::Vector::rotate(midPoint, rotation);
+    m_handVertices[3].position = -m_handVertices[5].position;
+}
+
+void WallClock::initSprite(const sf::Texture& texture)
+{
+    m_sprite = xy::Component::create<xy::AnimatedDrawable>(getMessageBus(), texture);
+    m_sprite->loadAnimationData("assets/images/sprites/clock.xya");
+    
+    auto frameSize = m_sprite->getFrameSize();
+    m_texture.create(frameSize.x, frameSize.y);
+    m_sprite->setScale(1.f, -1.f);
+    m_sprite->setOrigin(0.f, static_cast<float>(frameSize.y));
+    m_sprite->playAnimation(0);
 }
 
 void WallClock::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.draw(m_vertices.data(), m_vertices.size(), sf::Triangles, states);
+    states.transform = getTransform();
+    m_texture.clear(sf::Color::Transparent);
+    m_texture.draw(*m_sprite);
+    m_texture.draw(m_handVertices.data(), m_handVertices.size(), sf::Triangles, states);
+    m_texture.display();
 }

@@ -43,7 +43,8 @@ namespace Mesh
         Tree,
         Lights,
         Walls,
-        Cat
+        Cat,
+        Clock
     };
 }
 
@@ -59,7 +60,8 @@ namespace Material
         ThirdFurniture,
         Lights,
         Walls,
-        Cat
+        Cat,
+        Clock
     };
 }
 

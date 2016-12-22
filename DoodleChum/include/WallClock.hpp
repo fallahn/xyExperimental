@@ -29,29 +29,39 @@ source distribution.
 #define DC_WALL_CLOCK_HPP_
 
 #include <xygine/components/Component.hpp>
+#include <xygine/components/AnimatedDrawable.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 
 #include <SFML/System/Clock.hpp>
 
 #include <array>
 
-class WallClock final : public xy::Component, public sf::Drawable
+class WallClock final : public xy::Component, public sf::Drawable, public sf::Transformable
 {
 public:
-    explicit WallClock(xy::MessageBus&);
+    WallClock(xy::MessageBus&, const sf::Texture&);
     ~WallClock() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
     sf::FloatRect globalBounds() const override { return m_globalBounds; }
 
+    const sf::Texture& getTexture() const { return m_texture.getTexture(); }
+
 private:
     sf::FloatRect m_globalBounds;
     sf::Clock m_clock;
-    std::array<sf::Vertex, 6u> m_vertices;
+    std::array<sf::Vertex, 6u> m_handVertices;
     void updateHands();
+
+    mutable sf::RenderTexture m_texture;
+    xy::AnimatedDrawable::Ptr m_sprite;
+    void initSprite(const sf::Texture&);
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 

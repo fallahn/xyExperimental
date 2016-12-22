@@ -67,6 +67,7 @@ namespace
 {
     const sf::Vector2f budSize(100.f, 200.f);
     const sf::Vector2f catSize(80.f, 80.f);
+    const sf::Vector2f clockSize(80.f, 160.f);
 }
 
 using namespace std::placeholders;
@@ -363,15 +364,18 @@ void WorldClientState::initMeshes()
     m_meshRenderer.loadModel(Mesh::Bud, qb);
     
     m_textureResource.setFallbackColour({ 127, 127, 255 });
-
-    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
+    /*auto& budMat = */m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
     //budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
 
     //quad for cat
     xy::QuadBuilder cq(catSize);
     m_meshRenderer.loadModel(Mesh::Cat, cq);
+    /*auto& catMat = */m_meshRenderer.addMaterial(Material::Cat, xy::Material::Textured, true, true);
 
-    auto& catMat = m_meshRenderer.addMaterial(Material::Cat, xy::Material::Textured, true, true);
+    //quad for clock
+    xy::QuadBuilder clockQuad(clockSize);
+    m_meshRenderer.loadModel(Mesh::Clock, clockQuad);
+    m_meshRenderer.addMaterial(Material::Clock, xy::Material::Textured, true, true);
 }
 
 void WorldClientState::initMapData()
@@ -502,10 +506,16 @@ void WorldClientState::initMapData()
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
     //draws the hands of the wall clock
-    auto wc = xy::Component::create<WallClock>(m_messageBus);
+    auto wc = xy::Component::create<WallClock>(m_messageBus, m_textureResource.get("assets/images/sprites/clock.png"));
+    auto dwb = m_meshRenderer.createModel(Mesh::Clock, m_messageBus);
+    auto& material = m_meshRenderer.getMaterial(Material::Clock);
+    material.addProperty({ "u_diffuseMap", wc->getTexture() });
+    dwb->setBaseMaterial(material);
+    dwb->setPosition({ 0.f, 0.f, 1.f });
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(wc);
-    entity->setPosition(660.f, 490.f);
+    entity->addComponent(dwb);
+    entity->setPosition(660.f, 530.f);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
 }
 

@@ -1,0 +1,15 @@
+{
+  "Animations": [
+    {
+      "Start": 0,
+      "End": 11,
+      "Loop": true,
+      "Name": "default"
+    }
+  ],
+  "FrameCount": 12,
+  "FrameSize": "80, 160",
+  "FrameRate": 12.0,
+  "Texture": "clock.png",
+  "NormalMap": "none.png"
+}
