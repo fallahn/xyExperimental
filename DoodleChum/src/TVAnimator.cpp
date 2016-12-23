@@ -55,7 +55,10 @@ TVAnimator::TVAnimator(xy::MessageBus& mb)
     m_maskTexture.create(256, 256);
     m_maskTexture.setSmooth(true);
 
-    m_screenMask.setFillColor(sf::Color::Black);
+    m_screenColour.r = 255;
+    m_screenColour.g = 255;
+
+    m_screenMask.setFillColor(m_screenColour);
     m_screenMask.setPosition(screenPos);
     m_screenMask.setSize(screenSize);
 

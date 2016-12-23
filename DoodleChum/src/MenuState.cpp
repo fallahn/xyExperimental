@@ -208,6 +208,7 @@ void MenuState::buildOptions()
     soundSlider->setPosition(640.f, 604.f);
     soundSlider->setText("Volume");
     soundSlider->setTextColour(sf::Color::Black);
+    soundSlider->setBarColour(sf::Color::Black);
     soundSlider->setMaxValue(1.f);
     soundSlider->addCallback([this](const xy::UI::Slider* slider)
     {

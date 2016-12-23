@@ -84,8 +84,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 
     initMeshes();
     initMapData();
-    initBud();
     initCat();
+    initBud();
     initParticles();
     initUI();
 
@@ -423,7 +423,7 @@ void WorldClientState::initMapData()
                     for (const auto& o : objs)
                     {
                         auto light = xy::Component::create<xy::PointLight>(m_messageBus, 440.f, 270.f, sf::Color(255,233,240));
-                        light->setDepth(160.f);
+                        light->setDepth(200.f);
                         light->setIntensity(0.f);
                         light->enableShadowCasting(true);
 
@@ -436,7 +436,7 @@ void WorldClientState::initMapData()
                         m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
                     }
                 }
-                else if (name == "tasks")
+                else if (name == "tasks") //TODO tify these statements into a single function
                 {
                     const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& obj : objs)
@@ -481,6 +481,22 @@ void WorldClientState::initMapData()
                         task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
                         task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
                         task.worldPosition += mapOffset;
+                        const auto& properties = obj.getProperties();
+                        for (const auto& prop : properties)
+                        {
+                            if (prop.getType() == xy::tmx::Property::Type::Int)
+                            {
+                                const auto propName = prop.getName();
+                                if (propName == "id")
+                                {
+                                    task.id = prop.getIntValue();
+                                }
+                                else if (propName == "animation")
+                                {
+                                    task.animationID = prop.getIntValue();
+                                }
+                            }
+                        }
                     }
                 }
             }

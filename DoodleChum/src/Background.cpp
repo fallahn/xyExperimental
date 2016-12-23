@@ -55,8 +55,13 @@ Background::Background(xy::MessageBus& mb, const sf::Texture& texture)
     m_vertices[6].position = xy::DefaultSceneSize;
     m_vertices[7].position.y = xy::DefaultSceneSize.y;
 
+    m_vertices[8].position.y = -40.f; //TODO fix magic number
+    m_vertices[9].position = { xy::DefaultSceneSize.x, -40.f };
+    m_vertices[10].position = { xy::DefaultSceneSize.x, 280.f };//TODO get this as relative tex height / scene size
+    m_vertices[11].position.y = 280.f;
+
     //tex coords
-    auto texSize = static_cast<sf::Vector2f>(texture.getSize());
+    auto texSize = xy::DefaultSceneSize / 2.f;// static_cast<sf::Vector2f>(texture.getSize());
     const float texSplit = texSize.y / splitPoint;
     m_vertices[1].texCoords.x = texSize.x;
     m_vertices[2].texCoords = { texSize.x, texSplit };
@@ -67,12 +72,18 @@ Background::Background(xy::MessageBus& mb, const sf::Texture& texture)
     m_vertices[6].texCoords = texSize;
     m_vertices[7].texCoords.y = texSize.y;
 
+    const float texHeight = static_cast<float>(texture.getSize().y);
+    m_vertices[8].texCoords.y = texSize.y;
+    m_vertices[9].texCoords = texSize;
+    m_vertices[10].texCoords = { texSize.x, texHeight };
+    m_vertices[11].texCoords.y = texHeight;
+
     xy::Component::MessageHandler mh;
     mh.id = Message::TimeOfDay;
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::TODEvent>();
-        sf::Uint8 sunlight = static_cast<sf::Uint8>((255.f - minColour) * data.sunIntensity);
+        sf::Uint8 sunlight = static_cast<sf::Uint8>((235.f - minColour) * data.sunIntensity) + 20;
         sf::Color c(sunlight, sunlight, sunlight);
 
         for (auto& v : m_vertices)
@@ -89,6 +100,12 @@ void Background::entityUpdate(xy::Entity&, float dt)
 {
     float amount = moveSpeed * dt;
     for (auto i = 0; i < 4; ++i)
+    {
+        m_vertices[i].texCoords.x += amount;
+    }
+
+    amount *= 2.f;
+    for (auto i = 8; i < 12; ++i)
     {
         m_vertices[i].texCoords.x += amount;
     }

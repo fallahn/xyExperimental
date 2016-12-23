@@ -67,7 +67,7 @@ WallClock::WallClock(xy::MessageBus& mb, const sf::Texture& texture)
 //public
 void WallClock::entityUpdate(xy::Entity& e, float dt)
 {
-    if (m_clock.getElapsedTime().asSeconds() > 120.f)
+    if (m_clock.getElapsedTime().asSeconds() > 60.f)
     {
         updateHands();
         m_clock.restart();
