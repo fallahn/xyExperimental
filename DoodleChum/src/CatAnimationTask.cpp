@@ -33,12 +33,12 @@ source distribution.
 
 namespace
 {
-    const float minSleep = 210.f;
-    const float maxSleep = 440.f;
-    const float minSit = 302.f;
-    const float maxSit = 590.f;
-    const float poop = 6.f;
-    const float eat = 45.f;
+    const float minSleep = 120.f;
+    const float maxSleep = 240.f;
+    const float minSit = 60.f;
+    const float maxSit = 180.f;
+    //const float poop = 6.f;
+    const float eat = 10.f;
 }
 
 CatAnim::CatAnim(xy::Entity& e, xy::MessageBus& mb, Action action)
@@ -59,7 +59,7 @@ void CatAnim::onStart()
     default:
     case Action::Eat:
         m_time = eat;
-        //anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Eat | 0xF0);
+        anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Eat | 0xF0);
         break;
     //case Action::Poop:
     //    m_time = poop;
@@ -79,6 +79,8 @@ void CatAnim::onStart()
 
 void CatAnim::update(float dt)
 {
+    int oldTime = static_cast<int>(m_time);
+    
     m_time -= dt;
     if (m_time < 0)
     {
@@ -90,8 +92,14 @@ void CatAnim::update(float dt)
         }
     }
 
-    if (m_action != Action::Eat)
+    else if (m_action != Action::Eat)
     {
-        //TODO occasionally play idle anim to flick tail
+        //occasionally play idle anim to flick tail
+        if (oldTime > static_cast<int>(m_time) &&
+            oldTime % xy::Util::Random::value(10, 14) == 0)
+        {
+            auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
+            msg->id = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | 0xF0);
+        }
     }
 }

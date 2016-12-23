@@ -110,6 +110,7 @@ namespace Message
             Die,
             Scratch,
             Water,
+            Feed,
             Count
         }id;
     };

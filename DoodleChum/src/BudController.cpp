@@ -67,7 +67,8 @@ namespace
         0.4f, //sleeping
         8.f, //die
         12.f, //scratch
-        10.f //water
+        10.f, //water
+        10.f // feed
     };
 
     const float maxSleepTime = 300.f;
@@ -144,7 +145,7 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         case Message::TaskEvent::Sleep:
             LOG("Bud decided to sleep!", xy::Logger::Type::Info);
             {
-                float time = (m_attribManager.getPersonalAttribs()[AttribManager::Personal::Tiredness].first / 100.f) * maxSleepTime;
+                float time = (m_attribManager.getPersonalAttribs()[AttribManager::Personal::Tiredness].second / 100.f) * maxSleepTime;
                 m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus(), particlePos, time));
             }
             break;

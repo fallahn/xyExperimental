@@ -78,8 +78,8 @@ namespace
     const float foodPerEat = 3.6f;
     const float tirednessPerSleep = 75.f;
     const float entertainmentValue = 10.f; //a particular entertainment is increased this much with each purchase
-    const float entertainmentReductionMultiplier = 0.01f; // entertainment is this much less entertaining each time it's used
-    const float boredomReduction = 55.f; //boredom is reduced this much multiplied by the value of the activity
+    const float entertainmentReductionMultiplier = 0.05f; // entertainment is this much less entertaining each time it's used
+    const float boredomReduction = 25.f; //boredom is reduced this much multiplied by the value of the activity
 }
 
 AttribManager::AttribManager(xy::MessageBus& mb)
@@ -134,7 +134,16 @@ void AttribManager::handleMessage(const xy::Message& msg)
         const auto& data = msg.getData<Message::TaskEvent>();
         switch (data.taskName)
         {
-        default: break;
+        default: 
+            break;
+        case Message::TaskEvent::Idle01:
+        case Message::TaskEvent::Idle02:
+        case Message::TaskEvent::Idle03:
+        case Message::TaskEvent::Idle04:
+        case Message::TaskEvent::IdleEnd:
+            //assume an idle event and increase boredom
+            m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / 3.f));
+            break;
         case Message::TaskEvent::Drink:
             m_personalAttribs[Personal::Thirst] *= 0.14f;
             m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerDrink);

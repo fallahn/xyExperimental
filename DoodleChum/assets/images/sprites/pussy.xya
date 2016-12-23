@@ -25,13 +25,19 @@
       "Name": "left"
     },
     {
-      "Start": 4,
-      "End": 4,
+      "Start": 16,
+      "End": 19,
       "Loop": false,
       "Name": "idle"
+    },
+    {
+      "Start": 20,
+      "End": 23,
+      "Loop": true,
+      "Name": "eat"
     }
   ],
-  "FrameCount": 16,
+  "FrameCount": 32,
   "FrameSize": "128, 128",
   "FrameRate": 11.0,
   "Texture": "pussy.png",

@@ -89,9 +89,15 @@
       "End": 111,
       "Loop": true,
       "Name": "water"
+    },
+    {
+      "Start": 112,
+      "End": 119,
+      "Loop": true,
+      "Name": "feed"
     }
   ],
-  "FrameCount": 128,
+  "FrameCount": 120,
   "FrameSize": "32, 64",
   "FrameRate": 14.0,
   "Texture": "bud.png",

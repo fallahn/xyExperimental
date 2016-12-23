@@ -127,7 +127,7 @@ void TVAnimator::entityUpdate(xy::Entity&, float dt)
         fade = std::max(0.f, fade - dt);
     }
 
-    float intensity = 120.f - (55.f * wavetable[m_wavetableIndex]);
+    float intensity = 100.f - (55.f * wavetable[m_wavetableIndex]);
     m_screenColour.b = static_cast<sf::Uint8>(intensity * fade);
     m_screenMask.setFillColor(m_screenColour);
     m_wavetableIndex = (m_wavetableIndex + 1) % wavetable.size();
