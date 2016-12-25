@@ -68,18 +68,22 @@ namespace
         8.f, //die
         12.f, //scratch
         10.f, //water
-        10.f // feed
+        10.f, // feed
+        12.f, //vacuum walk
+        1.f //vacuum still
     };
 
     const float maxSleepTime = 300.f;
 }
 
-BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf, const std::vector<TaskData>& taskData, const sf::Texture& spriteSheet)
+BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf,
+    const std::vector<TaskData>& taskData, const std::vector<TaskData>& idleData, const sf::Texture& spriteSheet)
     : xy::Component (mb, this),
     m_entity        (nullptr),
     m_attribManager (am),
     m_pathFinder    (pf),
     m_taskData      (taskData),
+    m_taskIdleData  (idleData),
     m_spriteSheet   (spriteSheet)
 {
     //set up render texture ready for animations
@@ -104,9 +108,15 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             return td.id == data.taskName;
         });
 
+        if (result == m_taskData.end() && !m_taskIdleData.empty())
+        {
+            //pick a random idle task
+            result = m_taskIdleData.begin() + xy::Util::Random::value(0, m_taskIdleData.size() - 1);
+        }
+
         std::vector<sf::Vector2f> points;
         sf::Vector2f particlePos;
-        if (result != m_taskData.end())
+        //if (result != m_taskData.end())
         {
             //get new destination for requested task and calculate path
             m_destinationPosition = result->position;

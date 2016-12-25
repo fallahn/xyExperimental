@@ -54,6 +54,9 @@ ThinkBubble::ThinkBubble(xy::MessageBus& mb, const sf::Texture& texture)
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
+
+        if (data.id & 0xF0) return; //ignore cat animations
+
         if (data.id == Message::AnimationEvent::Idle)
         {
             m_grow = true;

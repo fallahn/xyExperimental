@@ -64,6 +64,7 @@ private:
 
     PathFinder m_pathFinder;
     std::vector<TaskData> m_tasks;
+    std::vector<TaskData> m_idleTasks;
     std::vector<TaskData> m_catTasks;
 
     AttribManager m_attribManager;

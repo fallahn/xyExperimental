@@ -83,11 +83,7 @@ namespace Message
             Think,
             Travel,
             CatTask,
-            Idle01 = 100,
-            Idle02,
-            Idle03,
-            Idle04,
-            IdleEnd
+            Idle
         }taskName;
     };
 
@@ -111,6 +107,8 @@ namespace Message
             Scratch,
             Water,
             Feed,
+            VacuumWalk,
+            VacuumStill,
             Count
         }id;
     };

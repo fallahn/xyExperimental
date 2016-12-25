@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="left-down" width="52" height="30" tilewidth="32" tileheight="32" nextobjectid="32">
+<map version="1.0" orientation="orthogonal" renderorder="left-down" width="52" height="30" tilewidth="32" tileheight="32" nextobjectid="33">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="4" columns="2">
   <image source="tileset.png" width="64" height="64"/>
  </tileset>
  <layer name="navigation" width="52" height="30" opacity="0.5">
   <data encoding="base64" compression="zlib">
    eJzt1lEKACAIBNHo/ocOvy0IgnSXedABpgIdAwCA/6bpUXfTV33Hr++ya1Hl0nL6Yw6cWoJTS6Cnt+rZwV6QsR9ocGlhP9Dh1BLo6a16drAfZAvhqQJJ
-  </data>
- </layer>
- <layer name="waypoints" width="52" height="30" visible="0">
-  <data encoding="base64" compression="zlib">
-   eJzt1rENADAIBDHYf+lskIYgUGQP8JRHBAAwKT+7AwD06e65fwEAdqm0+VXXbzsHS5gACA==
   </data>
  </layer>
  <objectgroup name="lights">
@@ -82,36 +77,6 @@
     <property name="id" type="int" value="8"/>
    </properties>
   </object>
-  <object id="18" name="Water Plant" x="608" y="928" width="32" height="32">
-   <properties>
-    <property name="animation" type="int" value="14"/>
-    <property name="id" type="int" value="100"/>
-   </properties>
-  </object>
-  <object id="19" name="Water other plant" x="320" y="608" width="32" height="32">
-   <properties>
-    <property name="animation" type="int" value="14"/>
-    <property name="id" type="int" value="101"/>
-   </properties>
-  </object>
-  <object id="20" name="idle" x="768" y="288" width="32" height="32">
-   <properties>
-    <property name="animation" type="int" value="13"/>
-    <property name="id" type="int" value="102"/>
-   </properties>
-  </object>
-  <object id="21" name="idle" x="1120" y="928" width="32" height="32">
-   <properties>
-    <property name="animation" type="int" value="13"/>
-    <property name="id" type="int" value="104"/>
-   </properties>
-  </object>
-  <object id="22" name="feed cat" x="736" y="928" width="32" height="32">
-   <properties>
-    <property name="animation" type="int" value="15"/>
-    <property name="id" type="int" value="103"/>
-   </properties>
-  </object>
  </objectgroup>
  <objectgroup color="#0055ff" name="cat">
   <object id="23" name="eat food" x="832" y="928" width="32" height="32">
@@ -127,5 +92,42 @@
   <object id="29" x="1088" y="288" width="32" height="32"/>
   <object id="30" x="544" y="288" width="32" height="32"/>
   <object id="31" x="96" y="288" width="32" height="32"/>
+ </objectgroup>
+ <objectgroup color="#ff55ff" name="idle">
+  <object id="20" name="idle" x="1152" y="288" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="13"/>
+    <property name="id" type="int" value="102"/>
+   </properties>
+  </object>
+  <object id="19" name="Water other plant" x="320" y="608" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="14"/>
+    <property name="id" type="int" value="101"/>
+   </properties>
+  </object>
+  <object id="18" name="Water Plant" x="608" y="928" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="14"/>
+    <property name="id" type="int" value="100"/>
+   </properties>
+  </object>
+  <object id="22" name="feed cat" x="736" y="928" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="15"/>
+    <property name="id" type="int" value="103"/>
+   </properties>
+  </object>
+  <object id="21" name="idle" x="1120" y="928" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="13"/>
+    <property name="id" type="int" value="104"/>
+   </properties>
+  </object>
+  <object id="32" name="water plant" x="800" y="288" width="32" height="32">
+   <properties>
+    <property name="animation" type="int" value="14"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

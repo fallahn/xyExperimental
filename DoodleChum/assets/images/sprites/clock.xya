@@ -8,7 +8,7 @@
     }
   ],
   "FrameCount": 12,
-  "FrameSize": "80, 160",
+  "FrameSize": "80, 194",
   "FrameRate": 12.0,
   "Texture": "clock.png",
   "NormalMap": "none.png"

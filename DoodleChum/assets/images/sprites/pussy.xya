@@ -37,7 +37,7 @@
       "Name": "eat"
     }
   ],
-  "FrameCount": 32,
+  "FrameCount": 24,
   "FrameSize": "128, 128",
   "FrameRate": 11.0,
   "Texture": "pussy.png",

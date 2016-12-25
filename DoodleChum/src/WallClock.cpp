@@ -37,9 +37,9 @@ namespace
 {
     const float degsPerHour = 360.f / 12.f;
     const float degsPerMinute = 360.f / 60.f;
-    const sf::Vector2f bigHand(0.f, -40.f);
-    const sf::Vector2f smallHand(0.f, -25.f);
-    const sf::Vector2f midPoint(3.f, 0.f);
+    const sf::Vector2f bigHand(0.f, -30.f);
+    const sf::Vector2f smallHand(0.f, -18.f);
+    const sf::Vector2f midPoint(1.8f, 0.f);
 }
 
 WallClock::WallClock(xy::MessageBus& mb, const sf::Texture& texture)
@@ -58,7 +58,7 @@ WallClock::WallClock(xy::MessageBus& mb, const sf::Texture& texture)
     m_globalBounds.width = -bigHand.y * 2.f;
     m_globalBounds.height = -bigHand.y * 2.f;
 
-    setPosition(40.f, 120.f);
+    setPosition(40.f, 154.f);
     setScale(1.f, -1.f);
 
     initSprite(texture);

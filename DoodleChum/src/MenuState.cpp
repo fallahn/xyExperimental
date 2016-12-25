@@ -159,7 +159,7 @@ void MenuState::buildHelp()
     
     auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/start_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
-    button->setPosition(xy::DefaultSceneSize.x / 2.f, 640.f);
+    button->setPosition(xy::DefaultSceneSize.x / 2.f, 820.f);
     button->setText("Continue...");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()

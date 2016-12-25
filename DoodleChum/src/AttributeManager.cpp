@@ -136,13 +136,9 @@ void AttribManager::handleMessage(const xy::Message& msg)
         {
         default: 
             break;
-        case Message::TaskEvent::Idle01:
-        case Message::TaskEvent::Idle02:
-        case Message::TaskEvent::Idle03:
-        case Message::TaskEvent::Idle04:
-        case Message::TaskEvent::IdleEnd:
+        case Message::TaskEvent::Idle:
             //assume an idle event and increase boredom
-            m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / 3.f));
+            m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / xy::Util::Random::value(2.5f, 4.f)));
             break;
         case Message::TaskEvent::Drink:
             m_personalAttribs[Personal::Thirst] *= 0.14f;

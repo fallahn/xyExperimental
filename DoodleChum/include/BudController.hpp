@@ -45,7 +45,8 @@ class AttribManager;
 class BudController final : public xy::Component, public sf::Drawable
 {
 public:
-    BudController(xy::MessageBus&, const AttribManager&, const PathFinder&, const std::vector<TaskData>&, const sf::Texture&);
+    BudController(xy::MessageBus&, const AttribManager&, const PathFinder&,
+        const std::vector<TaskData>&, const std::vector<TaskData>&, const sf::Texture&);
     ~BudController();
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
@@ -60,6 +61,7 @@ private:
     const AttribManager& m_attribManager;
     const PathFinder& m_pathFinder;
     const std::vector<TaskData>& m_taskData;
+    const std::vector<TaskData>& m_taskIdleData;
 
     sf::Vector2u m_currentPosition;
     sf::Vector2u m_destinationPosition;

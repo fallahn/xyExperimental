@@ -87,7 +87,7 @@ void ThinkTask::update(float dt)
         {
         case -1:
             //we want to do an idle animation
-            task = static_cast<Message::TaskEvent::Name>(xy::Util::Random::value(Message::TaskEvent::Idle01, Message::TaskEvent::IdleEnd));
+            task = Message::TaskEvent::Idle;
             break;
         case AttribManager::Personal::Tiredness:
         default: break;
@@ -96,6 +96,7 @@ void ThinkTask::update(float dt)
         {
             const auto& hhAtt = m_attribManager.getHouseholdAttribs();
             std::int32_t entertainment = AttribManager::Household::Music;
+            static std::int32_t lastEntertainment = -2;
             for (auto i = 0; i < AttribManager::Household::Count; ++i)
             {
                 //a bit kludgy, but fuck it
@@ -104,12 +105,20 @@ void ThinkTask::update(float dt)
                     i == AttribManager::Household::Games ||
                     i == AttribManager::Household::Films)
                 {
-                    if (hhAtt[i] > hhAtt[entertainment])
+                    if (hhAtt[i] > hhAtt[entertainment] &&
+                        hhAtt[i] != lastEntertainment)
                     {
                         entertainment = i;
                     }
                 }
+                int maxTries = 5;
+                while (entertainment == lastEntertainment
+                    && maxTries--)
+                {
+                    entertainment = xy::Util::Random::value(3, 5);
+                }
             }
+            lastEntertainment = entertainment;
 
             //raise a message is an entertainment is particularly low
             if (hhAtt[entertainment] < 25)

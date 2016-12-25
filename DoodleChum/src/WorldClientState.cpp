@@ -67,7 +67,7 @@ namespace
 {
     const sf::Vector2f budSize(100.f, 200.f);
     const sf::Vector2f catSize(80.f, 80.f);
-    const sf::Vector2f clockSize(80.f, 160.f);
+    const sf::Vector2f clockSize(80.f, 194.f);
 }
 
 using namespace std::placeholders;
@@ -416,13 +416,47 @@ void WorldClientState::initMapData()
             }
             else if (l->getType() == xy::tmx::Layer::Type::Object)
             {
+                std::function<void(const std::vector<xy::tmx::Object>&, std::vector<TaskData>&)> parseTasks =
+                    [&map, &mapOffset](const std::vector<xy::tmx::Object>& objs, std::vector<TaskData>& taskList)
+                {
+                    for (const auto& obj : objs)
+                    {
+                        taskList.emplace_back();
+                        auto& task = taskList.back();
+                        task.name = obj.getName();
+                        task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
+                        task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
+                        task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
+                        task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
+                        task.worldPosition += mapOffset;
+
+                        const auto& properties = obj.getProperties();
+                        for (const auto& prop : properties)
+                        {
+                            if (prop.getType() == xy::tmx::Property::Type::Int)
+                            {
+                                const auto propName = prop.getName();
+                                if (propName == "id")
+                                {
+                                    task.id = prop.getIntValue();
+                                }
+                                else if (propName == "animation")
+                                {
+                                    task.animationID = prop.getIntValue();
+                                }
+                            }
+                        }
+                    }
+                };
+                
+                
                 const auto& name = l->getName();
+                const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                 if (name == "lights")
                 {
-                    const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
                     for (const auto& o : objs)
                     {
-                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 440.f, 270.f, sf::Color(255,233,240));
+                        auto light = xy::Component::create<xy::PointLight>(m_messageBus, 540.f, 270.f, sf::Color(255,233,240));
                         light->setDepth(200.f);
                         light->setIntensity(0.f);
                         light->enableShadowCasting(true);
@@ -436,68 +470,17 @@ void WorldClientState::initMapData()
                         m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
                     }
                 }
-                else if (name == "tasks") //TODO tify these statements into a single function
+                else if (name == "tasks")
                 {
-                    const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
-                    for (const auto& obj : objs)
-                    {
-                        m_tasks.emplace_back();
-                        auto& task = m_tasks.back();
-                        task.name = obj.getName();
-                        task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
-                        task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
-                        task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
-                        task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
-                        task.worldPosition += mapOffset;
-                        
-                        const auto& properties = obj.getProperties();
-                        for (const auto& prop : properties)
-                        {
-                            if (prop.getType() == xy::tmx::Property::Type::Int)
-                            {
-                                const auto propName = prop.getName();
-                                if (propName == "id")
-                                {
-                                    task.id = prop.getIntValue();
-                                }
-                                else if (propName == "animation")
-                                {
-                                    task.animationID = prop.getIntValue();
-                                }
-                            }
-                        }
-                    }
+                    parseTasks(objs, m_tasks);
                 }
                 else if (name == "cat")
                 {
-                    const auto& objs = dynamic_cast<xy::tmx::ObjectGroup*>(l.get())->getObjects();
-                    for (const auto& obj : objs)
-                    {
-                        m_catTasks.emplace_back();
-                        auto& task = m_catTasks.back();
-                        task.name = obj.getName();
-                        task.position.x = static_cast<sf::Uint32>(obj.getPosition().x) / map.getTileSize().x;
-                        task.position.y = static_cast<sf::Uint32>(obj.getPosition().y) / map.getTileSize().y;
-                        task.worldPosition.x = static_cast<float>(task.position.x * map.getTileSize().x);
-                        task.worldPosition.y = static_cast<float>((task.position.y + 1) * map.getTileSize().y);
-                        task.worldPosition += mapOffset;
-                        const auto& properties = obj.getProperties();
-                        for (const auto& prop : properties)
-                        {
-                            if (prop.getType() == xy::tmx::Property::Type::Int)
-                            {
-                                const auto propName = prop.getName();
-                                if (propName == "id")
-                                {
-                                    task.id = prop.getIntValue();
-                                }
-                                else if (propName == "animation")
-                                {
-                                    task.animationID = prop.getIntValue();
-                                }
-                            }
-                        }
-                    }
+                    parseTasks(objs, m_catTasks);
+                }
+                else if(name == "idle")
+                {
+                    parseTasks(objs, m_idleTasks);
                 }
             }
         }
@@ -521,7 +504,7 @@ void WorldClientState::initMapData()
     entity->addComponent(bg);
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
-    //draws the hands of the wall clock
+    //draws the wall clock
     auto wc = xy::Component::create<WallClock>(m_messageBus, m_textureResource.get("assets/images/sprites/clock.png"));
     auto dwb = m_meshRenderer.createModel(Mesh::Clock, m_messageBus);
     auto& material = m_meshRenderer.getMaterial(Material::Clock);
@@ -531,13 +514,14 @@ void WorldClientState::initMapData()
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(wc);
     entity->addComponent(dwb);
-    entity->setPosition(660.f, 530.f);
+    entity->setPosition(660.f, 540.f);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontRear);
 }
 
 void WorldClientState::initBud()
 {
-    auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder, m_tasks, m_textureResource.get("assets/images/sprites/bud.png"));
+    auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder,
+        m_tasks, m_idleTasks, m_textureResource.get("assets/images/sprites/bud.png"));
 
     auto& material = m_meshRenderer.getMaterial(Material::Bud);
     material.addProperty({ "u_diffuseMap", controller->getTexture() });
