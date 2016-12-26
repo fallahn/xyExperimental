@@ -45,8 +45,17 @@ namespace Particle
     };
 }
 
+namespace Command
+{
+    enum ID
+    {
+        Vacuum = 0x8
+    };
+}
+
 namespace Message
 {
+    const std::int32_t CatAnimMask = 0xf00;
     enum ID
     {
         TimeOfDay = xy::Message::Count,
@@ -83,7 +92,8 @@ namespace Message
             Think,
             Travel,
             CatTask,
-            Idle
+            Idle,
+            Vacuum
         }taskName;
     };
 

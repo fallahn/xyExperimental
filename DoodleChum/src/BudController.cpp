@@ -41,6 +41,7 @@ source distribution.
 #include <IdleTask.hpp>
 #include <MessageIDs.hpp>
 #include <AttributeManager.hpp>
+#include <VacuumTask.hpp>
 
 #include <xygine/Entity.hpp>
 #include <xygine/Console.hpp>
@@ -69,7 +70,7 @@ namespace
         12.f, //scratch
         10.f, //water
         10.f, // feed
-        12.f, //vacuum walk
+        14.f, //vacuum walk
         1.f //vacuum still
     };
 
@@ -132,8 +133,16 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         switch (data.taskName)
         {
         default: 
-            //perform an idle task
-            m_tasks.emplace_back(std::make_unique<IdleTask>(*m_entity, getMessageBus(), result->animationID, data.taskName));
+            if (result->id == Message::TaskEvent::Vacuum)
+            {
+                //create a vacuum task
+                m_tasks.emplace_back(std::make_unique<VacuumTask>(*m_entity, getMessageBus()));
+            }
+            else
+            {
+                //perform an idle task
+                m_tasks.emplace_back(std::make_unique<IdleTask>(*m_entity, getMessageBus(), result->animationID, data.taskName));
+            }
             break;
         case Message::TaskEvent::Eat:
             LOG("Bud decided to eat!", xy::Logger::Type::Info);
@@ -269,7 +278,7 @@ void BudController::initSprite()
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
-        if (data.id & 0xf0) return; //this is a cat anim
+        if (data.id & Message::CatAnimMask) return; //this is a cat anim
         m_sprite->setFrameRate(frameRates[data.id]);
         m_sprite->playAnimation(data.id);
     };
@@ -338,6 +347,12 @@ void BudController::addConCommands()
     {
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::PlayComputer;
+    }, this);
+
+    xy::Console::addCommand("idle", [this](const std::string&)
+    {
+        auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
+        msg->taskName = Message::TaskEvent::Idle;
     }, this);
 }
 #endif //_DEBUG_

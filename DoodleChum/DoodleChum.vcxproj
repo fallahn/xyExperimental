@@ -173,6 +173,8 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\TreeLightController.hpp" />
     <ClInclude Include="include\TVAnimator.hpp" />
     <ClInclude Include="include\TVTask.hpp" />
+    <ClInclude Include="include\Vacuum.hpp" />
+    <ClInclude Include="include\VacuumTask.hpp" />
     <ClInclude Include="include\ValueBar.hpp" />
     <ClInclude Include="include\WallClock.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
@@ -214,6 +216,8 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\TreeLightController.cpp" />
     <ClCompile Include="src\TVAnimator.cpp" />
     <ClCompile Include="src\TVTask.cpp" />
+    <ClCompile Include="src\Vacuum.cpp" />
+    <ClCompile Include="src\VacuumTask.cpp" />
     <ClCompile Include="src\ValueBar.cpp" />
     <ClCompile Include="src\WallClock.cpp" />
     <ClCompile Include="src\WorldClientState.cpp" />

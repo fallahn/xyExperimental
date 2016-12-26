@@ -52,14 +52,14 @@ CatAnim::CatAnim(xy::Entity& e, xy::MessageBus& mb, Action action)
 //public
 void CatAnim::onStart()
 {
-    auto anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | 0xF0);
+    auto anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | Message::CatAnimMask);
 
     switch (m_action)
     {
     default:
     case Action::Eat:
         m_time = eat;
-        anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Eat | 0xF0);
+        anim = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Eat | Message::CatAnimMask);
         break;
     //case Action::Poop:
     //    m_time = poop;
@@ -99,7 +99,7 @@ void CatAnim::update(float dt)
             oldTime % xy::Util::Random::value(10, 14) == 0)
         {
             auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
-            msg->id = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | 0xF0);
+            msg->id = static_cast<Message::AnimationEvent::ID>(Message::AnimationEvent::Idle | Message::CatAnimMask);
         }
     }
 }

@@ -171,6 +171,12 @@
     <ClInclude Include="include\CatAnimationTask.hpp">
       <Filter>Header Files\Controllers\cat</Filter>
     </ClInclude>
+    <ClInclude Include="include\Vacuum.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VacuumTask.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -289,6 +295,12 @@
     </ClCompile>
     <ClCompile Include="src\CatAnimationTask.cpp">
       <Filter>Source Files\Controllers\cat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vacuum.cpp">
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VacuumTask.cpp">
+      <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

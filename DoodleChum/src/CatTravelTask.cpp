@@ -101,6 +101,6 @@ void CatTravel::setAnimation(sf::Vector2f direction)
         m_currentAnimation = anim;
 
         auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
-        msg->id = static_cast<Message::AnimationEvent::ID>(anim | 0xF0);
+        msg->id = static_cast<Message::AnimationEvent::ID>(anim | Message::CatAnimMask);
     }
 }

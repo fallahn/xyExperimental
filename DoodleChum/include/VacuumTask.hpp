@@ -25,46 +25,24 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESH_IDS_HPP_
-#define DC_MESH_IDS_HPP_
+#ifndef DC_VACUUM_TASK_HPP_
+#define DC_VACUUM_TASK_HPP_
 
-#include <xygine/shaders/Default.hpp>
+#include <Task.hpp>
 
-namespace Mesh
+class VacuumTask final : public Task
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Tree,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vacuum
-    };
-}
+public:
+    VacuumTask(xy::Entity&, xy::MessageBus&);
+    ~VacuumTask() = default;
 
-namespace Material
-{
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vaccum
-    };
-}
+    void onStart() override;
+    void update(float) override;
 
-#endif //DC_MESH_IDS_HPP_
+private:
+    sf::Vector2f m_startPosition;
+    bool m_returning;
+    float m_moveSpeed;
+};
+
+#endif //DC_VACUUM_TASK_HPP_

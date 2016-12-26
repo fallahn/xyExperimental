@@ -40,6 +40,7 @@ source distribution.
 #include <Background.hpp>
 #include <WallClock.hpp>
 #include <CatController.hpp>
+#include <Vacuum.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -68,6 +69,7 @@ namespace
     const sf::Vector2f budSize(100.f, 200.f);
     const sf::Vector2f catSize(80.f, 80.f);
     const sf::Vector2f clockSize(80.f, 194.f);
+    const sf::Vector2f vacuumSize(127.f, 78.f);
 }
 
 using namespace std::placeholders;
@@ -171,50 +173,86 @@ void WorldClientState::handleMessage(const xy::Message& msg)
     m_meshRenderer.handleMessage(msg);
     m_attribManager.handleMessage(msg);
 
-    if (msg.id == xy::Message::UIMessage)
+    switch (msg.id)
     {
-        const auto& msgData = msg.getData<xy::Message::UIEvent>();
-        switch (msgData.type)
+    default: break;
+
+    case xy::Message::UIMessage:
         {
-        default: break;
-        case xy::Message::UIEvent::ResizedWindow:
-        {
-            m_scene.setView(getContext().defaultView);
-            //m_meshRenderer.setView(getContext().defaultView);
+            const auto& msgData = msg.getData<xy::Message::UIEvent>();
+            switch (msgData.type)
+            {
+            default: break;
+            case xy::Message::UIEvent::ResizedWindow:
+            {
+                m_scene.setView(getContext().defaultView);
+                //m_meshRenderer.setView(getContext().defaultView);
+            }
+            break;
+            }
         }
         break;
+    case Message::Player:
+        {
+            const auto& data = msg.getData<Message::PlayerEvent>();
+            if (data.action == Message::PlayerEvent::Died)
+            {
+                //add a menu
+                auto& font = m_fontResource.get("assets/fonts/FallahnHand.ttf");
+                auto tab = xy::Component::create<GameOverTab>(m_messageBus, font, m_textureResource, m_attribManager);
+                auto entity = xy::Entity::create(m_messageBus);
+                entity->setPosition(xy::DefaultSceneSize / 2.f);
+                entity->addComponent(tab);
+                m_scene.addEntity(entity, xy::Scene::Layer::UI);
+            }
         }
-    }
-    else if (msg.id == Message::Player)
-    {
-        const auto& data = msg.getData<Message::PlayerEvent>();
-        if (data.action == Message::PlayerEvent::Died)
+        break;
+        case Message::System:
         {
-            //add a menu
-            auto& font = m_fontResource.get("assets/fonts/FallahnHand.ttf");
-            auto tab = xy::Component::create<GameOverTab>(m_messageBus, font, m_textureResource, m_attribManager);
-            auto entity = xy::Entity::create(m_messageBus);
-            entity->setPosition(xy::DefaultSceneSize / 2.f);
-            entity->addComponent(tab);
-            m_scene.addEntity(entity, xy::Scene::Layer::UI);
-        }
-    }
-    else if (msg.id == Message::System)
-    {
-        const auto& data = msg.getData<Message::SystemEvent>();
-        switch (data.action)
-        {
-        default: break;
-        case Message::SystemEvent::ResetGame:
-            requestStackPop();
-            requestStackPush(States::ID::Intro);
-            break;
-        case Message::SystemEvent::ToggleShadowMapping:
-        {
+            const auto& data = msg.getData<Message::SystemEvent>();
+            switch (data.action)
+            {
+            default: break;
+            case Message::SystemEvent::ResetGame:
+                requestStackPop();
+                requestStackPush(States::ID::Intro);
+                break;
+            case Message::SystemEvent::ToggleShadowMapping:
+            {
 
+            }
+            break;
+            }
+        }
+        break;
+        case Message::Animation:
+        {
+            const auto& msgData = msg.getData<Message::AnimationEvent>();
+            if (msgData.id == Message::AnimationEvent::VacuumStill
+                || msgData.id == Message::AnimationEvent::VacuumWalk)
+            {
+                xy::Command cmd;
+                cmd.category = Command::Vacuum;
+                cmd.action = [](xy::Entity& entity, float)
+                {
+                    //move the vacuum so it's visible
+                    entity.setPosition(0.f, 0.f);
+                };
+                m_scene.sendCommand(cmd);
+            }
+            else if(msgData.id == Message::AnimationEvent::Left)
+            {
+                //put the vacuum away
+                xy::Command cmd;
+                cmd.category = Command::Vacuum;
+                cmd.action = [](xy::Entity& entity, float)
+                {
+                    entity.setPosition(-xy::DefaultSceneSize * 2.f);
+                };
+                m_scene.sendCommand(cmd);
+            }
         }
             break;
-        }
     }
 }
 
@@ -359,6 +397,11 @@ void WorldClientState::initMeshes()
     entity->addComponent(md);
     m_scene.addEntity(entity, xy::Scene::Layer::BackFront);
 
+    //quad for vacuum
+    xy::QuadBuilder vacuumQuad(vacuumSize);
+    m_meshRenderer.loadModel(Mesh::Vacuum, vacuumQuad);
+    m_meshRenderer.addMaterial(Material::Vaccum, xy::Material::Textured, true, true);
+    
     //quad for player
     xy::QuadBuilder qb(budSize);
     m_meshRenderer.loadModel(Mesh::Bud, qb);
@@ -520,6 +563,24 @@ void WorldClientState::initMapData()
 
 void WorldClientState::initBud()
 {
+    //vacuum cleaner - need to create this first for draw order    
+    auto& vacMat = m_meshRenderer.getMaterial(Material::Vaccum);
+    vacMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/sprites/vacuum.png") });
+    
+    auto vacDrb = m_meshRenderer.createModel(Mesh::Vacuum, m_messageBus);
+    vacDrb->setBaseMaterial(vacMat);
+    vacDrb->setPosition({ 0.f, -(vacuumSize.y / 2.f) + 6.f, 3.f });
+    
+    auto vacController = xy::Component::create<VacuumController>(m_messageBus);
+
+    auto vacEnt = xy::Entity::create(m_messageBus);
+    vacEnt->addCommandCategories(Command::Vacuum);
+    vacEnt->addComponent(vacDrb);
+    vacEnt->addComponent(vacController);
+    vacEnt->setPosition(-xy::DefaultSceneSize * 2.f); //put off screen to start with
+    vacEnt->setOrigin(-vacuumSize.x / 2.5f, 0.f);
+    
+    //bob
     auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder,
         m_tasks, m_idleTasks, m_textureResource.get("assets/images/sprites/bud.png"));
 
@@ -538,6 +599,8 @@ void WorldClientState::initBud()
     entity->addComponent(controller);
     entity->addComponent(thinkBubble);
 
+    entity->addChild(vacEnt);
+
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
@@ -550,7 +613,7 @@ void WorldClientState::initCat()
 
     auto dwb = m_meshRenderer.createModel(Mesh::Cat, m_messageBus);
     dwb->setBaseMaterial(material);
-    dwb->setPosition({ 0.f, (-catSize.y / 2.f) + 6.f, 3.f });
+    dwb->setPosition({ 0.f, (-catSize.y / 2.f) + 6.f, 2.f });
 
     xy::ParticleSystem::Definition zz;
     zz.loadFromFile("assets/particles/zz_small.xyp", m_textureResource);

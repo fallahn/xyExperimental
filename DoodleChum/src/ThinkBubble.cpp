@@ -55,7 +55,7 @@ ThinkBubble::ThinkBubble(xy::MessageBus& mb, const sf::Texture& texture)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
 
-        if (data.id & 0xF0) return; //ignore cat animations
+        if (data.id & Message::CatAnimMask) return; //ignore cat animations
 
         if (data.id == Message::AnimationEvent::Idle)
         {

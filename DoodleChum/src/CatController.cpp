@@ -124,9 +124,9 @@ void CatController::initSprite()
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         //m_sprite->setFrameRate(frameRates[data.id]);
-        if (data.id & 0xF0)
+        if (data.id & Message::CatAnimMask)
         {
-            m_sprite->playAnimation((data.id & 0x0f));
+            m_sprite->playAnimation((data.id & ~Message::CatAnimMask));
         }
     };
     addMessageHandler(mh);

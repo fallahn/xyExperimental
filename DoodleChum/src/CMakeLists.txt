@@ -36,6 +36,8 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/TreeLightController.cpp
   ${PROJECT_DIR}/TVAnimator.cpp
   ${PROJECT_DIR}/TVTask.cpp
+  ${PROJECT_DIR}/Vacuum.cpp
+  ${PROJECT_DIR}/VacuumTask.cpp
   ${PROJECT_DIR}/ValueBar.cpp
   ${PROJECT_DIR}/WallClock.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)

@@ -25,46 +25,30 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESH_IDS_HPP_
-#define DC_MESH_IDS_HPP_
+#include <Vacuum.hpp>
 
-#include <xygine/shaders/Default.hpp>
+#include <xygine/Entity.hpp>
+#include <xygine/components/Model.hpp>
+#include <xygine/util/Wavetable.hpp>
 
-namespace Mesh
+VacuumController::VacuumController(xy::MessageBus& mb)
+    : xy::Component(mb, this),
+    m_model(nullptr),
+    m_index(0)
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Tree,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vacuum
-    };
+    m_waveTable = xy::Util::Wavetable::sine(0.6f, 15.f);
 }
 
-namespace Material
+//public
+void VacuumController::entityUpdate(xy::Entity&, float dt)
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vaccum
-    };
+    m_model->setPosition({ m_waveTable[m_index], m_initialPosition.y, m_initialPosition.z });
+    m_index = (m_index + 1) % m_waveTable.size();
 }
 
-#endif //DC_MESH_IDS_HPP_
+void VacuumController::onStart(xy::Entity& entity)
+{
+    m_model = entity.getComponent<xy::Model>();
+    XY_ASSERT(m_model, "entity has no model!");
+    m_initialPosition = m_model->getTranslation();
+}

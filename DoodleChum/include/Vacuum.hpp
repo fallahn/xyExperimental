@@ -25,46 +25,37 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MESH_IDS_HPP_
-#define DC_MESH_IDS_HPP_
+#ifndef DC_VACUUM_HPP_
+#define DC_VACUUM_HPP_
 
-#include <xygine/shaders/Default.hpp>
+#include <xygine/components/Component.hpp>
 
-namespace Mesh
+#include <SFML/System/Vector3.hpp>
+
+#include <vector>
+
+namespace xy
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Tree,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vacuum
-    };
+    class Model;
 }
 
-namespace Material
+class VacuumController final : public xy::Component
 {
-    enum ID
-    {
-        Haus = 0,
-        Background,
-        Bud,
-        Furniture,
-        MoreFurniture,
-        ThirdFurniture,
-        Lights,
-        Walls,
-        Cat,
-        Clock,
-        Vaccum
-    };
-}
+public:
+    explicit VacuumController(xy::MessageBus&);
+    ~VacuumController() = default;
 
-#endif //DC_MESH_IDS_HPP_
+    xy::Component::Type type() const override { return xy::Component::Type::Script; }
+    void entityUpdate(xy::Entity&, float) override;
+    void onStart(xy::Entity&) override;
+
+private:
+    xy::Model* m_model;
+    
+    std::vector<float> m_waveTable;
+    std::size_t m_index;
+
+    sf::Vector3f m_initialPosition;
+};
+
+#endif //DC_VACUUM_HPP_
