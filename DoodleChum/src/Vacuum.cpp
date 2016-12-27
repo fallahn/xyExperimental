@@ -29,12 +29,14 @@ source distribution.
 
 #include <xygine/Entity.hpp>
 #include <xygine/components/Model.hpp>
+#include <xygine/components/AudioSource.hpp>
 #include <xygine/util/Wavetable.hpp>
 
 VacuumController::VacuumController(xy::MessageBus& mb)
-    : xy::Component(mb, this),
-    m_model(nullptr),
-    m_index(0)
+    : xy::Component (mb, this),
+    m_model         (nullptr),
+    m_audioLoop     (nullptr),
+    m_index         (0)
 {
     m_waveTable = xy::Util::Wavetable::sine(0.6f, 10.f);
 }
@@ -44,6 +46,8 @@ void VacuumController::entityUpdate(xy::Entity&, float dt)
 {
     m_model->setPosition({ m_waveTable[m_index], m_initialPosition.y, m_initialPosition.z });
     m_index = (m_index + 1) % m_waveTable.size();
+
+    m_audioLoop->setPitch(1.f + (m_waveTable[m_index] / 500.f));
 }
 
 void VacuumController::onStart(xy::Entity& entity)
@@ -51,4 +55,7 @@ void VacuumController::onStart(xy::Entity& entity)
     m_model = entity.getComponent<xy::Model>();
     XY_ASSERT(m_model, "entity has no model!");
     m_initialPosition = m_model->getTranslation();
+
+    auto audio = entity.getComponents<xy::AudioSource>();
+    m_audioLoop = audio[0];
 }

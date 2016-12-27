@@ -126,6 +126,9 @@ TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Directi
                     m_distanceRemaining = m_travelDistance;
                     m_velocity = -m_velocity;
                     m_moving = true;
+
+                    auto toggleMsg = sendMessage<Message::InterfaceEvent>(Message::Interface);
+                    toggleMsg->type = Message::InterfaceEvent::TabToggled;
                 }
             }
         }

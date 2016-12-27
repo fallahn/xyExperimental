@@ -49,7 +49,24 @@ namespace Command
 {
     enum ID
     {
-        Vacuum = 0x8
+        Vacuum = 0x8,
+        MusicPlayer = 0x10,
+        PianoPlayer = 0x20
+    };
+}
+
+namespace Sound
+{
+    enum ID
+    {
+        ButtonClick,
+        ButtonSelect,
+        MenuClose,
+        MenuOpen,
+        TabOpen,
+        ToiletFlush,
+        RemoteClick,
+        VacuumEnd
     };
 }
 
@@ -129,7 +146,8 @@ namespace Message
         {
             MouseClick,
             ButtonClick,
-            MouseMoved
+            MouseMoved,
+            TabToggled
         }type;
         float positionX = 0.f;
         float positionY = 0.f;

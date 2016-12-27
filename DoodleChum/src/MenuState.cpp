@@ -90,6 +90,11 @@ bool MenuState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Pause:
         case sf::Keyboard::BackSpace:
             m_in = false;
+            {
+                auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
+                msg->stateID = States::ID::Menu;
+                msg->type = xy::Message::UIEvent::MenuClosed;
+            }
             break;
         }
     }
@@ -119,9 +124,9 @@ bool MenuState::update(float dt)
         {
             requestStackPop();
 
-            auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
+            /*auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
             msg->stateID = States::ID::Menu;
-            msg->type = xy::Message::UIEvent::MenuClosed;
+            msg->type = xy::Message::UIEvent::MenuClosed;*/
         }
     }
     m_background.setScale(m_scale, m_scale);
@@ -165,6 +170,10 @@ void MenuState::buildHelp()
     button->addCallback([this]()
     {
         m_in = false;
+
+        auto msg = getContext().appInstance.getMessageBus().post<xy::Message::UIEvent>(xy::Message::UIMessage);
+        msg->stateID = States::ID::Menu;
+        msg->type = xy::Message::UIEvent::MenuClosed;
     });
     m_helpContainer.addControl(button);
 
@@ -225,10 +234,11 @@ void MenuState::buildOptions()
     muteCheckbox->setPosition(1110.f, 534.f);
     muteCheckbox->setText("Mute");
     muteCheckbox->setTextColour(sf::Color::Black);
-    muteCheckbox->addCallback([this](const xy::UI::CheckBox* checkBox)
+    muteCheckbox->addCallback([this, soundSlider](const xy::UI::CheckBox* checkBox)
     {
         auto msg = m_messageBus.post<xy::Message::UIEvent>(xy::Message::UIMessage);
         msg->type = (checkBox->checked()) ? xy::Message::UIEvent::RequestAudioMute : xy::Message::UIEvent::RequestAudioUnmute;
+        msg->value = soundSlider->getValue();
     }, xy::UI::CheckBox::Event::CheckChanged);
     muteCheckbox->check(getContext().appInstance.getAudioSettings().muted);
     m_optionContainer.addControl(muteCheckbox);

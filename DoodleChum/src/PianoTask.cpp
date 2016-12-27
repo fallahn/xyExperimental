@@ -32,6 +32,8 @@ source distribution.
 #include <xygine/Scene.hpp>
 #include <xygine/Command.hpp>
 #include <xygine/components/ParticleSystem.hpp>
+#include <xygine/components/AudioSource.hpp>
+#include <xygine/util/Random.hpp>
 
 namespace 
 {
@@ -40,7 +42,7 @@ namespace
 
 PianoTask::PianoTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
     : Task      (e, mb),
-    m_time      (30.f),
+    m_time      (48.f),
     m_position  (position + offset)
 {
 
@@ -55,6 +57,22 @@ void PianoTask::onStart()
     {
         entity.setWorldPosition(m_position);
         entity.getComponent<xy::ParticleSystem>()->start();
+    };
+    getEntity().getScene()->sendCommand(cmd);
+
+    //plays a random piano track
+    cmd.category = Command::PianoPlayer;
+    cmd.action = [](xy::Entity& entity, float)
+    {
+        auto musics = entity.getComponents<xy::AudioSource>();
+        if (musics.size() == 1)
+        {
+            musics[0]->play();
+        }
+        else
+        {
+            musics[xy::Util::Random::value(0, musics.size() - 1)]->play();
+        }
     };
     getEntity().getScene()->sendCommand(cmd);
 

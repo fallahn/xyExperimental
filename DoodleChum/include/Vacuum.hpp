@@ -37,6 +37,7 @@ source distribution.
 namespace xy
 {
     class Model;
+    class AudioSource;
 }
 
 class VacuumController final : public xy::Component
@@ -51,6 +52,7 @@ public:
 
 private:
     xy::Model* m_model;
+    xy::AudioSource* m_audioLoop;
     
     std::vector<float> m_waveTable;
     std::size_t m_index;

@@ -1,0 +1,9 @@
+The music included with Doodle Bob is by myself, Matt Marchant, created over the last decade or
+so. The music may be freely distributed and even used in other projects, although I would appreciate
+any credits, embedded in the files or otherwise, remain in tact.
+
+Bob loves to listen to all kinds of music, so if you prefer something of your own simply delete the
+existing files (or not!) and copy your own music to this folder. As long as they are in .ogg format
+Bob will include them in his playlist. The total number of tracks included in Bob's playlist grows
+as you buy more music for him, so if you don't hear your favourite track right away be patient - or
+dig deep!

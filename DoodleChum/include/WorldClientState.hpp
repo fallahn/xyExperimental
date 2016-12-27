@@ -61,6 +61,7 @@ private:
     xy::TextureResource m_textureResource;
     xy::ShaderResource m_shaderResource;
     xy::FontResource m_fontResource;
+    xy::SoundResource m_soundResource;
 
     PathFinder m_pathFinder;
     std::vector<TaskData> m_tasks;
@@ -75,6 +76,7 @@ private:
     void initCat();
     void initParticles();
     void initUI();
+    void initSounds();
 };
 
 #endif //DC_WORLD_CLIENT_STATE_HPP_

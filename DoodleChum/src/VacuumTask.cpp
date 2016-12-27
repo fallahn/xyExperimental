@@ -28,6 +28,8 @@ source distribution.
 #include <VacuumTask.hpp>
 
 #include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
+#include <xygine/components/AudioSource.hpp>
 
 namespace
 {
@@ -51,6 +53,19 @@ void VacuumTask::onStart()
     msg->id = Message::AnimationEvent::VacuumStill;
 
     m_startPosition = getEntity().getWorldPosition();
+
+    //starts the audio
+    xy::Command cmd;
+    cmd.category = Command::Vacuum;
+    cmd.action = [](xy::Entity& entity, float)
+    {
+        auto sounds = entity.getComponents<xy::AudioSource>();
+        if (sounds.size() == 2)
+        {
+            sounds[0]->play(true);
+        }
+    };
+    getEntity().getScene()->sendCommand(cmd);
 }
 
 void VacuumTask::update(float dt)
@@ -95,6 +110,20 @@ void VacuumTask::update(float dt)
 
             auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);
             msg->id = Message::AnimationEvent::Left;
+
+            //ends the audio
+            xy::Command cmd;
+            cmd.category = Command::Vacuum;
+            cmd.action = [](xy::Entity& entity, float)
+            {
+                auto sounds = entity.getComponents<xy::AudioSource>();
+                if (sounds.size() == 2)
+                {
+                    sounds[0]->stop();
+                    sounds[1]->play();
+                }
+            };
+            getEntity().getScene()->sendCommand(cmd);
         }
     }
 

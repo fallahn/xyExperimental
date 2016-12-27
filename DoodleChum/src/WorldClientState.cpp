@@ -58,6 +58,8 @@ source distribution.
 #include <xygine/tilemap/TileLayer.hpp>
 #include <xygine/components/ParticleController.hpp>
 #include <xygine/SysTime.hpp>
+#include <xygine/components/AudioSource.hpp>
+#include <xygine/components/SoundPlayer.hpp>
 
 #include <xygine/postprocess/Blur.hpp>
 
@@ -90,6 +92,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initBud();
     initParticles();
     initUI();
+    initSounds();
 
     auto pp = xy::PostProcess::create<xy::PostBlur>();
     auto pptr = dynamic_cast<xy::PostBlur*>(pp.get());
@@ -286,6 +289,7 @@ void WorldClientState::initMeshes()
     hausMat.addProperty({ "u_normalMap", m_textureResource.get("assets/images/textures/haus_normal.png") });
     hausMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/textures/haus_mask.png") });
     hausMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+    m_textureResource.get("assets/images/textures/haus_diffuse.png").setSmooth(true);
 
     auto hausModel = m_meshRenderer.createModel(Mesh::Haus, m_messageBus);
     hausModel->setBaseMaterial(hausMat);
@@ -571,11 +575,50 @@ void WorldClientState::initBud()
     vacDrb->setBaseMaterial(vacMat);
     vacDrb->setPosition({ 0.f, -(vacuumSize.y / 2.f) + 6.f, 3.f });
     
+    const auto& audioSettings = getContext().appInstance.getAudioSettings();
+    xy::Component::MessageHandler volumeHandler;
+    volumeHandler.id = xy::Message::UIMessage;
+    volumeHandler.action =
+        [&audioSettings](xy::Component* component, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<xy::Message::UIEvent>();
+        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
+        switch (data.type)
+        {
+        case xy::Message::UIEvent::RequestAudioMute:
+            playerPtr->setVolume(0.f);
+            break;
+        case xy::Message::UIEvent::RequestAudioUnmute:
+            playerPtr->setVolume(data.value * 100.f);
+            break;
+        case xy::Message::UIEvent::RequestVolumeChange:
+            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
+            break;
+        default: break;
+        }
+    };
+
+    auto vacSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    vacSound->setSound("assets/sound/fx/vacuum_loop.wav");
+    vacSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    vacSound->setFadeInTime(1.f);
+    vacSound->setFadeOutTime(1.f);
+    vacSound->addMessageHandler(volumeHandler);
+
+    auto vacSoundEnd = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    vacSoundEnd->setSound("assets/sound/fx/vacuum_end.wav");
+    vacSoundEnd->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    vacSoundEnd->setFadeInTime(0.1f);
+    vacSoundEnd->setFadeOutTime(0.1f);
+    vacSoundEnd->addMessageHandler(volumeHandler);
+
     auto vacController = xy::Component::create<VacuumController>(m_messageBus);
 
     auto vacEnt = xy::Entity::create(m_messageBus);
     vacEnt->addCommandCategories(Command::Vacuum);
     vacEnt->addComponent(vacDrb);
+    vacEnt->addComponent(vacSound);
+    vacEnt->addComponent(vacSoundEnd);
     vacEnt->addComponent(vacController);
     vacEnt->setPosition(-xy::DefaultSceneSize * 2.f); //put off screen to start with
     vacEnt->setOrigin(-vacuumSize.x / 2.5f, 0.f);
@@ -700,5 +743,209 @@ void WorldClientState::initUI()
     auto dnc = xy::Component::create<DayNightCycle>(m_messageBus, m_scene.getSkyLight(), true);
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
+    m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}
+
+namespace
+{
+    const std::string musicPath("assets/sound/music/");
+    const std::string pianoPath("assets/sound/piano/");
+}
+
+void WorldClientState::initSounds()
+{
+    const auto& audioSettings = getContext().appInstance.getAudioSettings();
+    xy::Component::MessageHandler volumeHandler;
+    volumeHandler.id = xy::Message::UIMessage;
+    volumeHandler.action = 
+        [&audioSettings](xy::Component* component, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<xy::Message::UIEvent>();
+        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
+        switch (data.type)
+        {
+        case xy::Message::UIEvent::RequestAudioMute:
+            playerPtr->setVolume(0.f);
+            break;
+        case xy::Message::UIEvent::RequestAudioUnmute:
+            playerPtr->setVolume(data.value * 100.f);
+            break;
+        case xy::Message::UIEvent::RequestVolumeChange:
+            if(!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
+            break;
+        default: break;
+        }
+    };
+    
+    //entity to play music files
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::MusicPlayer);
+    auto fileList = xy::FileSystem::listFiles(musicPath);
+    auto count = 0;
+    for (const auto& f : fileList)
+    {
+        if (xy::FileSystem::getFileExtension(f) == ".ogg")
+        {
+            auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+            music->setSound(musicPath + f, xy::AudioSource::Mode::Stream);
+            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+            music->setFadeInTime(3.f);
+            music->setFadeOutTime(3.f);
+            music->addMessageHandler(volumeHandler);
+            auto musicPtr = music.get();
+
+            xy::Component::MessageHandler mh;
+            mh.id = Message::TaskCompleted;
+            mh.action = [musicPtr](xy::Component*, const xy::Message& msg)
+            {
+                const auto& data = msg.getData<Message::TaskEvent>();
+                if (data.taskName == Message::TaskEvent::PlayMusic)
+                {
+                    musicPtr->pause();
+                }
+            };
+            music->addMessageHandler(mh);
+            entity->addComponent(music);
+            count++;
+        }
+    }
+
+    if(count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    //entity to play piano music
+    entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::PianoPlayer);
+    fileList = xy::FileSystem::listFiles(pianoPath);
+    count = 0;
+    for (const auto& f : fileList)
+    {
+        if (xy::FileSystem::getFileExtension(f) == ".ogg")
+        {
+            auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+            music->setSound(pianoPath + f, xy::AudioSource::Mode::Stream);
+            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+            music->setFadeInTime(1.f);
+            music->setFadeOutTime(1.f);
+            music->addMessageHandler(volumeHandler);
+            auto musicPtr = music.get();
+
+            xy::Component::MessageHandler mh;
+            mh.id = Message::TaskCompleted;
+            mh.action = [musicPtr](xy::Component*, const xy::Message& msg)
+            {
+                const auto& data = msg.getData<Message::TaskEvent>();
+                if (data.taskName == Message::TaskEvent::PlayPiano)
+                {
+                    musicPtr->stop();
+                }
+            };
+            music->addMessageHandler(mh);
+            entity->addComponent(music);
+            count++;
+        }
+    }
+    if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+    //single entity to play loops sounds such as ambience / clock
+    auto daySound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    daySound->addMessageHandler(volumeHandler);
+    daySound->setSound("assets/sound/fx/day_ambience.ogg", xy::AudioSource::Mode::Stream);
+    daySound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    daySound->setFadeInTime(1.f);
+    daySound->play(true);
+
+    //TODO add TOD message handler to fade out at night
+
+
+    //and a soundplayer component to handle one-shot effects
+    auto soundPlayer = xy::Component::create<xy::SoundPlayer>(m_messageBus, m_soundResource);
+    soundPlayer->setMasterVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    auto playerPtr = soundPlayer.get();
+    soundPlayer->preCache(Sound::MenuOpen, "assets/sound/ui/menu_open.wav");
+    soundPlayer->preCache(Sound::MenuClose, "assets/sound/ui/menu_close.wav");
+
+    xy::Component::MessageHandler mh;
+    mh.id = xy::Message::UIMessage;
+    mh.action = [playerPtr, &audioSettings](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<xy::Message::UIEvent>();
+        switch(data.type)
+        {
+        case xy::Message::UIEvent::MenuClosed:
+            playerPtr->playSound(Sound::MenuClose, 0.f, 0.f);
+            break;
+        case xy::Message::UIEvent::MenuOpened:
+            playerPtr->playSound(Sound::MenuOpen, 0.f, 0.f);
+            break;
+        case xy::Message::UIEvent::RequestAudioMute:
+            playerPtr->setMasterVolume(0.f);
+            break;
+        case xy::Message::UIEvent::RequestAudioUnmute:
+            playerPtr->setMasterVolume(data.value);
+            break;
+        case xy::Message::UIEvent::RequestVolumeChange:
+            if(!audioSettings.muted) playerPtr->setMasterVolume(data.value);
+            break;
+        default: break;
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
+    soundPlayer->preCache(Sound::ButtonClick, "assets/sound/ui/button_click.wav");
+    soundPlayer->preCache(Sound::TabOpen, "assets/sound/ui/tab_open.wav");
+    mh.id = Message::Interface;
+    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::InterfaceEvent>();
+        if (data.type == Message::InterfaceEvent::TabToggled)
+        {
+            playerPtr->playSound(Sound::TabOpen, 0.f, 0.f);
+        }
+        else if (data.type == Message::InterfaceEvent::ButtonClick)
+        {
+            playerPtr->playSound(Sound::ButtonClick, 0.f, 0.f);
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
+    soundPlayer->preCache(Sound::ToiletFlush, "assets/sound/fx/flush.wav");
+    soundPlayer->preCache(Sound::VacuumEnd, "assets/sound/fx/vacuum_end.wav");
+    mh.id = Message::TaskCompleted;
+    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+        switch (data.taskName)
+        {
+        default: break;
+        case Message::TaskEvent::Poop:
+            playerPtr->playSound(Sound::ToiletFlush, 0.f, 0.f);
+            break;
+        //case Message::TaskEvent::Vacuum:
+        //    playerPtr->playSound(Sound::VacuumEnd, 0.f, 0.f);
+        //    break;
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
+    soundPlayer->preCache(Sound::RemoteClick, "assets/sound/fx/remote.wav");
+    mh.id = Message::Animation;
+    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        switch (data.id)
+        {
+        default:break;
+        case Message::AnimationEvent::TV:
+            playerPtr->playSound(Sound::RemoteClick, 0.f, 0.f);
+            break;
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(daySound);
+    entity->addComponent(soundPlayer);
+
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 }
