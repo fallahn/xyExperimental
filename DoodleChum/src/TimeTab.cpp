@@ -117,6 +117,9 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
     mh.id = Message::DayChanged;
     mh.action = [this](xy::Component*, const xy::Message&)
     {
+        //as far as I can tell this gets called before the attributes
+        //can handle this message so we end up a day behind - so I'm
+        //adding this to updateClockText() below
         m_daysText.setString(daysString + std::to_string(m_attribManager.getDaysToPayDay()));
     };
     addMessageHandler(mh);
@@ -159,6 +162,9 @@ void TimeTab::updateClockText(float time)
         << std::setw(2) << std::setfill('0') << minutes;
 
     m_clockText.setString(ss.str());
+
+    //ideally I want to update this less frequently..
+    m_daysText.setString(daysString + std::to_string(m_attribManager.getDaysToPayDay()));
 }
 
 void TimeTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const

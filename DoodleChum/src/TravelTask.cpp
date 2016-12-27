@@ -36,7 +36,7 @@ source distribution.
 
 namespace
 {
-    const float minDistance = 100.f;
+    const float minDistance = 10.f;
     const float moveSpeedX = 80.f;
     const float moveSpeedY = 50.f;
 }

@@ -36,7 +36,7 @@ VacuumController::VacuumController(xy::MessageBus& mb)
     m_model(nullptr),
     m_index(0)
 {
-    m_waveTable = xy::Util::Wavetable::sine(0.6f, 15.f);
+    m_waveTable = xy::Util::Wavetable::sine(0.6f, 10.f);
 }
 
 //public

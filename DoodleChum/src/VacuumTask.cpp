@@ -58,6 +58,12 @@ void VacuumTask::update(float dt)
     getEntity().move(m_moveSpeed * dt, 0.f);
         
     const auto position = getEntity().getWorldPosition();
+    //broadcsat movement
+    auto moveMsg = getMessageBus().post<Message::PlayerEvent>(Message::Player);
+    moveMsg->action = Message::PlayerEvent::Moved;
+    moveMsg->posX = position.x;
+    moveMsg->posY = position.y;
+
     float travelledDistance = position.x - m_startPosition.x;
 
     if (!m_returning)

@@ -45,14 +45,14 @@ namespace
 #include "StringConsts.inl"
 
     const int initialIncome = 10000;
-    const float payPerWeek = 5000; //(multiplied by Houshold::Incomerate)
+    const float payPerWeek = 10000; //(multiplied by Houshold::Incomerate)
     const float minIncomeRate = 10.f;
     const int daysPerWeek = 7; //duh, but y'know
 
     //these are approximate amounts based on a weeks consumption
     std::array<int, AttribManager::Household::Count> householdCosts = 
     {
-        11, //food
+        180, //food
         400, //water
         120, //music
         150, //sheet music
