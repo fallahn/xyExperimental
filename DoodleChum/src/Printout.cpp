@@ -26,8 +26,10 @@ source distribution.
 *********************************************************************/
 
 #include <Printout.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/Resource.hpp>
+#include <xygine/MessageBus.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -40,8 +42,9 @@ namespace
     const std::size_t charLimit = 26;
 }
 
-Printout::Printout(sf::Font& font, xy::TextureResource& tr)
-    : m_stringIdx   (0),
+Printout::Printout(sf::Font& font, xy::TextureResource& tr, xy::MessageBus& mb)
+    : m_messageBus  (mb),
+    m_stringIdx     (0),
     m_texture       (nullptr),
     m_scrollDistance(0.f)
 {
@@ -105,6 +108,9 @@ void Printout::printLine(const std::string & str)
     {
         if (!m_strings.empty())
         {
+            auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::PrintBegin;
+            
             scroll(dt);
             
             if (m_scrollDistance == 0)
@@ -122,6 +128,11 @@ void Printout::printLine(const std::string & str)
                 m_text.setString(str);
             }
         }
+        /*else
+        {
+            auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::PrintEnd;
+        }*/
 
         return m_strings.empty();
     };
@@ -135,6 +146,8 @@ void Printout::update(float dt)
         if (m_tasks.front()(dt))
         {
             m_tasks.pop_front();
+            auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::PrintEnd;
         }
     }
 }
@@ -144,11 +157,18 @@ void Printout::clear()
     m_scrollDistance = m_text.getGlobalBounds().top + m_text.getGlobalBounds().height;
     Task task = [this](float dt)->bool
     {
+        auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+        msg->type = Message::InterfaceEvent::PrintScroll;
+
         scroll(dt);
         if (m_scrollDistance == 0)
         {
             m_text.setPosition(defaultTextPos);
             m_text.setString("");
+
+            /*auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::PrintEnd;*/
+
             return true;
         }
 

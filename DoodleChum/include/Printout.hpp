@@ -43,12 +43,13 @@ source distribution.
 namespace xy
 {
     class TextureResource;
+    class MessageBus;
 }
 
 class Printout final : public sf::Drawable, public sf::Transformable
 {
 public:
-    Printout(sf::Font&, xy::TextureResource&);
+    Printout(sf::Font&, xy::TextureResource&, xy::MessageBus&);
     ~Printout() = default;
     Printout(const Printout&) = delete;
     Printout& operator = (const Printout&) = delete;
@@ -58,6 +59,8 @@ public:
     void clear();
 
 public:
+
+    xy::MessageBus& m_messageBus;
 
     using Task = std::function<bool(float)>;
     std::list<Task> m_tasks;

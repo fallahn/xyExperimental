@@ -62,17 +62,21 @@ void PianoTask::onStart()
 
     //plays a random piano track
     cmd.category = Command::PianoPlayer;
-    cmd.action = [](xy::Entity& entity, float)
+    cmd.action = [this](xy::Entity& entity, float)
     {
         auto musics = entity.getComponents<xy::AudioSource>();
         if (musics.size() == 1)
         {
             musics[0]->play();
+            m_time = musics[0]->getDuration();
         }
         else
         {
-            musics[xy::Util::Random::value(0, musics.size() - 1)]->play();
+            auto idx = xy::Util::Random::value(0, musics.size() - 1);
+            musics[idx]->play();
+            m_time = musics[idx]->getDuration();
         }
+        m_time = std::min(m_time, 180.f); //limit to 3 minutes
     };
     getEntity().getScene()->sendCommand(cmd);
 

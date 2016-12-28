@@ -96,6 +96,7 @@ private:
     xy::MessageBus& m_messageBus;
     std::array<float, Personal::Count> m_personalAttribs;
     std::array<float, Household::Count> m_householdAttribs;
+    float m_borednessModifier; //adjusts the rate of boredness increase during certain activities
 
     struct Stats final
     {

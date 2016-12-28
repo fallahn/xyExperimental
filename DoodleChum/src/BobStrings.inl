@@ -27,7 +27,7 @@ const std::vector<std::string> gameMessages =
     "Perhaps it would be fun to have some new games to play?",
     "There's a game on itch.io I'd like to get - Pseuthe I think it's called?",
     "I wouldn't mind having a go at that game, Dispersio",
-    "My game collection is boring, could I have something new?"
+    "My game collection is boring, could I have something new?",
     "I don't suppose you could grab me a copy of Re:Creation?"
 };
 
@@ -39,7 +39,8 @@ const std::vector<std::string> randomMessages =
     "It's equally as likely as any other random combination of words.",
     "Taken out of context anything can be as easily interpreted as anything else whether context is provided or not.",
     "I wish just once I could turn the light off when I go to bed.",
-    "I'd have escaped months ago if the door handle wasn't just drawn on."
+    "I'd have escaped months ago if the door handle wasn't just drawn on.",
+    "That LunarJetman - quite a character!"
 };
 
 const std::vector<std::string> failedMessages =

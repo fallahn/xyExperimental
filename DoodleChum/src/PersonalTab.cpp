@@ -76,7 +76,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
     }
 
     auto& printFont = fr.get("assets/fonts/Printer.ttf");
-    m_printout = std::make_unique<Printout>(printFont, tr);
+    m_printout = std::make_unique<Printout>(printFont, tr, mb);
     m_printout->setPosition(40.f, 720.f);
 
     //message handler for low resources

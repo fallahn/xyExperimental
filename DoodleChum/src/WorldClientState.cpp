@@ -846,6 +846,7 @@ void WorldClientState::initSounds()
     }
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
 
+
     //single entity to play loops sounds such as ambience / clock
     auto daySound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     daySound->addMessageHandler(volumeHandler);
@@ -853,9 +854,78 @@ void WorldClientState::initSounds()
     daySound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     daySound->setFadeInTime(1.f);
     daySound->play(true);
+    auto dsPtr = daySound.get();
 
-    //TODO add TOD message handler to fade out at night
+    xy::Component::MessageHandler mh;
+    mh.id = Message::TimeOfDay;
+    mh.action = [dsPtr, &audioSettings](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TODEvent>();
+        if (!audioSettings.muted)
+        {
+            dsPtr->setVolume(100.f * audioSettings.volume * data.sunIntensity);
+        }
+    };
+    daySound->addMessageHandler(mh);
 
+    auto nightSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    nightSound->addMessageHandler(volumeHandler);
+    nightSound->setSound("assets/sound/fx/night_ambience.ogg", xy::AudioSource::Mode::Stream);
+    nightSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    nightSound->setFadeInTime(1.f);
+    nightSound->play(true);
+    auto nsPtr = nightSound.get();
+
+    mh.action = [nsPtr, &audioSettings](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TODEvent>();
+        if (!audioSettings.muted)
+        {
+            nsPtr->setVolume(100.f * audioSettings.volume * (1.f - data.sunIntensity));
+        }
+    };
+    nightSound->addMessageHandler(mh);
+
+    auto printerSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    printerSound->addMessageHandler(volumeHandler);
+    printerSound->setSound("assets/sound/ui/printer.wav");
+    printerSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    auto psPtr = printerSound.get();
+
+    mh.id = Message::Interface;
+    mh.action = [psPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& msgData = msg.getData<Message::InterfaceEvent>();
+        if (msgData.type == Message::InterfaceEvent::PrintBegin)
+        {
+            psPtr->play(true);
+        }
+        else if (msgData.type == Message::InterfaceEvent::PrintEnd)
+        {
+            psPtr->stop();
+        }
+    };
+    printerSound->addMessageHandler(mh);
+
+    auto scrollSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    scrollSound->addMessageHandler(volumeHandler);
+    scrollSound->setSound("assets/sound/ui/printer_scroll.wav");
+    scrollSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    auto ssPtr = scrollSound.get();
+
+    mh.action = [ssPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& msgData = msg.getData<Message::InterfaceEvent>();
+        if (msgData.type == Message::InterfaceEvent::PrintScroll)
+        {
+            ssPtr->play(true);
+        }
+        else if (msgData.type == Message::InterfaceEvent::PrintEnd)
+        {
+            ssPtr->stop();
+        }
+    };
+    scrollSound->addMessageHandler(mh);
 
     //and a soundplayer component to handle one-shot effects
     auto soundPlayer = xy::Component::create<xy::SoundPlayer>(m_messageBus, m_soundResource);
@@ -864,7 +934,6 @@ void WorldClientState::initSounds()
     soundPlayer->preCache(Sound::MenuOpen, "assets/sound/ui/menu_open.wav");
     soundPlayer->preCache(Sound::MenuClose, "assets/sound/ui/menu_close.wav");
 
-    xy::Component::MessageHandler mh;
     mh.id = xy::Message::UIMessage;
     mh.action = [playerPtr, &audioSettings](xy::Component*, const xy::Message& msg)
     {
@@ -893,36 +962,56 @@ void WorldClientState::initSounds()
 
     soundPlayer->preCache(Sound::ButtonClick, "assets/sound/ui/button_click.wav");
     soundPlayer->preCache(Sound::TabOpen, "assets/sound/ui/tab_open.wav");
+    soundPlayer->preCache(Sound::NoMoney, "assets/sound/ui/no_money.wav");
     mh.id = Message::Interface;
     mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::InterfaceEvent>();
+        auto centre = xy::DefaultSceneSize / 2.f;
         if (data.type == Message::InterfaceEvent::TabToggled)
         {
-            playerPtr->playSound(Sound::TabOpen, 0.f, 0.f);
+            playerPtr->playSound(Sound::TabOpen, centre.x, centre.y);
         }
-        else if (data.type == Message::InterfaceEvent::ButtonClick)
+        /*else if (data.type == Message::InterfaceEvent::ButtonClick)
+        {
+            playerPtr->playSound(Sound::ButtonClick, centre.x, centre.y);
+        }*/
+        else if (data.type == Message::InterfaceEvent::NoMoney)
+        {
+            playerPtr->playSound(Sound::NoMoney, centre.x, centre.y);
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
+    soundPlayer->preCache(Sound::GotMoney, "assets/sound/ui/payday.wav");
+    mh.id = Message::Attribute;
+    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AttribEvent>();
+        if (data.action == Message::AttribEvent::SpentMoney)
         {
             playerPtr->playSound(Sound::ButtonClick, 0.f, 0.f);
+        }
+        else if (data.action == Message::AttribEvent::GotPaid)
+        {
+            //KERCHING!
+            playerPtr->playSound(Sound::GotMoney, 0.f, 0.f);
         }
     };
     soundPlayer->addMessageHandler(mh);
 
     soundPlayer->preCache(Sound::ToiletFlush, "assets/sound/fx/flush.wav");
-    soundPlayer->preCache(Sound::VacuumEnd, "assets/sound/fx/vacuum_end.wav");
     mh.id = Message::TaskCompleted;
-    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    mh.action = [playerPtr, this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::TaskEvent>();
         switch (data.taskName)
         {
         default: break;
         case Message::TaskEvent::Poop:
-            playerPtr->playSound(Sound::ToiletFlush, 0.f, 0.f);
+            playerPtr->playSound(Sound::ToiletFlush, m_tasks[Message::TaskEvent::Poop].worldPosition.x,
+                                                    m_tasks[Message::TaskEvent::Poop].worldPosition.y);
             break;
-        //case Message::TaskEvent::Vacuum:
-        //    playerPtr->playSound(Sound::VacuumEnd, 0.f, 0.f);
-        //    break;
         }
     };
     soundPlayer->addMessageHandler(mh);
@@ -944,6 +1033,9 @@ void WorldClientState::initSounds()
 
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(daySound);
+    entity->addComponent(nightSound);
+    entity->addComponent(printerSound);
+    entity->addComponent(scrollSound);
     entity->addComponent(soundPlayer);
 
     entity->setPosition(xy::DefaultSceneSize / 2.f);

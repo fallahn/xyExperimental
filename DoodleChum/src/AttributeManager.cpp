@@ -79,11 +79,12 @@ namespace
     const float tirednessPerSleep = 75.f;
     const float entertainmentValue = 10.f; //a particular entertainment is increased this much with each purchase
     const float entertainmentReductionMultiplier = 0.05f; // entertainment is this much less entertaining each time it's used
-    const float boredomReduction = 25.f; //boredom is reduced this much multiplied by the value of the activity
+    const float boredomReduction = 45.f; //boredom is reduced this much multiplied by the value of the activity
 }
 
 AttribManager::AttribManager(xy::MessageBus& mb)
-    : m_messageBus(mb)
+    : m_messageBus(mb),
+    m_borednessModifier(1.f)
 {
     if (!load())
     {
@@ -105,12 +106,32 @@ AttribManager::AttribManager(xy::MessageBus& mb)
         auto msg2 = m_messageBus.post<Message::AnimationEvent>(Message::Animation);
         msg2->id = Message::AnimationEvent::Die;
     }, this);
+
+    xy::Console::addCommand("pay", [this](const std::string& amount)
+    {
+        try
+        {
+            auto pay = std::atoi(amount.c_str());
+            m_stats.currentIncome += pay;
+            m_stats.totalIncoming += pay;
+
+            //raise a message saying we got paid $$$
+            auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
+            payMsg->action = Message::AttribEvent::GotPaid;
+            payMsg->value = m_stats.currentIncome;
+        }
+        catch (...)
+        {
+            xy::Console::print("pay: invalid value");
+        }
+    }, this);
 #endif //_DEBUG_
 }
 
 AttribManager::~AttribManager()
 {
     xy::App::removeUserWindows(this);
+    xy::Console::unregisterCommands(this);
 
     try
     {
@@ -187,6 +208,24 @@ void AttribManager::handleMessage(const xy::Message& msg)
         }
     }
 
+    //an activity has started
+    else if (msg.id == Message::Animation)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask) return;
+        switch (data.id)
+        {
+        default: 
+            m_borednessModifier = 1.f;
+            break;
+        case Message::AnimationEvent::Piano:
+        case Message::AnimationEvent::TV:
+        case Message::AnimationEvent::Sleep:
+            m_borednessModifier = 0.2f;
+            break;
+        }
+    }
+
     //UI buttons have been clicked
     else if (msg.id == Message::Interface)
     {
@@ -200,7 +239,6 @@ void AttribManager::handleMessage(const xy::Message& msg)
             {
                 auto cost = householdCosts[data.ID];
                 
-
                 //update the corresponding attribute
                 switch (data.ID)
                 {
@@ -240,6 +278,11 @@ void AttribManager::handleMessage(const xy::Message& msg)
                 auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
                 payMsg->action = Message::AttribEvent::SpentMoney;
                 payMsg->value = m_stats.currentIncome;
+            }
+            else //can't do this :/
+            {
+                auto deniedMsg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+                deniedMsg->type = Message::InterfaceEvent::NoMoney;
             }
         }
     }
@@ -342,7 +385,7 @@ void AttribManager::updateValues(float dt)
     m_personalAttribs[Personal::Cleanliness] = std::min(100.f, m_personalAttribs[Personal::Cleanliness] + (cleanlinessPerSecond * rate));
     m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] + (tirednessPerSecond * rate));
     m_personalAttribs[Personal::Poopiness] = std::min(100.f, m_personalAttribs[Personal::Poopiness] + (poopPerSecond * rate));
-    m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (borednessPerSecond * rate));
+    m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (borednessPerSecond * rate * m_borednessModifier));
 }
 
 void AttribManager::updateHealth()

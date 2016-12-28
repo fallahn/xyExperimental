@@ -66,7 +66,9 @@ namespace Sound
         TabOpen,
         ToiletFlush,
         RemoteClick,
-        VacuumEnd
+        VacuumEnd,
+        NoMoney,
+        GotMoney
     };
 }
 
@@ -147,7 +149,11 @@ namespace Message
             MouseClick,
             ButtonClick,
             MouseMoved,
-            TabToggled
+            TabToggled,
+            PrintBegin,
+            PrintScroll,
+            PrintEnd,
+            NoMoney
         }type;
         float positionX = 0.f;
         float positionY = 0.f;
