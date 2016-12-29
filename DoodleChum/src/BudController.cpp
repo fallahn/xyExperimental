@@ -65,7 +65,7 @@ namespace
         12.f, //TV
         12.f, //Piano
         12.f, //Computer
-        0.4f, //sleeping
+        0.2f, //sleeping
         8.f, //die
         12.f, //scratch
         10.f, //water

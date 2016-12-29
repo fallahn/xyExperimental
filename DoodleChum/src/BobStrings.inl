@@ -40,7 +40,7 @@ const std::vector<std::string> randomMessages =
     "Taken out of context anything can be as easily interpreted as anything else whether context is provided or not.",
     "I wish just once I could turn the light off when I go to bed.",
     "I'd have escaped months ago if the door handle wasn't just drawn on.",
-    "That LunarJetman - quite a character!"
+    "That Jonny - quite a character!"
 };
 
 const std::vector<std::string> failedMessages =

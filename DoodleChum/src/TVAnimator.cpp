@@ -29,6 +29,11 @@ source distribution.
 #include <MessageIDs.hpp>
 
 #include <xygine/util/Wavetable.hpp>
+#include <xygine/components/AudioSource.hpp>
+
+#include <xygine/Command.hpp>
+#include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
 
 namespace
 {
@@ -47,6 +52,8 @@ namespace
 
 TVAnimator::TVAnimator(xy::MessageBus& mb)
     : xy::Component (mb, this),
+    m_entity        (nullptr),
+    m_audioIdx      (0),
     m_on            (false),
     m_prepped       (false),
     m_animationCount(0),
@@ -100,15 +107,51 @@ TVAnimator::TVAnimator(xy::MessageBus& mb)
             {
                 m_on = true;
                 m_animationCount = maxAnimations;
+
+                //play audio and update audio index
+                xy::Command cmd;
+                cmd.category = Command::TVAudio;
+                cmd.action = [this](xy::Entity& entity, float)
+                {
+                    auto sounds = entity.getComponents<xy::AudioSource>();
+                    sounds[m_audioIdx]->play(true);
+                    m_audioIdx = (m_audioIdx + 1) % sounds.size();
+                };
+                m_entity->getScene()->sendCommand(cmd);
             }
             else
             {
-                //again a kludge, to ount the number of times animations are played
-                //TODO make thi sa const somewhere so we don't go out of sync with
+                //again a kludge, to count the number of times animations are played
+                //TODO make this a const somewhere so we don't go out of sync with
                 //the task which raises these animations
                 if (--m_animationCount == 0)
                 {
                     m_on = false;
+
+                    //update index (sounds are stopped by task completion)
+                    xy::Command cmd;
+                    cmd.category = Command::TVAudio;
+                    cmd.action = [this](xy::Entity& entity, float)
+                    {
+                        auto sounds = entity.getComponents<xy::AudioSource>();
+                        m_audioIdx = (m_audioIdx + 1) % sounds.size();
+                    };
+                    m_entity->getScene()->sendCommand(cmd);
+                }
+                else
+                {
+                    //play next audio and update index
+                    xy::Command cmd;
+                    cmd.category = Command::TVAudio;
+                    cmd.action = [this](xy::Entity& entity, float)
+                    {
+                        auto sounds = entity.getComponents<xy::AudioSource>();
+                        sounds[std::min(m_audioIdx - 1, sounds.size() - 1)]->stop();
+                        
+                        sounds[m_audioIdx]->play(true);
+                        m_audioIdx = (m_audioIdx + 1) % sounds.size();
+                    };
+                    m_entity->getScene()->sendCommand(cmd);
                 }
             }
         }

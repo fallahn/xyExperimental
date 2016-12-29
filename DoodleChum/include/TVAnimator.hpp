@@ -41,9 +41,13 @@ public:
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
+    void onStart(xy::Entity& entity) { m_entity = &entity; }
     const sf::Texture& getMaskTexture() const { return m_maskTexture.getTexture(); }
 
 private:
+
+    xy::Entity* m_entity;
+    std::size_t m_audioIdx;
 
     mutable sf::RenderTexture m_maskTexture;
     sf::RectangleShape m_screenMask;

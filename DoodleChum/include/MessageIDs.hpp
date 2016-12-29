@@ -51,7 +51,8 @@ namespace Command
     {
         Vacuum = 0x8,
         MusicPlayer = 0x10,
-        PianoPlayer = 0x20
+        PianoPlayer = 0x20,
+        TVAudio = 0x40
     };
 }
 

@@ -30,7 +30,7 @@ source distribution.
 
 TVTask::TVTask(xy::Entity& e, xy::MessageBus& mb)
     : Task  (e, mb),
-    m_time  (35.f)
+    m_time  (55.f)
 {
 
 }
@@ -47,7 +47,7 @@ void TVTask::update(float dt)
     float oldTime = m_time;
     m_time -= dt;
 
-    if ((oldTime > 15 && m_time < 15)
+    if ((oldTime > 25 && m_time < 25)
         || (oldTime > 1 && m_time < 1))
     {
         auto msg = getMessageBus().post<Message::AnimationEvent>(Message::Animation);

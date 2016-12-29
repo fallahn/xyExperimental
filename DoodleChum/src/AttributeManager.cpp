@@ -158,7 +158,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
         default: 
             break;
         case Message::TaskEvent::Idle:
-            //assume an idle event and increase boredom
+            //increase boredom
             m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / xy::Util::Random::value(2.5f, 4.f)));
             break;
         case Message::TaskEvent::Drink:
@@ -204,6 +204,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
         case Message::TaskEvent::Vacuum:
             //bob gets tired doing housework
             m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] * 1.35f);
+            m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / xy::Util::Random::value(2.5f, 3.f)));
             break;
         }
     }
@@ -399,7 +400,7 @@ void AttribManager::updateHealth()
         m_personalAttribs[Personal::Boredness];
     m_personalAttribs[Personal::Health] = 100.f - (average / (Personal::Count - 1));
 
-    if (m_personalAttribs[Personal::Health] < 4 && !m_stats.dead)
+    if (m_personalAttribs[Personal::Health] < 5 && !m_stats.dead)
     {
         m_stats.dead = true;
         m_stats.gameEndTime = std::time(nullptr);

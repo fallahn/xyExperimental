@@ -32,10 +32,11 @@ source distribution.
 #include <xygine/Scene.hpp>
 #include <xygine/Command.hpp>
 #include <xygine/components/ParticleSystem.hpp>
+#include <xygine/components/AudioSource.hpp>
 
 ShowerTask::ShowerTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
     : Task      (e, mb),
-    m_time      (15.f),
+    m_time      (37.f),
     m_position  (position)
 {
 
@@ -50,6 +51,7 @@ void ShowerTask::onStart()
     {
         entity.setWorldPosition(m_position);
         entity.getComponent<xy::ParticleSystem>()->start();
+        entity.getComponent<xy::AudioSource>()->play();
     };
     getEntity().getScene()->sendCommand(cmd);
 }

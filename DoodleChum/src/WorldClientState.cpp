@@ -576,41 +576,20 @@ void WorldClientState::initBud()
     vacDrb->setPosition({ 0.f, -(vacuumSize.y / 2.f) + 6.f, 3.f });
     
     const auto& audioSettings = getContext().appInstance.getAudioSettings();
-    xy::Component::MessageHandler volumeHandler;
-    volumeHandler.id = xy::Message::UIMessage;
-    volumeHandler.action =
-        [&audioSettings](xy::Component* component, const xy::Message& msg)
-    {
-        const auto& data = msg.getData<xy::Message::UIEvent>();
-        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
-        switch (data.type)
-        {
-        case xy::Message::UIEvent::RequestAudioMute:
-            playerPtr->setVolume(0.f);
-            break;
-        case xy::Message::UIEvent::RequestAudioUnmute:
-            playerPtr->setVolume(data.value * 100.f);
-            break;
-        case xy::Message::UIEvent::RequestVolumeChange:
-            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
-            break;
-        default: break;
-        }
-    };
 
     auto vacSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     vacSound->setSound("assets/sound/fx/vacuum_loop.wav");
     vacSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     vacSound->setFadeInTime(1.f);
     vacSound->setFadeOutTime(1.f);
-    vacSound->addMessageHandler(volumeHandler);
+    vacSound->addMessageHandler(getVolumeHandler());
 
     auto vacSoundEnd = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     vacSoundEnd->setSound("assets/sound/fx/vacuum_end.wav");
     vacSoundEnd->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     vacSoundEnd->setFadeInTime(0.1f);
     vacSoundEnd->setFadeOutTime(0.1f);
-    vacSoundEnd->addMessageHandler(volumeHandler);
+    vacSoundEnd->addMessageHandler(getVolumeHandler());
 
     auto vacController = xy::Component::create<VacuumController>(m_messageBus);
 
@@ -674,10 +653,17 @@ void WorldClientState::initParticles()
 {
     xy::ParticleSystem::Definition steam;
     steam.loadFromFile("assets/particles/steam.xyp", m_textureResource);
+
+    auto showerSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    showerSound->setSound("assets/sound/fx/shower.ogg");
+    showerSound->setFadeInTime(0.2f);
+    showerSound->addMessageHandler(getVolumeHandler());
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Steam);
     auto ps = steam.createSystem(m_messageBus);
     entity->addComponent(ps);
+    entity->addComponent(showerSound);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 
     xy::ParticleSystem::Definition music;
@@ -750,32 +736,12 @@ namespace
 {
     const std::string musicPath("assets/sound/music/");
     const std::string pianoPath("assets/sound/piano/");
+    const std::string TVPath("assets/sound/fx/tv/");
 }
 
 void WorldClientState::initSounds()
 {
     const auto& audioSettings = getContext().appInstance.getAudioSettings();
-    xy::Component::MessageHandler volumeHandler;
-    volumeHandler.id = xy::Message::UIMessage;
-    volumeHandler.action = 
-        [&audioSettings](xy::Component* component, const xy::Message& msg)
-    {
-        const auto& data = msg.getData<xy::Message::UIEvent>();
-        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
-        switch (data.type)
-        {
-        case xy::Message::UIEvent::RequestAudioMute:
-            playerPtr->setVolume(0.f);
-            break;
-        case xy::Message::UIEvent::RequestAudioUnmute:
-            playerPtr->setVolume(data.value * 100.f);
-            break;
-        case xy::Message::UIEvent::RequestVolumeChange:
-            if(!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
-            break;
-        default: break;
-        }
-    };
     
     //entity to play music files
     auto entity = xy::Entity::create(m_messageBus);
@@ -791,7 +757,7 @@ void WorldClientState::initSounds()
             music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
             music->setFadeInTime(3.f);
             music->setFadeOutTime(3.f);
-            music->addMessageHandler(volumeHandler);
+            music->addMessageHandler(getVolumeHandler());
             auto musicPtr = music.get();
 
             xy::Component::MessageHandler mh;
@@ -826,7 +792,7 @@ void WorldClientState::initSounds()
             music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
             music->setFadeInTime(1.f);
             music->setFadeOutTime(1.f);
-            music->addMessageHandler(volumeHandler);
+            music->addMessageHandler(getVolumeHandler());
             auto musicPtr = music.get();
 
             xy::Component::MessageHandler mh;
@@ -849,7 +815,7 @@ void WorldClientState::initSounds()
 
     //single entity to play loops sounds such as ambience / clock
     auto daySound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    daySound->addMessageHandler(volumeHandler);
+    daySound->addMessageHandler(getVolumeHandler());
     daySound->setSound("assets/sound/fx/day_ambience.ogg", xy::AudioSource::Mode::Stream);
     daySound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     daySound->setFadeInTime(1.f);
@@ -869,7 +835,7 @@ void WorldClientState::initSounds()
     daySound->addMessageHandler(mh);
 
     auto nightSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    nightSound->addMessageHandler(volumeHandler);
+    nightSound->addMessageHandler(getVolumeHandler());
     nightSound->setSound("assets/sound/fx/night_ambience.ogg", xy::AudioSource::Mode::Stream);
     nightSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     nightSound->setFadeInTime(1.f);
@@ -887,7 +853,7 @@ void WorldClientState::initSounds()
     nightSound->addMessageHandler(mh);
 
     auto printerSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    printerSound->addMessageHandler(volumeHandler);
+    printerSound->addMessageHandler(getVolumeHandler());
     printerSound->setSound("assets/sound/ui/printer.wav");
     printerSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     auto psPtr = printerSound.get();
@@ -908,7 +874,7 @@ void WorldClientState::initSounds()
     printerSound->addMessageHandler(mh);
 
     auto scrollSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    scrollSound->addMessageHandler(volumeHandler);
+    scrollSound->addMessageHandler(getVolumeHandler());
     scrollSound->setSound("assets/sound/ui/printer_scroll.wav");
     scrollSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     auto ssPtr = scrollSound.get();
@@ -926,6 +892,30 @@ void WorldClientState::initSounds()
         }
     };
     scrollSound->addMessageHandler(mh);
+
+    auto snoreSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    snoreSound->setSound("assets/sound/fx/snoring.ogg");
+    snoreSound->setFadeInTime(1.f);
+    snoreSound->setFadeOutTime(1.f);
+    snoreSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    snoreSound->addMessageHandler(getVolumeHandler());
+    auto snPtr = snoreSound.get();
+
+    mh.id = Message::Animation;
+    mh.action = [snPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask) return;
+        else if (data.id == Message::AnimationEvent::Sleep)
+        {
+            snPtr->play(true);
+        }
+        else
+        {
+            snPtr->stop();
+        }
+    };
+    snoreSound->addMessageHandler(mh);
 
     //and a soundplayer component to handle one-shot effects
     auto soundPlayer = xy::Component::create<xy::SoundPlayer>(m_messageBus, m_soundResource);
@@ -1036,8 +1026,74 @@ void WorldClientState::initSounds()
     entity->addComponent(nightSound);
     entity->addComponent(printerSound);
     entity->addComponent(scrollSound);
+    entity->addComponent(snoreSound);
     entity->addComponent(soundPlayer);
 
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
+
+
+    //tv sounds are on their own entity so can be updated by the animation controller
+    entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::TVAudio);
+    fileList = xy::FileSystem::listFiles(TVPath);
+    std::random_shuffle(std::begin(fileList), std::end(fileList));
+    count = 0;
+    for (const auto& f : fileList)
+    {
+        if (xy::FileSystem::getFileExtension(f) == ".ogg")
+        {
+            auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+            music->setSound(TVPath + f, xy::AudioSource::Mode::Stream);
+            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+            music->setFadeInTime(0.1f);
+            music->setFadeOutTime(0.1f);
+            music->addMessageHandler(getVolumeHandler());
+            auto musicPtr = music.get();
+
+            xy::Component::MessageHandler mh;
+            mh.id = Message::TaskCompleted;
+            mh.action = [musicPtr](xy::Component*, const xy::Message& msg)
+            {
+                const auto& data = msg.getData<Message::TaskEvent>();
+                if (data.taskName == Message::TaskEvent::WatchTV)
+                {
+                    musicPtr->stop();
+                }
+            };
+            music->addMessageHandler(mh);
+            entity->addComponent(music);
+            count++;
+        }
+    }
+    if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}
+
+xy::Component::MessageHandler WorldClientState::getVolumeHandler()
+{
+    const auto& audioSettings = getContext().appInstance.getAudioSettings();
+    
+    xy::Component::MessageHandler volumeHandler;
+    volumeHandler.id = xy::Message::UIMessage;
+    volumeHandler.action =
+        [&audioSettings](xy::Component* component, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<xy::Message::UIEvent>();
+        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
+        switch (data.type)
+        {
+        case xy::Message::UIEvent::RequestAudioMute:
+            playerPtr->setVolume(0.f);
+            break;
+        case xy::Message::UIEvent::RequestAudioUnmute:
+            playerPtr->setVolume(data.value * 100.f);
+            break;
+        case xy::Message::UIEvent::RequestVolumeChange:
+            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
+            break;
+        default: break;
+        }
+    };
+
+    return std::move(volumeHandler);
 }
