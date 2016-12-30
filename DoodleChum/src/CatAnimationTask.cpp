@@ -30,6 +30,7 @@ source distribution.
 #include <xygine/util/Random.hpp>
 #include <xygine/Entity.hpp>
 #include <xygine/components/ParticleSystem.hpp>
+#include <xygine/components/AudioSource.hpp>
 
 namespace
 {
@@ -38,7 +39,7 @@ namespace
     const float minSit = 60.f;
     const float maxSit = 180.f;
     //const float poop = 6.f;
-    const float eat = 10.f;
+    const float eat = 23.f;
 }
 
 CatAnim::CatAnim(xy::Entity& e, xy::MessageBus& mb, Action action)
@@ -70,6 +71,7 @@ void CatAnim::onStart()
     case Action::Sleep:
         m_time = xy::Util::Random::value(minSleep, maxSleep);
         getEntity().getComponent<xy::ParticleSystem>()->start();
+        getEntity().getComponent<xy::AudioSource>()->play(true);
         break;
     }
 

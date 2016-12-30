@@ -8,3 +8,19 @@ fx/shower.wav
 http://freesound.org/people/InspectorJ/sounds/353195/ 
 
 
+fx/eat.wav
+http://freesound.org/people/Sethroph/sounds/334209/
+
+
+fx/drink.wav
+http://freesound.org/people/bdunis4/sounds/271456/
+
+
+fx/bella_snore.ogg
+http://freesound.org/people/sagetyrtle/sounds/77267/
+
+
+fx/bella_eat.ogg
+http://freesound.org/people/lolamadeus/sounds/196254/
+
+

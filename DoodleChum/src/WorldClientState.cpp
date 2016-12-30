@@ -65,6 +65,7 @@ source distribution.
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Audio/Listener.hpp>
 
 namespace
 {
@@ -182,7 +183,8 @@ void WorldClientState::handleMessage(const xy::Message& msg)
 
     case xy::Message::UIMessage:
         {
-            const auto& msgData = msg.getData<xy::Message::UIEvent>();
+        const auto& audioSettings = getContext().appInstance.getAudioSettings();
+        const auto& msgData = msg.getData<xy::Message::UIEvent>();
             switch (msgData.type)
             {
             default: break;
@@ -192,6 +194,15 @@ void WorldClientState::handleMessage(const xy::Message& msg)
                 //m_meshRenderer.setView(getContext().defaultView);
             }
             break;
+            case xy::Message::UIEvent::RequestAudioMute:
+                sf::Listener::setGlobalVolume(0.f);
+                break;
+            case xy::Message::UIEvent::RequestAudioUnmute:
+                sf::Listener::setGlobalVolume(msgData.value * 100.f);
+                break;
+            case xy::Message::UIEvent::RequestVolumeChange:
+                if (!audioSettings.muted) sf::Listener::setGlobalVolume(msgData.value * 100.f);
+                break;
             }
         }
         break;
@@ -574,22 +585,16 @@ void WorldClientState::initBud()
     auto vacDrb = m_meshRenderer.createModel(Mesh::Vacuum, m_messageBus);
     vacDrb->setBaseMaterial(vacMat);
     vacDrb->setPosition({ 0.f, -(vacuumSize.y / 2.f) + 6.f, 3.f });
-    
-    const auto& audioSettings = getContext().appInstance.getAudioSettings();
 
     auto vacSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     vacSound->setSound("assets/sound/fx/vacuum_loop.wav");
-    vacSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     vacSound->setFadeInTime(1.f);
     vacSound->setFadeOutTime(1.f);
-    vacSound->addMessageHandler(getVolumeHandler());
 
     auto vacSoundEnd = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     vacSoundEnd->setSound("assets/sound/fx/vacuum_end.wav");
-    vacSoundEnd->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     vacSoundEnd->setFadeInTime(0.1f);
     vacSoundEnd->setFadeOutTime(0.1f);
-    vacSoundEnd->addMessageHandler(getVolumeHandler());
 
     auto vacController = xy::Component::create<VacuumController>(m_messageBus);
 
@@ -616,10 +621,75 @@ void WorldClientState::initBud()
     const auto& thinkTex = m_textureResource.get("assets/images/ui/think_bubble.png");
     auto thinkBubble = xy::Component::create<ThinkBubble>(m_messageBus, thinkTex);
 
+    auto walkSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    walkSound->setSound("assets/sound/fx/walk.wav");
+    walkSound->setFadeInTime(0.1f);
+    walkSound->setFadeOutTime(0.1f);
+    auto wsPtr = walkSound.get();
+    xy::Component::MessageHandler mh;
+    mh.id = Message::Animation;
+    mh.action = [wsPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask) return;
+        switch (data.id)
+        {
+        case Message::AnimationEvent::Left:
+        case Message::AnimationEvent::Right:
+        case Message::AnimationEvent::VacuumWalk:
+            wsPtr->setPitch(1.f);
+            wsPtr->play(true);
+            break;
+        case Message::AnimationEvent::Up:
+        case Message::AnimationEvent::Down:
+            wsPtr->setPitch(0.875f);
+            wsPtr->play(true);
+            break;
+        default:
+            wsPtr->stop();
+            break;
+        }
+    };
+    walkSound->addMessageHandler(mh);
+
+    auto eatSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    eatSound->setSound("assets/sound/fx/eat.wav");
+    auto ePtr = eatSound.get();
+    mh.action = [ePtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask) return;
+        if (data.id == Message::AnimationEvent::Eat)
+        {
+            ePtr->play(true);
+        }
+        else
+        {
+            ePtr->stop();
+        }
+    };
+    eatSound->addMessageHandler(mh);
+
+    auto drinkSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    drinkSound->setSound("assets/sound/fx/drink.wav");
+    auto dPtr = drinkSound.get();
+    mh.action = [dPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Drink)
+        {
+            dPtr->play();
+        }
+    };
+    drinkSound->addMessageHandler(mh);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
     entity->addComponent(controller);
     entity->addComponent(thinkBubble);
+    entity->addComponent(walkSound);
+    entity->addComponent(eatSound);
+    entity->addComponent(drinkSound);
 
     entity->addChild(vacEnt);
 
@@ -641,10 +711,58 @@ void WorldClientState::initCat()
     zz.loadFromFile("assets/particles/zz_small.xyp", m_textureResource);
     auto ps = zz.createSystem(m_messageBus);
 
+    auto snoreSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    snoreSound->setSound("assets/sound/fx/bella_snore.ogg", xy::AudioSource::Mode::Stream);
+    snoreSound->setFadeInTime(0.1f);
+    snoreSound->setFadeOutTime(0.5f);
+    auto snPtr = snoreSound.get();
+    xy::Component::MessageHandler mh;
+    mh.id = Message::Animation;
+    mh.action = [snPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask)
+        {
+            if (data.id == (Message::AnimationEvent::Idle | Message::CatAnimMask))
+            {
+                //snPtr->play(true);
+                //made the cat animation task to do this
+            }
+            else
+            {
+                snPtr->stop();
+            }
+        }
+    };
+    snoreSound->addMessageHandler(mh);
+
+    auto eatSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    eatSound->setSound("assets/sound/fx/bella_eat.ogg", xy::AudioSource::Mode::Stream);
+    eatSound->setFadeOutTime(1.f);
+    auto ePtr = eatSound.get();
+    mh.action = [ePtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask)
+        {
+            if (data.id == (Message::AnimationEvent::Eat | Message::CatAnimMask))
+            {
+                ePtr->play();
+            }
+            else
+            {
+                ePtr->stop();
+            }
+        }
+    };
+    eatSound->addMessageHandler(mh);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(controller);
     entity->addComponent(dwb);
     entity->addComponent(ps);
+    entity->addComponent(snoreSound);
+    entity->addComponent(eatSound);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
@@ -657,7 +775,6 @@ void WorldClientState::initParticles()
     auto showerSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     showerSound->setSound("assets/sound/fx/shower.ogg");
     showerSound->setFadeInTime(0.2f);
-    showerSound->addMessageHandler(getVolumeHandler());
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Particle::Steam);
@@ -754,10 +871,8 @@ void WorldClientState::initSounds()
         {
             auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
             music->setSound(musicPath + f, xy::AudioSource::Mode::Stream);
-            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
             music->setFadeInTime(3.f);
             music->setFadeOutTime(3.f);
-            music->addMessageHandler(getVolumeHandler());
             auto musicPtr = music.get();
 
             xy::Component::MessageHandler mh;
@@ -789,10 +904,8 @@ void WorldClientState::initSounds()
         {
             auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
             music->setSound(pianoPath + f, xy::AudioSource::Mode::Stream);
-            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
             music->setFadeInTime(1.f);
             music->setFadeOutTime(1.f);
-            music->addMessageHandler(getVolumeHandler());
             auto musicPtr = music.get();
 
             xy::Component::MessageHandler mh;
@@ -815,9 +928,7 @@ void WorldClientState::initSounds()
 
     //single entity to play loops sounds such as ambience / clock
     auto daySound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    daySound->addMessageHandler(getVolumeHandler());
     daySound->setSound("assets/sound/fx/day_ambience.ogg", xy::AudioSource::Mode::Stream);
-    daySound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     daySound->setFadeInTime(1.f);
     daySound->play(true);
     auto dsPtr = daySound.get();
@@ -835,9 +946,7 @@ void WorldClientState::initSounds()
     daySound->addMessageHandler(mh);
 
     auto nightSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    nightSound->addMessageHandler(getVolumeHandler());
     nightSound->setSound("assets/sound/fx/night_ambience.ogg", xy::AudioSource::Mode::Stream);
-    nightSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     nightSound->setFadeInTime(1.f);
     nightSound->play(true);
     auto nsPtr = nightSound.get();
@@ -853,9 +962,7 @@ void WorldClientState::initSounds()
     nightSound->addMessageHandler(mh);
 
     auto printerSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    printerSound->addMessageHandler(getVolumeHandler());
     printerSound->setSound("assets/sound/ui/printer.wav");
-    printerSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     auto psPtr = printerSound.get();
 
     mh.id = Message::Interface;
@@ -874,9 +981,7 @@ void WorldClientState::initSounds()
     printerSound->addMessageHandler(mh);
 
     auto scrollSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    scrollSound->addMessageHandler(getVolumeHandler());
     scrollSound->setSound("assets/sound/ui/printer_scroll.wav");
-    scrollSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
     auto ssPtr = scrollSound.get();
 
     mh.action = [ssPtr](xy::Component*, const xy::Message& msg)
@@ -894,11 +999,9 @@ void WorldClientState::initSounds()
     scrollSound->addMessageHandler(mh);
 
     auto snoreSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
-    snoreSound->setSound("assets/sound/fx/snoring.ogg");
+    snoreSound->setSound("assets/sound/fx/snoring.ogg", xy::AudioSource::Mode::Stream);
     snoreSound->setFadeInTime(1.f);
     snoreSound->setFadeOutTime(1.f);
-    snoreSound->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
-    snoreSound->addMessageHandler(getVolumeHandler());
     auto snPtr = snoreSound.get();
 
     mh.id = Message::Animation;
@@ -919,10 +1022,12 @@ void WorldClientState::initSounds()
 
     //and a soundplayer component to handle one-shot effects
     auto soundPlayer = xy::Component::create<xy::SoundPlayer>(m_messageBus, m_soundResource);
-    soundPlayer->setMasterVolume(audioSettings.muted ? 0.f : audioSettings.volume);
+    soundPlayer->setMasterVolume(1.f);
     auto playerPtr = soundPlayer.get();
     soundPlayer->preCache(Sound::MenuOpen, "assets/sound/ui/menu_open.wav");
     soundPlayer->preCache(Sound::MenuClose, "assets/sound/ui/menu_close.wav");
+    soundPlayer->preCache(Sound::ButtonSelect, "assets/sound/ui/button_select.wav");
+    soundPlayer->preCache(Sound::ButtonClick, "assets/sound/ui/button_click.wav");
 
     mh.id = xy::Message::UIMessage;
     mh.action = [playerPtr, &audioSettings](xy::Component*, const xy::Message& msg)
@@ -936,21 +1041,17 @@ void WorldClientState::initSounds()
         case xy::Message::UIEvent::MenuOpened:
             playerPtr->playSound(Sound::MenuOpen, 0.f, 0.f);
             break;
-        case xy::Message::UIEvent::RequestAudioMute:
-            playerPtr->setMasterVolume(0.f);
+        case xy::Message::UIEvent::SelectionChanged:
+            playerPtr->playSound(Sound::ButtonSelect, 0.f, 0.f);
             break;
-        case xy::Message::UIEvent::RequestAudioUnmute:
-            playerPtr->setMasterVolume(data.value);
-            break;
-        case xy::Message::UIEvent::RequestVolumeChange:
-            if(!audioSettings.muted) playerPtr->setMasterVolume(data.value);
+        case xy::Message::UIEvent::SelectionActivated:
+            playerPtr->playSound(Sound::ButtonClick, 0.f, 0.f);
             break;
         default: break;
         }
     };
     soundPlayer->addMessageHandler(mh);
 
-    soundPlayer->preCache(Sound::ButtonClick, "assets/sound/ui/button_click.wav");
     soundPlayer->preCache(Sound::TabOpen, "assets/sound/ui/tab_open.wav");
     soundPlayer->preCache(Sound::NoMoney, "assets/sound/ui/no_money.wav");
     mh.id = Message::Interface;
@@ -1045,10 +1146,8 @@ void WorldClientState::initSounds()
         {
             auto music = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
             music->setSound(TVPath + f, xy::AudioSource::Mode::Stream);
-            music->setVolume(audioSettings.muted ? 0.f : audioSettings.volume);
             music->setFadeInTime(0.1f);
             music->setFadeOutTime(0.1f);
-            music->addMessageHandler(getVolumeHandler());
             auto musicPtr = music.get();
 
             xy::Component::MessageHandler mh;
@@ -1069,31 +1168,31 @@ void WorldClientState::initSounds()
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
 }
 
-xy::Component::MessageHandler WorldClientState::getVolumeHandler()
-{
-    const auto& audioSettings = getContext().appInstance.getAudioSettings();
-    
-    xy::Component::MessageHandler volumeHandler;
-    volumeHandler.id = xy::Message::UIMessage;
-    volumeHandler.action =
-        [&audioSettings](xy::Component* component, const xy::Message& msg)
-    {
-        const auto& data = msg.getData<xy::Message::UIEvent>();
-        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
-        switch (data.type)
-        {
-        case xy::Message::UIEvent::RequestAudioMute:
-            playerPtr->setVolume(0.f);
-            break;
-        case xy::Message::UIEvent::RequestAudioUnmute:
-            playerPtr->setVolume(data.value * 100.f);
-            break;
-        case xy::Message::UIEvent::RequestVolumeChange:
-            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
-            break;
-        default: break;
-        }
-    };
-
-    return std::move(volumeHandler);
-}
+//xy::Component::MessageHandler WorldClientState::getVolumeHandler()
+//{
+//    const auto& audioSettings = getContext().appInstance.getAudioSettings();
+//    
+//    xy::Component::MessageHandler volumeHandler;
+//    volumeHandler.id = xy::Message::UIMessage;
+//    volumeHandler.action =
+//        [&audioSettings](xy::Component* component, const xy::Message& msg)
+//    {
+//        const auto& data = msg.getData<xy::Message::UIEvent>();
+//        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
+//        switch (data.type)
+//        {
+//        case xy::Message::UIEvent::RequestAudioMute:
+//            playerPtr->setVolume(0.f);
+//            break;
+//        case xy::Message::UIEvent::RequestAudioUnmute:
+//            playerPtr->setVolume(data.value * 100.f);
+//            break;
+//        case xy::Message::UIEvent::RequestVolumeChange:
+//            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
+//            break;
+//        default: break;
+//        }
+//    };
+//
+//    return std::move(volumeHandler);
+//}
