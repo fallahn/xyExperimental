@@ -68,9 +68,15 @@
     },
     {
       "Start": 52,
-      "End": 55,
+      "End": 53,
       "Loop": true,
       "Name": "sleep"
+    },
+    {
+      "Start": 55,
+      "End": 55,
+      "Loop": false,
+      "Name": "crouch"
     },
     {
       "Start": 80,
@@ -87,13 +93,13 @@
     {
       "Start": 96,
       "End": 111,
-      "Loop": true,
+      "Loop": false,
       "Name": "water"
     },
     {
       "Start": 112,
       "End": 119,
-      "Loop": true,
+      "Loop": false,
       "Name": "feed"
     },
     {

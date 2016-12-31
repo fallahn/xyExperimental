@@ -133,6 +133,7 @@ namespace Message
             Piano,
             Computer,
             Sleep,
+            Crouch,
             Die,
             Scratch,
             Water,

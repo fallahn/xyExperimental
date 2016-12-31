@@ -66,6 +66,7 @@ namespace
         12.f, //Piano
         12.f, //Computer
         0.2f, //sleeping
+        1.f, //crouch/sleep
         8.f, //die
         12.f, //scratch
         10.f, //water

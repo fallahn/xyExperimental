@@ -422,18 +422,20 @@ void WorldClientState::initMeshes()
     m_meshRenderer.loadModel(Mesh::Bud, qb);
     
     m_textureResource.setFallbackColour({ 127, 127, 255 });
-    /*auto& budMat = */m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
-    //budMat.addProperty({ "u_normalMap", m_textureResource.get("fallback") });
+    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
+    budMat.addProperty({ "u_maskMap", maskTex });
 
     //quad for cat
     xy::QuadBuilder cq(catSize);
     m_meshRenderer.loadModel(Mesh::Cat, cq);
-    /*auto& catMat = */m_meshRenderer.addMaterial(Material::Cat, xy::Material::Textured, true, true);
+    auto& catMat = m_meshRenderer.addMaterial(Material::Cat, xy::Material::Textured, true, true);
+    catMat.addProperty({ "u_maskMap", maskTex });
 
     //quad for clock
     xy::QuadBuilder clockQuad(clockSize);
     m_meshRenderer.loadModel(Mesh::Clock, clockQuad);
-    m_meshRenderer.addMaterial(Material::Clock, xy::Material::Textured, true, true);
+    auto& clockMat = m_meshRenderer.addMaterial(Material::Clock, xy::Material::Textured, true, true);
+    clockMat.addProperty({ "u_maskMap", maskTex });
 }
 
 void WorldClientState::initMapData()
@@ -581,6 +583,7 @@ void WorldClientState::initBud()
     //vacuum cleaner - need to create this first for draw order    
     auto& vacMat = m_meshRenderer.getMaterial(Material::Vaccum);
     vacMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/sprites/vacuum.png") });
+    vacMat.addProperty({ "u_maskMap", m_textureResource.get("assets/images/sprites/vacuum_mask.png") });
     
     auto vacDrb = m_meshRenderer.createModel(Mesh::Vacuum, m_messageBus);
     vacDrb->setBaseMaterial(vacMat);
@@ -683,6 +686,71 @@ void WorldClientState::initBud()
     };
     drinkSound->addMessageHandler(mh);
 
+    auto waterSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    waterSound->setSound("assets/sound/fx/water_plant.wav");
+    waterSound->setFadeOutTime(1.f);
+    auto wPtr = waterSound.get();
+    mh.action = [wPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        //if (data.id & Message::CatAnimMask) return;
+        if (data.id == Message::AnimationEvent::Water)
+        {
+            wPtr->play(/*true*/);
+        }
+        /*else
+        {
+            wPtr->stop();
+        }*/
+    };
+    waterSound->addMessageHandler(mh);
+
+    auto feedSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    feedSound->setSound("assets/sound/fx/feed_bella.wav");
+    auto fPtr = feedSound.get();
+    mh.action = [fPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        //if (data.id & Message::CatAnimMask) return;
+        if (data.id == Message::AnimationEvent::Feed)
+        {
+            fPtr->play();
+        }
+    };
+    feedSound->addMessageHandler(mh);
+
+    auto scratchSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    scratchSound->setSound("assets/sound/fx/scratch.wav");
+    scratchSound->setFadeOutTime(0.5f);
+    auto scPtr = scratchSound.get();
+    mh.action = [scPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id & Message::CatAnimMask) return;
+        if (data.id == Message::AnimationEvent::Scratch)
+        {
+            scPtr->play(true);
+        }
+        else
+        {
+            scPtr->stop();
+        }
+    };
+    scratchSound->addMessageHandler(mh);
+
+    auto poopSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    poopSound->setSound("assets/sound/fx/call_of_doody.wav");
+    auto pPtr = poopSound.get();
+    mh.action = [pPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Poop)
+        {
+            pPtr->play();
+        }
+    };
+    poopSound->addMessageHandler(mh);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
     entity->addComponent(controller);
@@ -690,6 +758,10 @@ void WorldClientState::initBud()
     entity->addComponent(walkSound);
     entity->addComponent(eatSound);
     entity->addComponent(drinkSound);
+    entity->addComponent(waterSound);
+    entity->addComponent(feedSound);
+    entity->addComponent(scratchSound);
+    entity->addComponent(poopSound);
 
     entity->addChild(vacEnt);
 

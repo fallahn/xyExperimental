@@ -46,6 +46,17 @@ void IdleTask::onStart()
     if (m_animID != -1 && m_animID < Message::AnimationEvent::Count)
     {       
         msg->id = static_cast<Message::AnimationEvent::ID>(m_animID);
+
+        switch (m_animID)
+        {
+        default: break;
+        case Message::AnimationEvent::Water:
+            m_time = 3.f;
+            break;
+        case Message::AnimationEvent::Feed:
+            m_time = 2.f;
+            break;
+        }
     }
     else
     {

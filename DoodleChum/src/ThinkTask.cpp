@@ -72,11 +72,13 @@ void ThinkTask::update(float dt)
         
         //make sure we ignore the health attrib
         std::int32_t attrib = -1;
+        static std::int32_t lastAttrib = -1;
         for (const auto& pa : personalAttribs)
         {
-            if (canDo(pa.first))
+            if (canDo(pa.first) && lastAttrib != pa.first)
             {
                 attrib = pa.first;
+                lastAttrib = attrib;
                 break;
             }
         }
@@ -226,9 +228,10 @@ bool ThinkTask::canDo(std::int32_t attrib)
             return possible;
         }
     case AttribManager::Personal::Tiredness:
-    { //only sleep at night
+    { //only sleep at night - or if compeltely tired
         const auto& curTime = xy::SysTime::now();
-        return ((curTime.hours() >= 20 || curTime.hours() <= 8) && personalAttribs[AttribManager::Personal::Tiredness].second > 30.f);
+        return (((curTime.hours() > 20 || curTime.hours() < 8) && personalAttribs[AttribManager::Personal::Tiredness].second > 30.f)
+            || personalAttribs[AttribManager::Personal::Tiredness].second == 100);
     }
     }
 }
