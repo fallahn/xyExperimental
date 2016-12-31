@@ -42,6 +42,9 @@ public:
 private:
     float m_time;
     sf::Vector2f m_position;
+
+    float m_rotation;
+    float m_rotationSpeed;
 };
 
 #endif //DC_SLEEP_TASK_HPP_

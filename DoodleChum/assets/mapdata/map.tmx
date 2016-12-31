@@ -52,7 +52,7 @@
     <property name="id" type="int" value="3"/>
    </properties>
   </object>
-  <object id="12" name="sleep" x="736" y="608" width="32" height="32">
+  <object id="12" name="sleep" x="832" y="608" width="32" height="32">
    <properties>
     <property name="id" type="int" value="4"/>
    </properties>
@@ -96,37 +96,37 @@
  <objectgroup color="#ff55ff" name="idle">
   <object id="20" name="idle" x="1056" y="288" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="13"/>
+    <property name="animation" type="int" value="14"/>
     <property name="id" type="int" value="102"/>
    </properties>
   </object>
   <object id="19" name="Water other plant" x="320" y="608" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="14"/>
+    <property name="animation" type="int" value="15"/>
     <property name="id" type="int" value="101"/>
    </properties>
   </object>
   <object id="18" name="Water Plant" x="608" y="928" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="14"/>
+    <property name="animation" type="int" value="15"/>
     <property name="id" type="int" value="100"/>
    </properties>
   </object>
   <object id="22" name="feed cat" x="736" y="928" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="15"/>
+    <property name="animation" type="int" value="16"/>
     <property name="id" type="int" value="103"/>
    </properties>
   </object>
   <object id="21" name="idle" x="1120" y="928" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="13"/>
+    <property name="animation" type="int" value="14"/>
     <property name="id" type="int" value="104"/>
    </properties>
   </object>
   <object id="32" name="water plant" x="768" y="288" width="32" height="32">
    <properties>
-    <property name="animation" type="int" value="14"/>
+    <property name="animation" type="int" value="15"/>
    </properties>
   </object>
   <object id="33" name="vacuum" x="256" y="608" width="32" height="32">

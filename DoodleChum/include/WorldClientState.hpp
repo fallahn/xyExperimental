@@ -77,8 +77,6 @@ private:
     void initParticles();
     void initUI();
     void initSounds();
-
-    //xy::Component::MessageHandler getVolumeHandler();
 };
 
 #endif //DC_WORLD_CLIENT_STATE_HPP_

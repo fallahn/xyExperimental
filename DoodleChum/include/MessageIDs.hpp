@@ -179,6 +179,8 @@ namespace Message
             Moved,
             TaskFailed,
             ResourceLow,
+            Slept,
+            Woke,
             Died
         }action;
         float posX = 0.f;

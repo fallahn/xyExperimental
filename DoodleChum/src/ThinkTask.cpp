@@ -75,10 +75,10 @@ void ThinkTask::update(float dt)
         static std::int32_t lastAttrib = -1;
         for (const auto& pa : personalAttribs)
         {
-            if (canDo(pa.first) && lastAttrib != pa.first)
+            if (canDo(pa.first)/* && lastAttrib != pa.first*/)
             {
                 attrib = pa.first;
-                lastAttrib = attrib;
+                //lastAttrib = attrib;
                 break;
             }
         }

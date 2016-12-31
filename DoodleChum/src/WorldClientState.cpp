@@ -999,6 +999,10 @@ void WorldClientState::initSounds()
 
 
     //single entity to play loops sounds such as ambience / clock
+    auto clockSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    clockSound->setSound("assets/sound/fx/clock.wav");
+    clockSound->play(true);
+
     auto daySound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     daySound->setSound("assets/sound/fx/day_ambience.ogg", xy::AudioSource::Mode::Stream);
     daySound->setFadeInTime(1.f);
@@ -1073,19 +1077,18 @@ void WorldClientState::initSounds()
     auto snoreSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     snoreSound->setSound("assets/sound/fx/snoring.ogg", xy::AudioSource::Mode::Stream);
     snoreSound->setFadeInTime(1.f);
-    snoreSound->setFadeOutTime(1.f);
+    snoreSound->setFadeOutTime(0.1f);
     auto snPtr = snoreSound.get();
 
-    mh.id = Message::Animation;
+    mh.id = Message::Player;
     mh.action = [snPtr](xy::Component*, const xy::Message& msg)
     {
-        const auto& data = msg.getData<Message::AnimationEvent>();
-        if (data.id & Message::CatAnimMask) return;
-        else if (data.id == Message::AnimationEvent::Sleep)
+        const auto& data = msg.getData<Message::PlayerEvent>();
+        if (data.action == Message::PlayerEvent::Slept)
         {
             snPtr->play(true);
         }
-        else
+        else if (data.action == Message::PlayerEvent::Woke)
         {
             snPtr->stop();
         }
@@ -1195,6 +1198,7 @@ void WorldClientState::initSounds()
     soundPlayer->addMessageHandler(mh);
 
     entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(clockSound);
     entity->addComponent(daySound);
     entity->addComponent(nightSound);
     entity->addComponent(printerSound);
@@ -1239,32 +1243,3 @@ void WorldClientState::initSounds()
     }
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
 }
-
-//xy::Component::MessageHandler WorldClientState::getVolumeHandler()
-//{
-//    const auto& audioSettings = getContext().appInstance.getAudioSettings();
-//    
-//    xy::Component::MessageHandler volumeHandler;
-//    volumeHandler.id = xy::Message::UIMessage;
-//    volumeHandler.action =
-//        [&audioSettings](xy::Component* component, const xy::Message& msg)
-//    {
-//        const auto& data = msg.getData<xy::Message::UIEvent>();
-//        auto* playerPtr = dynamic_cast<xy::AudioSource*>(component);
-//        switch (data.type)
-//        {
-//        case xy::Message::UIEvent::RequestAudioMute:
-//            playerPtr->setVolume(0.f);
-//            break;
-//        case xy::Message::UIEvent::RequestAudioUnmute:
-//            playerPtr->setVolume(data.value * 100.f);
-//            break;
-//        case xy::Message::UIEvent::RequestVolumeChange:
-//            if (!audioSettings.muted) playerPtr->setVolume(data.value * 100.f);
-//            break;
-//        default: break;
-//        }
-//    };
-//
-//    return std::move(volumeHandler);
-//}
