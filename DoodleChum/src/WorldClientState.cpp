@@ -628,10 +628,10 @@ void WorldClientState::initBud()
     walkSound->setSound("assets/sound/fx/walk.wav");
     walkSound->setFadeInTime(0.1f);
     walkSound->setFadeOutTime(0.1f);
-    auto wsPtr = walkSound.get();
+    auto ptr = walkSound.get();
     xy::Component::MessageHandler mh;
     mh.id = Message::Animation;
-    mh.action = [wsPtr](xy::Component*, const xy::Message& msg)
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id & Message::CatAnimMask) return;
@@ -640,16 +640,16 @@ void WorldClientState::initBud()
         case Message::AnimationEvent::Left:
         case Message::AnimationEvent::Right:
         case Message::AnimationEvent::VacuumWalk:
-            wsPtr->setPitch(1.f);
-            wsPtr->play(true);
+            ptr->setPitch(1.f);
+            ptr->play(true);
             break;
         case Message::AnimationEvent::Up:
         case Message::AnimationEvent::Down:
-            wsPtr->setPitch(0.875f);
-            wsPtr->play(true);
+            ptr->setPitch(0.875f);
+            ptr->play(true);
             break;
         default:
-            wsPtr->stop();
+            ptr->stop();
             break;
         }
     };
@@ -657,31 +657,31 @@ void WorldClientState::initBud()
 
     auto eatSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     eatSound->setSound("assets/sound/fx/eat.wav");
-    auto ePtr = eatSound.get();
-    mh.action = [ePtr](xy::Component*, const xy::Message& msg)
+    ptr = eatSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id & Message::CatAnimMask) return;
         if (data.id == Message::AnimationEvent::Eat)
         {
-            ePtr->play(true);
+            ptr->play(true);
         }
         else
         {
-            ePtr->stop();
+            ptr->stop();
         }
     };
     eatSound->addMessageHandler(mh);
 
     auto drinkSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     drinkSound->setSound("assets/sound/fx/drink.wav");
-    auto dPtr = drinkSound.get();
-    mh.action = [dPtr](xy::Component*, const xy::Message& msg)
+    ptr = drinkSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id == Message::AnimationEvent::Drink)
         {
-            dPtr->play();
+            ptr->play();
         }
     };
     drinkSound->addMessageHandler(mh);
@@ -689,32 +689,26 @@ void WorldClientState::initBud()
     auto waterSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     waterSound->setSound("assets/sound/fx/water_plant.wav");
     waterSound->setFadeOutTime(1.f);
-    auto wPtr = waterSound.get();
-    mh.action = [wPtr](xy::Component*, const xy::Message& msg)
+    ptr = waterSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
-        //if (data.id & Message::CatAnimMask) return;
         if (data.id == Message::AnimationEvent::Water)
         {
-            wPtr->play(/*true*/);
+            ptr->play();
         }
-        /*else
-        {
-            wPtr->stop();
-        }*/
     };
     waterSound->addMessageHandler(mh);
 
     auto feedSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     feedSound->setSound("assets/sound/fx/feed_bella.wav");
-    auto fPtr = feedSound.get();
-    mh.action = [fPtr](xy::Component*, const xy::Message& msg)
+    ptr = feedSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
-        //if (data.id & Message::CatAnimMask) return;
         if (data.id == Message::AnimationEvent::Feed)
         {
-            fPtr->play();
+            ptr->play();
         }
     };
     feedSound->addMessageHandler(mh);
@@ -722,34 +716,47 @@ void WorldClientState::initBud()
     auto scratchSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     scratchSound->setSound("assets/sound/fx/scratch.wav");
     scratchSound->setFadeOutTime(0.5f);
-    auto scPtr = scratchSound.get();
-    mh.action = [scPtr](xy::Component*, const xy::Message& msg)
+    ptr = scratchSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id & Message::CatAnimMask) return;
         if (data.id == Message::AnimationEvent::Scratch)
         {
-            scPtr->play(true);
+            ptr->play(true);
         }
         else
         {
-            scPtr->stop();
+            ptr->stop();
         }
     };
     scratchSound->addMessageHandler(mh);
 
     auto poopSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     poopSound->setSound("assets/sound/fx/call_of_doody.wav");
-    auto pPtr = poopSound.get();
-    mh.action = [pPtr](xy::Component*, const xy::Message& msg)
+    ptr = poopSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::AnimationEvent>();
         if (data.id == Message::AnimationEvent::Poop)
         {
-            pPtr->play();
+            ptr->play();
         }
     };
     poopSound->addMessageHandler(mh);
+
+    auto washSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    washSound->setSound("assets/sound/fx/wash_hands.wav");
+    ptr = washSound.get();
+    mh.action = [ptr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Wash)
+        {
+            ptr->play();
+        }
+    };
+    washSound->addMessageHandler(mh);
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(dwb);
@@ -762,6 +769,7 @@ void WorldClientState::initBud()
     entity->addComponent(feedSound);
     entity->addComponent(scratchSound);
     entity->addComponent(poopSound);
+    entity->addComponent(washSound);
 
     entity->addChild(vacEnt);
 

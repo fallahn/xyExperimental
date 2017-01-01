@@ -177,6 +177,9 @@
     <ClInclude Include="include\VacuumTask.hpp">
       <Filter>Header Files\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="include\WashTask.hpp">
+      <Filter>Header Files\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -300,6 +303,9 @@
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="src\VacuumTask.cpp">
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WashTask.cpp">
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
   </ItemGroup>

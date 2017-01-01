@@ -113,7 +113,8 @@ namespace Message
             Travel,
             CatTask,
             Idle,
-            Vacuum
+            Vacuum,
+            Wash
         }taskName;
     };
 
@@ -132,7 +133,7 @@ namespace Message
             TV,
             Piano,
             Computer,
-            Sleep,
+            Wash,
             Crouch,
             Die,
             Scratch,

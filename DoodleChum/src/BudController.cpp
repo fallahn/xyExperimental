@@ -42,6 +42,7 @@ source distribution.
 #include <MessageIDs.hpp>
 #include <AttributeManager.hpp>
 #include <VacuumTask.hpp>
+#include <WashTask.hpp>
 
 #include <xygine/Entity.hpp>
 #include <xygine/Console.hpp>
@@ -65,7 +66,7 @@ namespace
         12.f, //TV
         12.f, //Piano
         12.f, //Computer
-        0.2f, //sleeping
+        6.f, //washing hands
         1.f, //crouch/sleep
         8.f, //die
         12.f, //scratch
@@ -155,7 +156,26 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             break;
         case Message::TaskEvent::Poop:
             LOG("Bud decided to poop!", xy::Logger::Type::Info);
+            
             m_tasks.emplace_back(std::make_unique<PoopTask>(*m_entity, getMessageBus()));
+            //go wash afterwards
+            {
+                auto washStation = std::find_if(std::begin(m_taskData), std::end(m_taskData),
+                    [](const TaskData& td) 
+                {
+                    return td.id == Message::TaskEvent::Wash;
+                });
+                if (washStation != m_taskData.end())
+                {
+                    m_destinationPosition = washStation->position;
+                    points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+                    m_tasks.emplace_back(std::make_unique<TravelTask>(*m_entity, getMessageBus(), points));
+                    m_currentPosition = m_destinationPosition;
+                    
+                    //add wash task
+                    m_tasks.emplace_back(std::make_unique<WashTask>(*m_entity, getMessageBus()));
+                }
+            }
             break;
         case Message::TaskEvent::Shower:
             LOG("Bud decided to shower!", xy::Logger::Type::Info);

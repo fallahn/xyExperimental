@@ -221,7 +221,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
             break;
         case Message::AnimationEvent::Piano:
         case Message::AnimationEvent::TV:
-        case Message::AnimationEvent::Sleep:
+        case Message::AnimationEvent::Crouch:
             m_borednessModifier = 0.2f;
             break;
         }

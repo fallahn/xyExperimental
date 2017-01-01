@@ -37,7 +37,9 @@ const std::vector<std::string> randomMessages =
     "You have no idea how badly I need to open the window right now.",
     "Face? FACE?? Oh, right, so it is.",
     "It's equally as likely as any other random combination of words.",
+    "select_this, select_that... select what??",
     "Taken out of context anything can be as easily interpreted as anything else whether context is provided or not.",
+    "His name was Doris, he had a beard. I touched it once, it felt weird.",
     "I wish just once I could turn the light off when I go to bed.",
     "I'd have escaped months ago if the door handle wasn't just drawn on.",
     "That Jonny - quite a character!"

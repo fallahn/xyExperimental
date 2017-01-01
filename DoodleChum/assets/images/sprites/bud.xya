@@ -68,9 +68,9 @@
     },
     {
       "Start": 52,
-      "End": 53,
+      "End": 54,
       "Loop": true,
-      "Name": "sleep"
+      "Name": "wash"
     },
     {
       "Start": 55,

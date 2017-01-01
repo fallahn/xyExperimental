@@ -40,4 +40,5 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/VacuumTask.cpp
   ${PROJECT_DIR}/ValueBar.cpp
   ${PROJECT_DIR}/WallClock.cpp
+  ${PROJECT_DIR}/WashTask.cpp
   ${PROJECT_DIR}/WorldClientState.cpp)
