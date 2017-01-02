@@ -77,7 +77,7 @@
     <property name="id" type="int" value="8"/>
    </properties>
   </object>
-  <object id="35" name="wash" x="1376" y="928" width="32" height="32">
+  <object id="35" name="wash" x="1440" y="608" width="32" height="32">
    <properties>
     <property name="id" type="int" value="14"/>
    </properties>

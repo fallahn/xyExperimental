@@ -73,6 +73,7 @@ namespace
     const sf::Vector2f catSize(80.f, 80.f);
     const sf::Vector2f clockSize(80.f, 194.f);
     const sf::Vector2f vacuumSize(127.f, 78.f);
+    const sf::Vector2f showerSize(130.f, 250.f);
 }
 
 using namespace std::placeholders;
@@ -436,6 +437,12 @@ void WorldClientState::initMeshes()
     m_meshRenderer.loadModel(Mesh::Clock, clockQuad);
     auto& clockMat = m_meshRenderer.addMaterial(Material::Clock, xy::Material::Textured, true, true);
     clockMat.addProperty({ "u_maskMap", maskTex });
+
+    //quad for shower
+    xy::QuadBuilder showerQuad(showerSize);
+    m_meshRenderer.loadModel(Mesh::Shower, showerQuad);
+    auto& showerMat = m_meshRenderer.addMaterial(Material::Shower, xy::Material::Textured, true, true);
+    showerMat.addProperty({ "u_maskMap", maskTex });
 }
 
 void WorldClientState::initMapData()
@@ -774,6 +781,25 @@ void WorldClientState::initBud()
     entity->addChild(vacEnt);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    //create the shower here too for proper draw order
+    auto& showerMat = m_meshRenderer.getMaterial(Material::Shower);
+    showerMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/shower_diffuse.png") });
+    auto showerModel = m_meshRenderer.createModel(Mesh::Shower, m_messageBus);
+    showerModel->setBaseMaterial(showerMat);
+    showerModel->setPosition({ 0.f, -showerSize.y / 2.f, 18.f });
+
+    entity = xy::Entity::create(m_messageBus);
+    entity->addComponent(showerModel);
+    auto showerTask = std::find_if(std::begin(m_tasks), std::end(m_tasks), [](const TaskData& td)
+    {
+        return td.id == Message::TaskEvent::Shower;
+    });
+    if (showerTask != m_tasks.end())
+    {
+        entity->setPosition(showerTask->worldPosition);
+        m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    }
 }
 
 void WorldClientState::initCat()

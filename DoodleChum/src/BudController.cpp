@@ -76,7 +76,7 @@ namespace
         1.f //vacuum still
     };
 
-    const float maxSleepTime = 300.f;
+    const float maxSleepTime = 150.f;
 }
 
 BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const PathFinder& pf,
@@ -318,60 +318,80 @@ void BudController::addConCommands()
 {
     xy::Console::addCommand("eat", [this](const std::string&)
     {
+        if(m_tasks.size() > 1) m_tasks.pop_back(); //skip thinking, we're forcing what to do
+        
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Eat;
     }, this);
 
     xy::Console::addCommand("drink", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Drink;
     }, this);
 
     xy::Console::addCommand("poop", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Poop;
     }, this);
 
     xy::Console::addCommand("watch_tv", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::WatchTV;
     }, this);
 
     xy::Console::addCommand("shower", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Shower;
     }, this);
 
     xy::Console::addCommand("sleep", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Sleep;
     }, this);
 
     xy::Console::addCommand("play_music", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::PlayMusic;
     }, this);
 
     xy::Console::addCommand("play_piano", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::PlayPiano;
     }, this);
 
     xy::Console::addCommand("play_computer", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::PlayComputer;
     }, this);
 
     xy::Console::addCommand("idle", [this](const std::string&)
     {
+        if (m_tasks.size() > 1) m_tasks.pop_back();
+
         auto msg = getMessageBus().post<Message::TaskEvent>(Message::NewTask);
         msg->taskName = Message::TaskEvent::Idle;
     }, this);

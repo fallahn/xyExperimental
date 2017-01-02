@@ -45,7 +45,8 @@ namespace Mesh
         Walls,
         Cat,
         Clock,
-        Vacuum
+        Vacuum,
+        Shower
     };
 }
 
@@ -63,7 +64,8 @@ namespace Material
         Walls,
         Cat,
         Clock,
-        Vaccum
+        Vaccum,
+        Shower
     };
 }
 
