@@ -165,7 +165,7 @@ void MenuState::buildHelp()
     auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/start_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(xy::DefaultSceneSize.x / 2.f, 820.f);
-    button->setText("Continue...");
+    button->setString("Continue...");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
@@ -180,7 +180,7 @@ void MenuState::buildHelp()
     button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(720.f, 820.f);
-    button->setText("Quit");
+    button->setString("Quit");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
@@ -191,7 +191,7 @@ void MenuState::buildHelp()
     button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(1200.f, 820.f);
-    button->setText("Options");
+    button->setString("Options");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
@@ -215,7 +215,7 @@ void MenuState::buildOptions()
     
     auto soundSlider = std::make_shared<xy::UI::Slider>(m_font, m_textureResource.get("assets/images/ui/slider_handle.png"), 375.f);
     soundSlider->setPosition(640.f, 604.f);
-    soundSlider->setText("Volume");
+    soundSlider->setString("Volume");
     soundSlider->setTextColour(sf::Color::Black);
     soundSlider->setBarColour(sf::Color::Black);
     soundSlider->setMaxValue(1.f);
@@ -232,7 +232,7 @@ void MenuState::buildOptions()
 
     auto muteCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
     muteCheckbox->setPosition(1110.f, 534.f);
-    muteCheckbox->setText("Mute");
+    muteCheckbox->setString("Mute");
     muteCheckbox->setTextColour(sf::Color::Black);
     muteCheckbox->addCallback([this, soundSlider](const xy::UI::CheckBox* checkBox)
     {
@@ -267,14 +267,14 @@ void MenuState::buildOptions()
 
     auto fullscreenCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
     fullscreenCheckbox->setPosition(1110.f, 604.f);
-    fullscreenCheckbox->setText("Full Screen");
+    fullscreenCheckbox->setString("Full Screen");
     fullscreenCheckbox->setTextColour(sf::Color::Black);
     fullscreenCheckbox->check((getContext().appInstance.getVideoSettings().WindowStyle & sf::Style::Fullscreen) != 0);
     m_optionContainer.addControl(fullscreenCheckbox);
 
     auto shadowCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
     shadowCheckbox->setPosition(1110.f, 684.f);
-    shadowCheckbox->setText("Shadow Maps");
+    shadowCheckbox->setString("Shadow Maps");
     shadowCheckbox->setTextColour(sf::Color::Black);
     shadowCheckbox->check(true);
     shadowCheckbox->addCallback([this](const xy::UI::CheckBox*)
@@ -287,7 +287,7 @@ void MenuState::buildOptions()
 
 
     auto applyButton = std::make_shared<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
-    applyButton->setText("Apply");
+    applyButton->setString("Apply");
     applyButton->setTextColour(sf::Color::Black);
     applyButton->setAlignment(xy::UI::Alignment::Centre);
     applyButton->setPosition(xy::DefaultSceneSize.x / 2.f, 820.f);
@@ -306,7 +306,7 @@ void MenuState::buildOptions()
     auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(720.f, 820.f);
-    button->setText("Back");
+    button->setString("Back");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
@@ -317,7 +317,7 @@ void MenuState::buildOptions()
     button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(1200.f, 820.f);
-    button->setText("Credits");
+    button->setString("Credits");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {
@@ -374,7 +374,7 @@ void MenuState::buildCredits()
     auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(720.f, 820.f);
-    button->setText("Back");
+    button->setString("Back");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
     {

@@ -54,7 +54,7 @@ void VacuumController::onStart(xy::Entity& entity)
 {
     m_model = entity.getComponent<xy::Model>();
     XY_ASSERT(m_model, "entity has no model!");
-    m_initialPosition = m_model->getTranslation();
+    m_initialPosition = m_model->getPosition();
 
     auto audio = entity.getComponents<xy::AudioSource>();
     m_audioLoop = audio[0];

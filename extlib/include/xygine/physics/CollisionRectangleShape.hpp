@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2014 - 2017
 http://trederia.blogspot.com
 
 xygine - Zlib license.
@@ -55,6 +55,17 @@ namespace xy
             \param position Position of the box relative to the parent body
             */
             CollisionRectangleShape(const sf::Vector2f& size, const sf::Vector2f& position = sf::Vector2f());
+
+            /*!
+            \brief Creates a box from a size.
+            
+            When attached to a rigidbody the position is relative to its parent,
+            else it is in world coordinates
+            
+            \param sf::FloatRect an sf::FloatRect representing the size and position of the
+            */
+            CollisionRectangleShape(const sf::FloatRect& size);
+
             ~CollisionRectangleShape() = default;
             CollisionRectangleShape(const CollisionRectangleShape&);
             const CollisionRectangleShape& operator = (const CollisionRectangleShape&) = delete;

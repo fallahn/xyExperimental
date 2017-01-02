@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2014 - 2017
 http://trederia.blogspot.com
 
 xygine - Zlib license.
@@ -144,7 +144,7 @@ namespace xy
         /*!
         \brief Sets the maximum volume for this sound source
 
-        \param float new maximum volume. Must be between 0 and 100
+        \param float new maximum volume. Must be between 0 and 1
         */
         void setVolume(float);
         /*!

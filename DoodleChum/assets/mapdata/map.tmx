@@ -129,7 +129,7 @@
     <property name="id" type="int" value="104"/>
    </properties>
   </object>
-  <object id="32" name="water plant" x="800" y="288" width="32" height="32">
+  <object id="32" name="water plant" x="768" y="288" width="32" height="32">
    <properties>
     <property name="animation" type="int" value="15"/>
    </properties>

@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2014 - 2017
 http://trederia.blogspot.com
 
 xygine - Zlib license.
@@ -100,9 +100,9 @@ namespace xy
             */
             void addCallback(const Callback& c);
             /*!
-            \brief Sets the button's text
+            \brief Sets the button's text's string
             */
-            void setText(const std::string& text);
+            void setString(const std::string& text);
             /*!
             \brief Sets the colours of the button's text
             */

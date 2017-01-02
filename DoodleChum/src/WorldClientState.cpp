@@ -1024,7 +1024,7 @@ void WorldClientState::initSounds()
         const auto& data = msg.getData<Message::TODEvent>();
         if (!audioSettings.muted)
         {
-            dsPtr->setVolume(100.f * audioSettings.volume * data.sunIntensity);
+            dsPtr->setVolume(audioSettings.volume * data.sunIntensity);
         }
     };
     daySound->addMessageHandler(mh);
@@ -1040,7 +1040,7 @@ void WorldClientState::initSounds()
         const auto& data = msg.getData<Message::TODEvent>();
         if (!audioSettings.muted)
         {
-            nsPtr->setVolume(100.f * audioSettings.volume * (1.f - data.sunIntensity));
+            nsPtr->setVolume(audioSettings.volume * (1.f - data.sunIntensity));
         }
     };
     nightSound->addMessageHandler(mh);

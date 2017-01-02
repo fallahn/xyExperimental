@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2014 - 2016
+Matt Marchant 2014 - 2017
 http://trederia.blogspot.com
 
 xygine - Zlib license.
@@ -139,7 +139,7 @@ namespace xy
             /*!
             \brief Set the text string of the slider
             */
-            void setText(const std::string& text);
+            void setString(const std::string& text);
             /*!
             \brief Set the colour of the slider text
             */
