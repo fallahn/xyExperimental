@@ -143,6 +143,42 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
         case sf::Keyboard::Pause:
             requestStackPush(States::ID::Menu);
             break;
+        case sf::Keyboard::Up:
+        case sf::Keyboard::Numpad8:
+        {
+            xy::Command cmd;
+            cmd.category = Command::TopTab;
+            cmd.action = [](xy::Entity& ent, float)
+            {
+                ent.getComponent<TabComponent>()->toggle();
+            };
+            m_scene.sendCommand(cmd);
+        }
+            break;
+        case sf::Keyboard::Left:
+        case sf::Keyboard::Numpad4:
+        {
+            xy::Command cmd;
+            cmd.category = Command::LeftTab;
+            cmd.action = [](xy::Entity& ent, float)
+            {
+                ent.getComponent<TabComponent>()->toggle();
+            };
+            m_scene.sendCommand(cmd);
+        }
+            break;
+        case sf::Keyboard::Right:
+        case sf::Keyboard::Numpad6:
+        {
+            xy::Command cmd;
+            cmd.category = Command::RightTab;
+            cmd.action = [](xy::Entity& ent, float)
+            {
+                ent.getComponent<TabComponent>()->toggle();
+            };
+            m_scene.sendCommand(cmd);
+        }
+            break;
         }
     }
     else if (evt.type == sf::Event::MouseButtonReleased)
@@ -926,6 +962,7 @@ void WorldClientState::initUI()
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(leftTab);
     entity->addComponent(personalTab);
+    entity->addCommandCategories(Command::LeftTab);
     entity->setPosition(-tabWidth, 0.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
     
@@ -935,6 +972,7 @@ void WorldClientState::initUI()
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(rightTab);
     entity->addComponent(householdTab);
+    entity->addCommandCategories(Command::RightTab);
     entity->setPosition(xy::DefaultSceneSize.x + tabWidth, 0.f);
     entity->setScale(-1.f, 1.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
@@ -945,6 +983,7 @@ void WorldClientState::initUI()
     entity = xy::Entity::create(m_messageBus);
     entity->addComponent(topTab);
     entity->addComponent(timeInfo);
+    entity->addCommandCategories(Command::TopTab);
     entity->setPosition(0.f, -tabHeight);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
 

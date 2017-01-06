@@ -121,15 +121,7 @@ TabComponent::TabComponent(xy::MessageBus& mb, const sf::Vector2f& size, Directi
             sf::Vector2f localPoint = m_entity->getWorldTransform().getInverse().transformPoint(data.positionX, data.positionY);
             if(m_tabBounds.contains(localPoint))
             {
-                if (!m_moving)
-                {
-                    m_distanceRemaining = m_travelDistance;
-                    m_velocity = -m_velocity;
-                    m_moving = true;
-
-                    auto toggleMsg = sendMessage<Message::InterfaceEvent>(Message::Interface);
-                    toggleMsg->type = Message::InterfaceEvent::TabToggled;
-                }
+                toggle();
             }
         }
     };
@@ -159,6 +151,19 @@ void TabComponent::entityUpdate(xy::Entity& entity, float dt)
         }
 
         entity.move(m_velocity * entity.getScale() * distance);
+    }
+}
+
+void TabComponent::toggle()
+{
+    if (!m_moving)
+    {
+        m_distanceRemaining = m_travelDistance;
+        m_velocity = -m_velocity;
+        m_moving = true;
+
+        auto toggleMsg = sendMessage<Message::InterfaceEvent>(Message::Interface);
+        toggleMsg->type = Message::InterfaceEvent::TabToggled;
     }
 }
 

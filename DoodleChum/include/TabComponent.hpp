@@ -52,6 +52,8 @@ public:
 
     sf::FloatRect globalBounds() const override { return m_globalBounds; }
 
+    void toggle();
+
 private:
 
     bool m_moving;

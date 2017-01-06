@@ -49,10 +49,13 @@ namespace Command
 {
     enum ID
     {
-        Vacuum = 0x8,
+        Vacuum      = 0x8,
         MusicPlayer = 0x10,
         PianoPlayer = 0x20,
-        TVAudio = 0x40
+        TVAudio     = 0x40,
+        LeftTab     = 0x80,
+        TopTab      = 0x100,
+        RightTab    = 0x200
     };
 }
 
