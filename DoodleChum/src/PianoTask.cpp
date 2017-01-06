@@ -38,12 +38,15 @@ source distribution.
 namespace 
 {
     const sf::Vector2f offset(50.f, -100.f);
+    const float minMusicDuration = 30.f;
+    const float maxMusicDuration = 360.f;
 }
 
-PianoTask::PianoTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position)
-    : Task      (e, mb),
-    m_time      (48.f),
-    m_position  (position + offset)
+PianoTask::PianoTask(xy::Entity& e, xy::MessageBus& mb, const sf::Vector2f& position, bool playFull)
+    : Task          (e, mb),
+    m_time          (48.f),
+    m_position      (position + offset),
+    m_playFullTrack (playFull)
 {
 
 }
@@ -65,18 +68,11 @@ void PianoTask::onStart()
     cmd.action = [this](xy::Entity& entity, float)
     {
         auto musics = entity.getComponents<xy::AudioSource>();
-        if (musics.size() == 1)
-        {
-            musics[0]->play();
-            m_time = musics[0]->getDuration();
-        }
-        else
-        {
-            auto idx = xy::Util::Random::value(0, musics.size() - 1);
-            musics[idx]->play();
-            m_time = musics[idx]->getDuration();
-        }
-        m_time = std::min(m_time, 180.f); //limit to 3 minutes
+
+        auto idx = (musics.size() == 1) ? 0 : xy::Util::Random::value(0, musics.size() - 1);
+        musics[idx]->play();
+        m_time = (m_playFullTrack) ? musics[idx]->getDuration() : minMusicDuration;
+        m_time = std::min(m_time, maxMusicDuration); //limit to 6 minutes
     };
     getEntity().getScene()->sendCommand(cmd);
 

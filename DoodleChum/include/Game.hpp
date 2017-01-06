@@ -29,7 +29,7 @@ source distribution.
 #define GAME_HPP_
 
 #include <xygine/App.hpp>
-
+#include <xygine/util/ConfigFile.hpp>
 #include <xygine/Resource.hpp>
 
 class Game final : public xy::App
@@ -47,6 +47,8 @@ private:
     //load the resources for the menu in here so pushing menu state loads reasonably quickly
     xy::TextureResource m_textureResource;
     xy::FontResource m_fontResource;
+
+    xy::Util::ConfigFile m_config;
 
     void handleEvent(const sf::Event&) override;
     void handleMessage(const xy::Message&) override;

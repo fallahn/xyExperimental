@@ -194,8 +194,10 @@ namespace Message
         enum
         {
             ToggleShadowMapping,
+            ToggleFullTrack,
             ResetGame
         }action;
+        bool value = false;
     };
 }
 

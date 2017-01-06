@@ -38,6 +38,8 @@ source distribution.
 namespace
 {
     float gameSpeed = 1.f;
+
+    const std::string cfgName("default.xfg");
 }
 
 Game::Game()
@@ -102,6 +104,14 @@ void Game::draw()
 
 void Game::initialise()
 {    
+    //check config
+    if (!m_config.load(cfgName))
+    {
+        m_config.insert("play_full_tracks", false);
+        m_config.insert("use_shadowmapping", true);
+        m_config.save(cfgName);
+    }
+    
     //preload the resources for the menu
     m_textureResource.get("assets/images/ui/menu_background.png");
     m_textureResource.get("assets/images/ui/menu_tabs.png");
@@ -125,11 +135,13 @@ void Game::finalise()
 {
     m_stateStack.clearStates();
     m_stateStack.applyPendingChanges();
+
+    m_config.save(cfgName);
 }
 
 void Game::registerStates()
 {
     m_stateStack.registerState<IntroState>(States::ID::Intro);
     m_stateStack.registerState<WorldClientState>(States::ID::WorldClient);
-    m_stateStack.registerState<MenuState>(States::ID::Menu, m_fontResource.get("assets/fonts/FallahnHand.ttf"), m_textureResource);
+    m_stateStack.registerState<MenuState>(States::ID::Menu, m_fontResource.get("assets/fonts/FallahnHand.ttf"), m_textureResource, m_config);
 }

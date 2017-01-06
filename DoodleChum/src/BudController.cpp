@@ -87,6 +87,7 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
     m_pathFinder    (pf),
     m_taskData      (taskData),
     m_taskIdleData  (idleData),
+    m_playFullTrack (false),
     m_spriteSheet   (spriteSheet)
 {
     //set up render texture ready for animations
@@ -196,12 +197,12 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         case Message::TaskEvent::PlayPiano:
             LOG("Bud decided to play piano!", xy::Logger::Type::Info);
             //animation
-            m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus(), particlePos));
+            m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus(), particlePos, m_playFullTrack));
             break;
         case Message::TaskEvent::PlayMusic:
             LOG("Bud decided to play music!", xy::Logger::Type::Info);
             //dancing animation with note particle effect
-            m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus(), particlePos));
+            m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus(), particlePos, m_playFullTrack));
             break;
         case Message::TaskEvent::PlayComputer:
             LOG("Bud decided to play computer!", xy::Logger::Type::Info);
@@ -222,6 +223,17 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         if (data.action == Message::PlayerEvent::Died)
         {
             m_tasks.clear();
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::System;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::SystemEvent>();
+        if (data.action == Message::SystemEvent::ToggleFullTrack)
+        {
+            m_playFullTrack = data.value;
         }
     };
     addMessageHandler(mh);

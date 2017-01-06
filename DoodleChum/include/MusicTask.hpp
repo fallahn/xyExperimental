@@ -33,7 +33,7 @@ source distribution.
 class MusicTask final : public Task
 {
 public:
-    MusicTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&);
+    MusicTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&, bool);
     ~MusicTask() = default;
 
     void onStart() override;
@@ -42,6 +42,7 @@ public:
 private:
     float m_time;
     sf::Vector2f m_position;
+    bool m_playFullTrack;
 };
 
 #endif //DC_MUSIC_TASK_HPP_

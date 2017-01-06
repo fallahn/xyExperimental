@@ -85,7 +85,10 @@ RoomLightController::RoomLightController(xy::MessageBus& mb)
     mh.action = [this](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::SystemEvent>();
-        if (data.action == Message::SystemEvent::ToggleShadowMapping) toggleShadowMap();
+        if (data.action == Message::SystemEvent::ToggleShadowMapping)
+        {
+            toggleShadowMap(data.value);
+        }
     };
     addMessageHandler(mh);
 }
@@ -114,10 +117,10 @@ void RoomLightController::onStart(xy::Entity& entity)
     m_entity = &entity;
 }
 
-void RoomLightController::toggleShadowMap()
+void RoomLightController::toggleShadowMap(bool v)
 {
     XY_ASSERT(m_light, "controller not init yet");
-    if (!m_light->castShadows())
+    if (v)
     {
         intensityMultiplier = 9.f;
         m_light->enableShadowCasting(true);

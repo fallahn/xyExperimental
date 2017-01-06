@@ -37,10 +37,18 @@ source distribution.
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
+namespace xy
+{
+    namespace Util
+    {
+        class ConfigFile;
+    }
+}
+
 class MenuState final : public xy::State
 {
 public:
-    MenuState(xy::StateStack&, Context, const sf::Font&, xy::TextureResource&);
+    MenuState(xy::StateStack&, Context, const sf::Font&, xy::TextureResource&, xy::Util::ConfigFile&);
     ~MenuState() = default;
 
     bool handleEvent(const sf::Event&) override;
@@ -54,6 +62,7 @@ private:
     xy::MessageBus& m_messageBus;
     xy::TextureResource& m_textureResource;
     const sf::Font& m_font;
+    xy::Util::ConfigFile& m_config;
 
     xy::UI::Container m_helpContainer;
     xy::UI::Container m_optionContainer;
