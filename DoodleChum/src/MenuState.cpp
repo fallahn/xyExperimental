@@ -36,6 +36,7 @@ source distribution.
 #include <xygine/ui/Slider.hpp>
 #include <xygine/ui/Selection.hpp>
 #include <xygine/ui/Label.hpp>
+#include <xygine/ui/Marquee.hpp>
 #include <xygine/util/ConfigFile.hpp>
 
 #include <SFML/Window/Event.hpp>
@@ -208,6 +209,18 @@ void MenuState::buildHelp()
         m_currentContainer = &m_optionContainer;
     });
     m_helpContainer.addControl(button);
+
+    auto marquee = xy::UI::create<xy::UI::Marquee>(m_font, sf::Vector2u(800, 50));
+    marquee->setAlignment(xy::UI::Alignment::Centre);
+    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 760.f);
+    marquee->setTextColour(sf::Color::Black);
+    marquee->setScrollSpeed(100.f);
+    marquee->addString("Make sure to check up on Bob regularly!");
+    marquee->addString("Tip: you can use the arrow keys or the numpad to open the side tabs");
+    marquee->addString("Dont like Bobs music? Place your own in the music folder and Bob will play something you do like!");
+    marquee->addString("Tip: You can return to this menu at any time by pressing P, Pause or Escape");
+    marquee->addString("Tip: if you dont want to listen to the entire musical reptoire, then disable playing the full track in the options menu");
+    m_helpContainer.addControl(marquee);
 }
 
 void MenuState::buildOptions()
@@ -407,4 +420,13 @@ void MenuState::buildCredits()
         m_currentContainer = &m_optionContainer;
     });
     m_creditsContainer.addControl(button);
+
+    auto marquee = xy::UI::create<xy::UI::Marquee>(m_font, sf::Vector2u(800, 50));
+    marquee->setAlignment(xy::UI::Alignment::Centre);
+    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 760.f);
+    marquee->setTextColour(sf::Color::Black);
+    marquee->setScrollSpeed(100.f);
+    marquee->addString("Special mention goes to: Jonny for his contributions to xygine, Doris for the exemplary xygine logo, Naomi for all her patience, Jo & Jamz for the creative input");
+    marquee->addString("And not to forget Malone and Jon for being just plain wonderful people!");
+    m_creditsContainer.addControl(marquee);
 }
