@@ -304,6 +304,7 @@ void BudController::initSprite()
     m_sprite->playAnimation(Message::AnimationEvent::Idle);
 
     m_texture.create(frameSize.x, frameSize.y);
+    //m_texture.setSmooth(true);
 
     //add a message handler to respond to animation changes
     xy::Component::MessageHandler mh;

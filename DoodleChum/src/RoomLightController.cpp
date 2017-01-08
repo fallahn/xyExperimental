@@ -39,8 +39,9 @@ namespace
 {
     const float bobOffset = 180.f; //make position near his head
 
-    float intensityMultiplier = 6.f; //this is used to increase brightness of lights when shadow maps are enabled
-
+    const float shadowMapIntensity = 6.f;
+    float intensityMultiplier = shadowMapIntensity; //this is used to increase brightness of lights when shadow maps are enabled
+    
     const sf::Vector2f radius(400.f, 128.f);
     bool contains(sf::Vector2f point, sf::Vector2f ellipse)
     {
@@ -122,7 +123,7 @@ void RoomLightController::toggleShadowMap(bool v)
     XY_ASSERT(m_light, "controller not init yet");
     if (v)
     {
-        intensityMultiplier = 9.f;
+        intensityMultiplier = shadowMapIntensity;
         m_light->enableShadowCasting(true);
     }
     else

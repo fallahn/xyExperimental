@@ -85,6 +85,14 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene),
     m_attribManager         (m_messageBus)
 {
+    auto& loadingTex = m_textureResource.get("assets/images/sprites/bud.png");
+    loadingTex.setRepeated(true);
+    m_loadingSprite.setTexture(loadingTex);
+    sf::IntRect spriteRect(0, 704, 32, 64);
+    m_loadingSprite.setTextureRect(spriteRect);
+    m_loadingSprite.move(40.f, 40.f);
+    m_loadingSprite.setScale(3.f, 3.f);
+
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
 
@@ -120,6 +128,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     msg->stateID = States::ID::Menu;
 
     quitLoadingScreen();
+    
+    context.renderWindow.setTitle("DoodleBob!");
 }
 
 //public
@@ -374,6 +384,7 @@ void WorldClientState::initMeshes()
     moreFurnitureMat.addProperty({ "u_maskMap", maskTex });
     moreFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
     moreFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+    m_textureResource.get("assets/images/textures/furniture2_diffuse.png").setSmooth(true);
 
     auto moreFurnitureModel = m_meshRenderer.createModel(Mesh::MoreFurniture, m_messageBus);
     moreFurnitureModel->setBaseMaterial(moreFurnitureMat);
@@ -389,6 +400,7 @@ void WorldClientState::initMeshes()
     thirdFurnitureMat.addProperty({ "u_maskMap", tvAnimator->getMaskTexture() });
     thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
     thirdFurnitureMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+    m_textureResource.get("assets/images/textures/furniture3_diffuse.png").setSmooth(true);
 
     auto thirdFurnitureModel = m_meshRenderer.createModel(Mesh::ThirdFurniture, m_messageBus);
     thirdFurnitureModel->setBaseMaterial(thirdFurnitureMat);
@@ -821,6 +833,7 @@ void WorldClientState::initBud()
     //create the shower here too for proper draw order
     auto& showerMat = m_meshRenderer.getMaterial(Material::Shower);
     showerMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/shower_diffuse.png") });
+
     auto showerModel = m_meshRenderer.createModel(Mesh::Shower, m_messageBus);
     showerModel->setBaseMaterial(showerMat);
     showerModel->setPosition({ 0.f, -showerSize.y / 2.f, 18.f });
@@ -1315,4 +1328,27 @@ void WorldClientState::initSounds()
         }
     }
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}
+
+namespace
+{
+    //used in loading screen update
+    const float frameTime = 1.f / 12.f;
+    float currentTime = 0.f;
+
+    const int increment = 32;
+}
+
+void WorldClientState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
+{
+    rw.draw(m_loadingSprite);
+
+    currentTime += dt;
+    if (currentTime > frameTime)
+    {
+        currentTime = 0.f;
+        auto rect = m_loadingSprite.getTextureRect();
+        rect.left += increment;
+        m_loadingSprite.setTextureRect(rect);
+    }
 }

@@ -77,6 +77,9 @@ private:
     void initParticles();
     void initUI();
     void initSounds();
+
+    sf::Sprite m_loadingSprite;
+    void updateLoadingScreen(float, sf::RenderWindow&) override;
 };
 
 #endif //DC_WORLD_CLIENT_STATE_HPP_
