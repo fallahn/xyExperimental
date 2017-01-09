@@ -88,10 +88,10 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     auto& loadingTex = m_textureResource.get("assets/images/sprites/bud.png");
     loadingTex.setRepeated(true);
     m_loadingSprite.setTexture(loadingTex);
-    sf::IntRect spriteRect(0, 704, 32, 64);
+    sf::IntRect spriteRect(1024, 1280, 128, 256);
     m_loadingSprite.setTextureRect(spriteRect);
     m_loadingSprite.move(40.f, 40.f);
-    m_loadingSprite.setScale(3.f, 3.f);
+    //m_loadingSprite.setScale(3.f, 3.f);
 
     launchLoadingScreen();
     m_scene.setView(context.defaultView);
@@ -1336,7 +1336,12 @@ namespace
     const float frameTime = 1.f / 12.f;
     float currentTime = 0.f;
 
-    const int increment = 32;
+    std::size_t idx = 0;
+    std::array<int, 8> offsets = 
+    {
+        1024, 1152, 1280, 1408,
+        1536, 1664, 1792, 1920
+    };
 }
 
 void WorldClientState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
@@ -1347,8 +1352,9 @@ void WorldClientState::updateLoadingScreen(float dt, sf::RenderWindow& rw)
     if (currentTime > frameTime)
     {
         currentTime = 0.f;
+        idx = (idx + 1) % 8;
         auto rect = m_loadingSprite.getTextureRect();
-        rect.left += increment;
+        rect.left = offsets[idx];
         m_loadingSprite.setTextureRect(rect);
     }
 }
