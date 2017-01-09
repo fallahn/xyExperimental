@@ -69,7 +69,7 @@ source distribution.
 
 namespace
 {
-    const sf::Vector2f budSize(100.f, 200.f);
+    const sf::Vector2f bobSize(100.f, 200.f);
     const sf::Vector2f catSize(80.f, 80.f);
     const sf::Vector2f clockSize(80.f, 194.f);
     const sf::Vector2f vacuumSize(127.f, 78.f);
@@ -85,7 +85,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene),
     m_attribManager         (m_messageBus)
 {
-    auto& loadingTex = m_textureResource.get("assets/images/sprites/bud.png");
+    auto& loadingTex = m_textureResource.get("assets/images/sprites/bob.png");
     loadingTex.setRepeated(true);
     m_loadingSprite.setTexture(loadingTex);
     sf::IntRect spriteRect(1024, 1280, 128, 256);
@@ -467,12 +467,12 @@ void WorldClientState::initMeshes()
     m_meshRenderer.addMaterial(Material::Vaccum, xy::Material::Textured, true, true);
     
     //quad for player
-    xy::QuadBuilder qb(budSize);
-    m_meshRenderer.loadModel(Mesh::Bud, qb);
+    xy::QuadBuilder qb(bobSize);
+    m_meshRenderer.loadModel(Mesh::Bob, qb);
     
     m_textureResource.setFallbackColour({ 127, 127, 255 });
-    auto& budMat = m_meshRenderer.addMaterial(Material::Bud, xy::Material::Textured/*Bumped*/, true, true);
-    budMat.addProperty({ "u_maskMap", maskTex });
+    auto& bobMat = m_meshRenderer.addMaterial(Material::Bob, xy::Material::Textured/*Bumped*/, true, true);
+    bobMat.addProperty({ "u_maskMap", maskTex });
 
     //quad for cat
     xy::QuadBuilder cq(catSize);
@@ -667,14 +667,14 @@ void WorldClientState::initBud()
     
     //bob
     auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder,
-        m_tasks, m_idleTasks, m_textureResource.get("assets/images/sprites/bud.png"));
+        m_tasks, m_idleTasks, m_textureResource.get("assets/images/sprites/bob.png"));
 
-    auto& material = m_meshRenderer.getMaterial(Material::Bud);
+    auto& material = m_meshRenderer.getMaterial(Material::Bob);
     material.addProperty({ "u_diffuseMap", controller->getTexture() });
 
-    auto dwb = m_meshRenderer.createModel(Mesh::Bud, m_messageBus);
+    auto dwb = m_meshRenderer.createModel(Mesh::Bob, m_messageBus);
     dwb->setBaseMaterial(material);
-    dwb->setPosition({ 0.f, -((budSize.y / 2.f) - 6.f), 4.f });
+    dwb->setPosition({ 0.f, -((bobSize.y / 2.f) - 6.f), 4.f });
 
     const auto& thinkTex = m_textureResource.get("assets/images/ui/think_bubble.png");
     auto thinkBubble = xy::Component::create<ThinkBubble>(m_messageBus, thinkTex);

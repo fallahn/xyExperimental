@@ -148,15 +148,15 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             }
             break;
         case Message::TaskEvent::Eat:
-            LOG("Bud decided to eat!", xy::Logger::Type::Info);
+            LOG("Bob decided to eat!", xy::Logger::Type::Info);
             m_tasks.emplace_back(std::make_unique<EatTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Drink:
-            LOG("Bud decided to drink!", xy::Logger::Type::Info);
+            LOG("Bob decided to drink!", xy::Logger::Type::Info);
             m_tasks.emplace_back(std::make_unique<DrinkTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::Poop:
-            LOG("Bud decided to poop!", xy::Logger::Type::Info);
+            LOG("Bob decided to poop!", xy::Logger::Type::Info);
             
             m_tasks.emplace_back(std::make_unique<PoopTask>(*m_entity, getMessageBus()));
             //go wash afterwards
@@ -179,33 +179,33 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
             }
             break;
         case Message::TaskEvent::Shower:
-            LOG("Bud decided to shower!", xy::Logger::Type::Info);
+            LOG("Bob decided to shower!", xy::Logger::Type::Info);
             //scale 0, steam particle effect
             m_tasks.emplace_back(std::make_unique<ShowerTask>(*m_entity, getMessageBus(), particlePos));
             break;
         case Message::TaskEvent::Sleep:
-            LOG("Bud decided to sleep!", xy::Logger::Type::Info);
+            LOG("Bob decided to sleep!", xy::Logger::Type::Info);
             {
                 float time = (m_attribManager.getPersonalAttribs()[AttribManager::Personal::Tiredness].second / 100.f) * maxSleepTime;
                 m_tasks.emplace_back(std::make_unique<SleepTask>(*m_entity, getMessageBus(), particlePos, time));
             }
             break;
         case Message::TaskEvent::WatchTV:
-            LOG("Bud decided to watch TV!", xy::Logger::Type::Info);
+            LOG("Bob decided to watch TV!", xy::Logger::Type::Info);
             m_tasks.emplace_back(std::make_unique<TVTask>(*m_entity, getMessageBus()));
             break;
         case Message::TaskEvent::PlayPiano:
-            LOG("Bud decided to play piano!", xy::Logger::Type::Info);
+            LOG("Bob decided to play piano!", xy::Logger::Type::Info);
             //animation
             m_tasks.emplace_back(std::make_unique<PianoTask>(*m_entity, getMessageBus(), particlePos, m_playFullTrack));
             break;
         case Message::TaskEvent::PlayMusic:
-            LOG("Bud decided to play music!", xy::Logger::Type::Info);
+            LOG("Bob decided to play music!", xy::Logger::Type::Info);
             //dancing animation with note particle effect
             m_tasks.emplace_back(std::make_unique<MusicTask>(*m_entity, getMessageBus(), particlePos, m_playFullTrack));
             break;
         case Message::TaskEvent::PlayComputer:
-            LOG("Bud decided to play computer!", xy::Logger::Type::Info);
+            LOG("Bob decided to play computer!", xy::Logger::Type::Info);
             //probably recycle piano animation
             m_tasks.emplace_back(std::make_unique<ComputerTask>(*m_entity, getMessageBus()));
             break;
@@ -275,7 +275,7 @@ void BudController::onStart(xy::Entity& entity)
         auto msg = sendMessage<Message::PlayerEvent>(Message::Player);
         msg->action = Message::PlayerEvent::Died;
     }
-    else //place a ThinkTask on stack first so bud decides what to do
+    else //place a ThinkTask on stack first so bob decides what to do
     {
         m_tasks.emplace_back(std::make_unique<ThinkTask>(entity, getMessageBus(), m_attribManager));
     }
@@ -296,7 +296,7 @@ void BudController::onDelayedStart(xy::Entity& entity)
 void BudController::initSprite()
 {   
     m_sprite = xy::Component::create<xy::AnimatedDrawable>(getMessageBus(), m_spriteSheet);
-    m_sprite->loadAnimationData("assets/images/sprites/bud.xya");
+    m_sprite->loadAnimationData("assets/images/sprites/bob.xya");
 
     auto frameSize = m_sprite->getFrameSize();
     m_sprite->setScale(1.f, -1.f);

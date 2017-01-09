@@ -118,6 +118,6 @@
   "FrameCount": 128,
   "FrameSize": "128, 256",
   "FrameRate": 14.0,
-  "Texture": "bud.png",
+  "Texture": "bob.png",
   "NormalMap": "none.png"
 }

@@ -36,7 +36,7 @@ namespace Mesh
     {
         Haus = 0,
         Background,
-        Bud,
+        Bob,
         Furniture,
         MoreFurniture,
         ThirdFurniture,
@@ -56,7 +56,7 @@ namespace Material
     {
         Haus = 0,
         Background,
-        Bud,
+        Bob,
         Furniture,
         MoreFurniture,
         ThirdFurniture,
