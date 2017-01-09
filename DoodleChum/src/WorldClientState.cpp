@@ -74,6 +74,8 @@ namespace
     const sf::Vector2f clockSize(80.f, 194.f);
     const sf::Vector2f vacuumSize(127.f, 78.f);
     const sf::Vector2f showerSize(130.f, 250.f);
+
+    const std::string windowTitle("DoodleBob!");
 }
 
 using namespace std::placeholders;
@@ -129,7 +131,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 
     quitLoadingScreen();
     
-    context.renderWindow.setTitle("DoodleBob!");
+    context.renderWindow.setTitle(windowTitle);
 }
 
 //public
@@ -239,6 +241,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             {
                 m_scene.setView(getContext().defaultView);
                 //m_meshRenderer.setView(getContext().defaultView);
+                getContext().renderWindow.setTitle(windowTitle);
             }
             break;
             case xy::Message::UIEvent::RequestAudioMute:
