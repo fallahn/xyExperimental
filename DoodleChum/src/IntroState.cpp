@@ -77,7 +77,6 @@ IntroState::IntroState(xy::StateStack& stack, Context context)
     m_sound.play();
 
     context.renderWindow.setView(context.defaultView);
-    context.renderWindow.setTitle("DoodleBob!");
 }
 
 //public

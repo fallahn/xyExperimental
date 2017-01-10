@@ -123,21 +123,17 @@ void Game::initialise()
 
     registerStates();
 
-    //set window icon
-    sf::Image img;
-    if (img.loadFromFile("assets/images/ui/window.png"))
-    {
-        getRenderWindow().setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
-    }
-
 #ifdef _DEBUG_
     m_stateStack.pushState(States::WorldClient);
+    setWindowTitle("DoodleBob! (debug build)");
 #else
     m_stateStack.pushState(States::Intro);
+    setWindowTitle("DoodleBob!");
 #endif //_DEBUG_
     getRenderWindow().setKeyRepeatEnabled(false);
 
     if (!xy::Input::load()) xy::Input::save();
+    setWindowIcon("assets/images/ui/window.png");
 }
 
 void Game::finalise()
