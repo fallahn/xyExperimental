@@ -182,6 +182,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\WallClock.hpp" />
     <ClInclude Include="include\WashTask.hpp" />
     <ClInclude Include="include\WorldClientState.hpp" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AttributeManager.cpp" />
@@ -230,6 +231,9 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
   <ItemGroup>
     <None Include="src\BobStrings.inl" />
     <None Include="src\StringConsts.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\DoodleChum.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

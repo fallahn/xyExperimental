@@ -36,6 +36,7 @@ source distribution.
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 namespace xy
 {
@@ -71,6 +72,8 @@ private:
     
     sf::Sprite m_background;
     sf::Sprite m_tabs;
+
+    sf::Text m_versionNumber;
 
     bool m_in;
     float m_scale;

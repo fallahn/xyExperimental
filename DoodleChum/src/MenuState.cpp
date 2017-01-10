@@ -41,6 +41,10 @@ source distribution.
 
 #include <SFML/Window/Event.hpp>
 
+namespace
+{
+    const float numberPadding = 12.f;
+}
 
 MenuState::MenuState(xy::StateStack& stack, Context context, const sf::Font& font, xy::TextureResource& tr, xy::Util::ConfigFile& cf)
     : State             (stack, context),
@@ -70,6 +74,11 @@ MenuState::MenuState(xy::StateStack& stack, Context context, const sf::Font& fon
     m_tabs.setTexture(tex);
     m_tabs.setScale(2.f, 2.f);
 
+    m_versionNumber.setFont(font);
+    m_versionNumber.setString("V:1.0.0");
+    m_versionNumber.setFillColor(sf::Color::Black);
+    m_versionNumber.setPosition(xy::DefaultSceneSize.x - (m_versionNumber.getLocalBounds().width + numberPadding),
+                                xy::DefaultSceneSize.y - (m_versionNumber.getLocalBounds().height + numberPadding));
 
     buildHelp();
     buildOptions();
@@ -139,6 +148,9 @@ bool MenuState::update(float dt)
     c.a = static_cast<sf::Uint8>(m_scale * 255.f);
     m_tabs.setColor(c);
 
+    c.r = 0; c.g = 0; c.b = 0;
+    m_versionNumber.setFillColor(c);
+
     return true;
 }
 
@@ -149,6 +161,7 @@ void MenuState::draw()
     rw.draw(m_tabs);
     rw.draw(m_background);
     rw.draw(*m_currentContainer);
+    rw.draw(m_versionNumber);
 }
 
 //private

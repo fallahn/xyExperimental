@@ -34,6 +34,7 @@ source distribution.
 #include <xygine/Console.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Image.hpp>
 
 namespace
 {
@@ -121,6 +122,14 @@ void Game::initialise()
     m_textureResource.get("assets/images/ui/scroll_arrow.png");
 
     registerStates();
+
+    //set window icon
+    sf::Image img;
+    if (img.loadFromFile("assets/images/ui/window.png"))
+    {
+        getRenderWindow().setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+    }
+
 #ifdef _DEBUG_
     m_stateStack.pushState(States::WorldClient);
 #else
