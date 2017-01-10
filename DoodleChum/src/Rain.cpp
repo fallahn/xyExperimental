@@ -34,6 +34,7 @@ source distribution.
 namespace
 {
     const float rainSpeed = -550.f;
+    const sf::Uint8 minColour = 23;
 }
 
 RainEffect::RainEffect(xy::MessageBus& mb, sf::Texture& t)
@@ -65,6 +66,20 @@ RainEffect::RainEffect(xy::MessageBus& mb, sf::Texture& t)
         m_stopped = !msg.getData<bool>();
     };
     addMessageHandler(mh);
+
+    mh.id = Message::TimeOfDay;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TODEvent>();
+        sf::Uint8 sunlight = static_cast<sf::Uint8>((235.f - minColour) * data.sunIntensity) + 20;
+
+        for (auto& v : m_vertices)
+        {
+            v.color.r = v.color.g = v.color.b = sunlight;
+        }
+
+    };
+    addMessageHandler(mh);
 }
 
 //public
@@ -80,17 +95,20 @@ void RainEffect::entityUpdate(xy::Entity&, float dt)
     }
     sf::Uint8 alpha = static_cast<sf::Uint8>(255.f * m_transparency);
     
-    float speed = rainSpeed * dt;
-    for (auto i = 0; i < 4; ++i)
+    if (m_transparency > 0)
     {
-        m_vertices[i].texCoords.y += speed;
-        m_vertices[i].color.a = alpha;
-    }
-    speed *= 1.5f;
-    for (auto i = 4; i < 8; ++i)
-    {
-        m_vertices[i].texCoords.y += speed;
-        m_vertices[i].color.a = alpha;
+        float speed = rainSpeed * dt;
+        for (auto i = 0; i < 4; ++i)
+        {
+            m_vertices[i].texCoords.y += speed;
+            m_vertices[i].color.a = alpha;
+        }
+        speed *= 1.5f;
+        for (auto i = 4; i < 8; ++i)
+        {
+            m_vertices[i].texCoords.y += speed;
+            m_vertices[i].color.a = alpha;
+        }
     }
 }
 
@@ -100,6 +118,7 @@ void RainEffect::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     if (m_transparency > 0)
     {
         states.texture = &m_texture;
+        //states.blendMode = sf::BlendAdd;
         rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
     }
 }

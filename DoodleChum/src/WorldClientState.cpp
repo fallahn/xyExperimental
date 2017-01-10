@@ -342,7 +342,7 @@ void WorldClientState::updateWeather(float dt)
     if (currTime > weatherTime)
     {
         currTime = 0.f;
-        weatherTime = xy::Util::Random::value(5.f, 25.f/*180.f, 600.f*/);
+        weatherTime = xy::Util::Random::value(180.f, 600.f);
         raining = !raining;
         auto msg = m_messageBus.post<bool>(Message::Weather);
         *msg = raining;
@@ -1202,6 +1202,27 @@ void WorldClientState::initSounds()
     };
     snoreSound->addMessageHandler(mh);
 
+    auto rainSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    rainSound->setSound("assets/sound/fx/rain.ogg", xy::AudioSource::Mode::Stream);
+    rainSound->setFadeInTime(2.f);
+    rainSound->setFadeOutTime(2.f);
+    auto rPtr = rainSound.get();
+
+    mh.id = Message::Weather;
+    mh.action = [rPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto rain = msg.getData<bool>();
+        if (rain)
+        {
+            rPtr->play(true);
+        }
+        else
+        {
+            rPtr->stop();
+        }
+    };
+    rainSound->addMessageHandler(mh);
+
     //and a soundplayer component to handle one-shot effects
     auto soundPlayer = xy::Component::create<xy::SoundPlayer>(m_messageBus, m_soundResource);
     soundPlayer->setMasterVolume(1.f);
@@ -1311,6 +1332,7 @@ void WorldClientState::initSounds()
     entity->addComponent(printerSound);
     entity->addComponent(scrollSound);
     entity->addComponent(snoreSound);
+    entity->addComponent(rainSound);
     entity->addComponent(soundPlayer);
 
     entity->setPosition(xy::DefaultSceneSize / 2.f);
