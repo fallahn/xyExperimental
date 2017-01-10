@@ -41,6 +41,7 @@ source distribution.
 #include <WallClock.hpp>
 #include <CatController.hpp>
 #include <Vacuum.hpp>
+#include <Rain.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -133,6 +134,8 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
 //public
 bool WorldClientState::update(float dt)
 {    
+    updateWeather(dt);
+    
     m_attribManager.update(dt);
     m_scene.update(dt);
     m_meshRenderer.update();
@@ -328,6 +331,24 @@ void WorldClientState::draw()
 }
 
 //private
+#include <xygine/util/Random.hpp>
+void WorldClientState::updateWeather(float dt)
+{
+    static float currTime = 0.f;
+    static float weatherTime = 0.f;
+    static bool raining = (xy::Util::Random::value(0, 1) == 0);
+
+    currTime += dt;
+    if (currTime > weatherTime)
+    {
+        currTime = 0.f;
+        weatherTime = xy::Util::Random::value(5.f, 25.f/*180.f, 600.f*/);
+        raining = !raining;
+        auto msg = m_messageBus.post<bool>(Message::Weather);
+        *msg = raining;
+    }
+}
+
 void WorldClientState::initMeshes()
 {
     m_meshRenderer.setView(getContext().defaultView);
@@ -613,8 +634,10 @@ void WorldClientState::initMapData()
     bgTex.setRepeated(true);
     bgTex.setSmooth(true);
     auto bg = xy::Component::create<Background>(m_messageBus, bgTex);
+    auto rain = xy::Component::create<RainEffect>(m_messageBus, m_textureResource.get("assets/images/textures/rain.png"));
     auto entity = xy::Entity::create(m_messageBus);
     entity->addComponent(bg);
+    entity->addComponent(rain);
     m_scene.addEntity(entity, xy::Scene::Layer::BackRear);
 
     //draws the wall clock

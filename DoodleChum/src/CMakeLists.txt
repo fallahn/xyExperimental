@@ -25,6 +25,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/PoopTask.cpp
   ${PROJECT_DIR}/PriceTag.cpp
   ${PROJECT_DIR}/Printout.cpp
+  ${PROJECT_DIR}/Rain.cpp
   ${PROJECT_DIR}/RoomLightController.cpp
   ${PROJECT_DIR}/ShowerTask.cpp
   ${PROJECT_DIR}/SleepTask.cpp

@@ -70,6 +70,9 @@ private:
 
     AttribManager m_attribManager;
 
+    //TODO this should be kept elsewhere
+    void updateWeather(float);
+
     void initMeshes();
     void initMapData();
     void initBud();

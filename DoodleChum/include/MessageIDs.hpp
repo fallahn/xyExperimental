@@ -90,7 +90,8 @@ namespace Message
         Interface,
         Attribute,
         Player,
-        System
+        System,
+        Weather
     };
 
     struct TODEvent final

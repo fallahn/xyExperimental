@@ -163,6 +163,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\PoopTask.hpp" />
     <ClInclude Include="include\PriceTag.hpp" />
     <ClInclude Include="include\Printout.hpp" />
+    <ClInclude Include="include\Rain.hpp" />
     <ClInclude Include="include\RoomLightController.hpp" />
     <ClInclude Include="include\ShowerTask.hpp" />
     <ClInclude Include="include\SleepTask.hpp" />
@@ -210,6 +211,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\PoopTask.cpp" />
     <ClCompile Include="src\PriceTag.cpp" />
     <ClCompile Include="src\Printout.cpp" />
+    <ClCompile Include="src\Rain.cpp" />
     <ClCompile Include="src\RoomLightController.cpp" />
     <ClCompile Include="src\ShowerTask.cpp" />
     <ClCompile Include="src\SleepTask.cpp" />
