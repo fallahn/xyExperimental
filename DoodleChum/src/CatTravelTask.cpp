@@ -32,7 +32,7 @@ source distribution.
 
 namespace
 {
-    const float minDistance = 100.f;
+    const float minDistance = 10.f;
     const float moveSpeedX = 70.f;
     const float moveSpeedY = 40.f;
 }
@@ -60,6 +60,7 @@ void CatTravel::update(float dt)
 
     if (distance < minDistance)
     {
+        getEntity().setPosition(m_points.back());
         m_points.pop_back();
         if (m_points.empty())
         {

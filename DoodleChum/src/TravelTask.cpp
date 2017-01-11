@@ -64,6 +64,7 @@ void TravelTask::update(float dt)
 
     if (distance < minDistance)
     {
+        getEntity().setPosition(m_points.back());
         m_points.pop_back();
         if (m_points.empty())
         {
