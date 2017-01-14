@@ -46,7 +46,8 @@ namespace Mesh
         Cat,
         Clock,
         Vacuum,
-        Shower
+        Shower,
+        HouseLights
     };
 }
 
@@ -65,7 +66,8 @@ namespace Material
         Cat,
         Clock,
         Vaccum,
-        Shower
+        Shower,
+        HouseLights
     };
 }
 

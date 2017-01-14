@@ -434,6 +434,18 @@ void WorldClientState::initMeshes()
     auto wallModel = m_meshRenderer.createModel(Mesh::Walls, m_messageBus);
     wallModel->setBaseMaterial(wallMat);
 
+    /*xy::IQMBuilder houseLights("assets/models/house_lights.iqm");
+    m_meshRenderer.loadModel(Mesh::HouseLights, houseLights);
+
+    auto& houseLightsMat = m_meshRenderer.addMaterial(Material::HouseLights, xy::Material::Textured, true, true);
+    houseLightsMat.addProperty({ "u_diffuseMap", m_textureResource.get("assets/images/textures/houselights_diffuse.png") });
+    houseLightsMat.getRenderPass(xy::RenderPass::ID::Default)->setCullFace(xy::CullFace::Front);
+    houseLightsMat.getRenderPass(xy::RenderPass::ID::ShadowMap)->setCullFace(xy::CullFace::Front);
+
+    auto houseLightsModel = m_meshRenderer.createModel(Mesh::HouseLights, m_messageBus);
+    houseLightsModel->setBaseMaterial(houseLightsMat);
+    houseLightsModel->setPosition({ 0.f, 0.f, -60.f });*/
+
     auto entity = xy::Entity::create(m_messageBus);
 
     //christmas decs
@@ -469,6 +481,7 @@ void WorldClientState::initMeshes()
     entity->addComponent(tvAnimator);
     entity->addComponent(thirdFurnitureModel);
     entity->addComponent(wallModel);
+    //entity->addComponent(houseLightsModel);
     entity->setPosition(xy::DefaultSceneSize / 2.f);
     m_scene.addEntity(entity, xy::Scene::BackFront);
 
@@ -684,7 +697,7 @@ void WorldClientState::initBud()
     vacEnt->addComponent(vacSoundEnd);
     vacEnt->addComponent(vacController);
     vacEnt->setPosition(-xy::DefaultSceneSize * 2.f); //put off screen to start with
-    vacEnt->setOrigin(-vacuumSize.x / 2.5f, 0.f);
+    vacEnt->setOrigin(-vacuumSize.x / 2.5f, 2.f);
     
     //bob
     auto controller = xy::Component::create<BudController>(m_messageBus, m_attribManager, m_pathFinder,
@@ -695,7 +708,7 @@ void WorldClientState::initBud()
 
     auto dwb = m_meshRenderer.createModel(Mesh::Bob, m_messageBus);
     dwb->setBaseMaterial(material);
-    dwb->setPosition({ 0.f, -((bobSize.y / 2.f) - 6.f), 4.f });
+    dwb->setPosition({ 0.f, -((bobSize.y / 2.f) - 8.f), 4.f });
 
     const auto& thinkTex = m_textureResource.get("assets/images/ui/think_bubble.png");
     auto thinkBubble = xy::Component::create<ThinkBubble>(m_messageBus, thinkTex);

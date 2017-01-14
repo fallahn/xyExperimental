@@ -120,6 +120,7 @@ void Game::initialise()
     m_textureResource.get("assets/images/ui/small_button.png");
     m_textureResource.get("assets/images/ui/checkbox.png");
     m_textureResource.get("assets/images/ui/scroll_arrow.png");
+    m_textureResource.get("assets/images/ui/menu_pic.png");
 
     registerStates();
 

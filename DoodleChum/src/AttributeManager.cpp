@@ -513,6 +513,7 @@ bool AttribManager::load()
 
     auto dayCount = newTime->tm_yday - oldTime;
     if (dayCount < 0) dayCount = std::abs(dayCount) + newTime->tm_yday;
+    dayCount = std::min(dayCount, 90); //prevent overloading the message bus if the gamee wasn't loaded for a long time
     for (auto i = 0u; i < dayCount; ++i)
     {
         auto dayChangeMsg = m_messageBus.post<float>(Message::DayChanged);

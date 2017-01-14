@@ -66,7 +66,7 @@ namespace
         12.f, //TV
         12.f, //Piano
         12.f, //Computer
-        6.f, //washing hands
+        12.f, //washing hands
         1.f, //crouch/sleep
         8.f, //die
         12.f, //scratch

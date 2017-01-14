@@ -167,14 +167,18 @@ void MenuState::draw()
 //private
 void MenuState::buildHelp()
 {
-    m_helpContainer.setOrigin(xy::DefaultSceneSize / 2.f);
     m_helpContainer.setPosition(xy::DefaultSceneSize / 2.f);
+    m_helpContainer.setBackgroundTexture(m_textureResource.get("assets/images/ui/menu_pic.png"), true);
+    auto containerOffset = xy::DefaultSceneSize / 2.f;
+    containerOffset.y += 30.f;
+    m_helpContainer.setPosition(containerOffset);
     
     auto text = xy::UI::create<xy::UI::Label>(m_font);
     text->setString("DoodleBob!");
     text->setCharacterSize(80u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 420.f);
+    text->move(-containerOffset);
     text->setColour(sf::Color::Black);
     m_helpContainer.addControl(text);
 
@@ -183,12 +187,14 @@ void MenuState::buildHelp()
     text->setCharacterSize(50u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 480.f);
+    text->move(-containerOffset);
     text->setColour(sf::Color::Black);
     m_helpContainer.addControl(text);
     
     auto button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/start_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(xy::DefaultSceneSize.x / 2.f, 820.f);
+    button->move(-containerOffset);
     button->setString("Continue...");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
@@ -204,6 +210,7 @@ void MenuState::buildHelp()
     button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(720.f, 820.f);
+    button->move(-containerOffset);
     button->setString("Quit");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
@@ -215,6 +222,7 @@ void MenuState::buildHelp()
     button = xy::UI::create<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     button->setAlignment(xy::UI::Alignment::Centre);
     button->setPosition(1200.f, 820.f);
+    button->move(-containerOffset);
     button->setString("Options");
     button->setTextColour(sf::Color::Black);
     button->addCallback([this]()
@@ -225,7 +233,8 @@ void MenuState::buildHelp()
 
     auto marquee = xy::UI::create<xy::UI::Marquee>(m_font, sf::Vector2u(800, 50));
     marquee->setAlignment(xy::UI::Alignment::Centre);
-    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 760.f);
+    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 770.f);
+    marquee->move(-containerOffset);
     marquee->setTextColour(sf::Color::Black);
     marquee->setScrollSpeed(100.f);
     marquee->addString("Make sure to check up on Bob regularly!");
@@ -392,7 +401,7 @@ void MenuState::buildCredits()
     m_creditsContainer.addControl(text);
 
     text = xy::UI::create<xy::UI::Label>(m_font);
-    text->setString("Josh Mercier - 3D models and artwork");
+    text->setString("Josh Mercier - 3D models & artwork");
     text->setCharacterSize(40u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 500.f);
@@ -400,7 +409,7 @@ void MenuState::buildCredits()
     m_creditsContainer.addControl(text);
 
     text = xy::UI::create<xy::UI::Label>(m_font);
-    text->setString("Matt Marchant - programming and doodles");
+    text->setString("Matt Marchant - programming & doodles");
     text->setCharacterSize(40u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 560.f);
@@ -408,10 +417,18 @@ void MenuState::buildCredits()
     m_creditsContainer.addControl(text);
 
     text = xy::UI::create<xy::UI::Label>(m_font);
-    text->setString("SFML Community - join us in #sfml on irc.boxbox.org!");
+    text->setString("Dorus Abeln - music & doodles");
     text->setCharacterSize(36u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 620.f);
+    text->setColour(sf::Color::Black);
+    m_creditsContainer.addControl(text);
+
+    text = xy::UI::create<xy::UI::Label>(m_font);
+    text->setString("SFML Community - join us in #sfml on irc.boxbox.org!");
+    text->setCharacterSize(36u);
+    text->setAlignment(xy::UI::Alignment::Centre);
+    text->setPosition(xy::DefaultSceneSize.x / 2.f, 680.f);
     text->setColour(sf::Color::Black);
     m_creditsContainer.addControl(text);
 
@@ -436,10 +453,10 @@ void MenuState::buildCredits()
 
     auto marquee = xy::UI::create<xy::UI::Marquee>(m_font, sf::Vector2u(800, 50));
     marquee->setAlignment(xy::UI::Alignment::Centre);
-    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 760.f);
+    marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 770.f);
     marquee->setTextColour(sf::Color::Black);
     marquee->setScrollSpeed(100.f);
-    marquee->addString("Special mention goes to: Jonny for his contributions to xygine, Doris for the exemplary xygine logo, Naomi for all her patience, Jo & Jamz for the creative input");
+    marquee->addString("Special mention goes to: Jonny for his contributions to xygine, Doris for the exemplary xygine logo, Naomi for all her patience, Jo & Jamz for their creative input");
     marquee->addString("And not to forget Malone and Jon for being just plain wonderful people!");
     m_creditsContainer.addControl(marquee);
 }
