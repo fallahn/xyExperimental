@@ -682,11 +682,13 @@ void WorldClientState::initBud()
     vacSound->setSound("assets/sound/fx/vacuum_loop.wav");
     vacSound->setFadeInTime(1.f);
     vacSound->setFadeOutTime(1.f);
+    vacSound->setVolume(0.4f);
 
     auto vacSoundEnd = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
     vacSoundEnd->setSound("assets/sound/fx/vacuum_end.wav");
     vacSoundEnd->setFadeInTime(0.1f);
     vacSoundEnd->setFadeOutTime(0.1f);
+    vacSoundEnd->setVolume(0.4f);
 
     auto vacController = xy::Component::create<VacuumController>(m_messageBus);
 
@@ -1219,6 +1221,7 @@ void WorldClientState::initSounds()
     rainSound->setSound("assets/sound/fx/rain.ogg", xy::AudioSource::Mode::Stream);
     rainSound->setFadeInTime(2.f);
     rainSound->setFadeOutTime(2.f);
+    rainSound->setVolume(0.6f);
     auto rPtr = rainSound.get();
 
     mh.id = Message::Weather;

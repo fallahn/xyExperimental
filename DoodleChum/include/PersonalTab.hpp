@@ -53,10 +53,12 @@ public:
     ~PersonalTab() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
-    void entityUpdate(xy::Entity&, float);
+    void entityUpdate(xy::Entity&, float) override;
+    void onStart(xy::Entity& e) override { m_entity = &e; }
 
 private:
     const AttribManager& m_attribManager;
+    xy::Entity* m_entity;
 
     sf::Text m_titleText;
     std::vector<std::unique_ptr<ValueBar>> m_bars;

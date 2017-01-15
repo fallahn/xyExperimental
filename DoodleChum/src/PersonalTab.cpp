@@ -28,8 +28,10 @@ source distribution.
 #include <PersonalTab.hpp>
 #include <AttributeManager.hpp>
 #include <MessageIDs.hpp>
+#include <TabComponent.hpp>
 
 #include <xygine/Resource.hpp>
+#include <xygine/Entity.hpp>
 #include <xygine/util/Position.hpp>
 #include <xygine/util/Random.hpp>
 
@@ -50,7 +52,8 @@ namespace
 
 PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& tr, const AttribManager& am)
     : xy::Component(mb, this),
-    m_attribManager(am)
+    m_attribManager(am),
+    m_entity(nullptr)
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
@@ -158,10 +161,27 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
             }
             m_messageList.clear();
             m_messageIDs.clear();
+
+            //display if tab hidden
+            if (m_entity->getPosition().x < -10)
+            {
+                m_entity->getComponent<TabComponent>()->toggle();
+            }
         }
     };
     addMessageHandler(mh);
 
+    mh.id = Message::TaskCompleted;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+        if (data.taskName == Message::TaskEvent::PlayComputer
+            && m_entity->getPosition().x > -10)
+        {
+            m_entity->getComponent<TabComponent>()->toggle();
+        }
+    };
+    addMessageHandler(mh);
 
 #ifdef _DEBUG_
     xy::Console::addCommand("printer_print", [this](const std::string& str)

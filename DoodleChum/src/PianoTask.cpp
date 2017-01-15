@@ -70,6 +70,7 @@ void PianoTask::onStart()
         auto musics = entity.getComponents<xy::AudioSource>();
 
         auto idx = (musics.size() == 1) ? 0 : xy::Util::Random::value(0, musics.size() - 1);
+        if (m_playFullTrack) musics[idx]->stop(); //ensures track is rewound if paused
         musics[idx]->play();
         m_time = (m_playFullTrack) ? musics[idx]->getDuration() : minMusicDuration;
         m_time = std::min(m_time, maxMusicDuration); //limit to 6 minutes

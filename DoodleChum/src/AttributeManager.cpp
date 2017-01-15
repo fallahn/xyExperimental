@@ -358,12 +358,12 @@ void AttribManager::initValues()
     m_stats.dead = false;
         
     m_personalAttribs[Personal::Health] = 100.f;
-    m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(10.f, 25.f);
-    m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(15.f, 30.f);
+    m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(30.f, 45.f);
+    m_personalAttribs[Personal::Thirst] = xy::Util::Random::value(35.f, 60.f);
     m_personalAttribs[Personal::Tiredness] = xy::Util::Random::value(12.f, 28.f);
     m_personalAttribs[Personal::Poopiness] = xy::Util::Random::value(10.f, 20.f);
     m_personalAttribs[Personal::Cleanliness] = 0.f;
-    m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(50.f, 70.f);
+    m_personalAttribs[Personal::Boredness] = xy::Util::Random::value(70.f, 95.f);
 
     m_householdAttribs[Household::Food] = 100.f;
     m_householdAttribs[Household::Water] = 100.f;
