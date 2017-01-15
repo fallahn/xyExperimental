@@ -202,9 +202,10 @@ void AttribManager::handleMessage(const xy::Message& msg)
             m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - (tirednessPerSleep * (m_personalAttribs[Personal::Health] / 100.f)));
             break;
         case Message::TaskEvent::Vacuum:
-            //bob gets tired doing housework
+            //bob gets tired/hungry doing housework
             m_personalAttribs[Personal::Tiredness] = std::min(100.f, m_personalAttribs[Personal::Tiredness] * 1.25f);
             m_personalAttribs[Personal::Boredness] = std::min(100.f, m_personalAttribs[Personal::Boredness] + (boredomReduction / xy::Util::Random::value(2.5f, 3.f)));
+            m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] * 1.4f);
             break;
         }
     }

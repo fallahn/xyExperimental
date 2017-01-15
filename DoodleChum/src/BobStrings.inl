@@ -42,7 +42,8 @@ const std::vector<std::string> randomMessages =
     "His name was Doris, he had a beard. I touched it once, it felt weird.",
     "I wish just once I could turn the light off when I go to bed.",
     "I'd have escaped months ago if the door handle wasn't just drawn on.",
-    "That Jonny - quite a character!"
+    "That Jonny - quite a character!",
+    "I can't really play the piano. If you lift the lid you'll find a monkey holding an iPod."
 };
 
 const std::vector<std::string> failedMessages =

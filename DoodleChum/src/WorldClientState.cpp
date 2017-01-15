@@ -149,9 +149,14 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
         switch (evt.key.code)
         {
         default: break;
+        /*case sf::Keyboard::Space:
+            requestStackClear();
+            requestStackPush(States::ID::Intro);
+            break;*/
         case sf::Keyboard::Escape:
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
+        case sf::Keyboard::BackSpace:
             requestStackPush(States::ID::Menu);
             break;
         case sf::Keyboard::Up:
