@@ -152,6 +152,9 @@ void AttribManager::handleMessage(const xy::Message& msg)
     //handle updates from completed tasks
     if (msg.id == Message::TaskCompleted)
     {
+        //as he gets older bob's activities have less benefit
+        float ageModifier = 0.9375f - ((static_cast<float>(m_stats.age) * 0.0625f) + 0.0625f);
+
         const auto& data = msg.getData<Message::TaskEvent>();
         switch (data.taskName)
         {
@@ -199,7 +202,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
             m_householdAttribs[Household::Water] = std::max(0.f, m_householdAttribs[Household::Water] - waterPerShower);
             break;
         case Message::TaskEvent::Sleep:
-            m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - (tirednessPerSleep * (m_personalAttribs[Personal::Health] / 100.f)));
+            m_personalAttribs[Personal::Tiredness] = std::max(0.f, m_personalAttribs[Personal::Tiredness] - ((tirednessPerSleep * (m_personalAttribs[Personal::Health] / 100.f))) * ageModifier);
             break;
         case Message::TaskEvent::Vacuum:
             //bob gets tired/hungry doing housework
@@ -381,8 +384,12 @@ void AttribManager::initValues()
 void AttribManager::updateValues(float dt)
 {
     //rate of decline increases as health decreases
-    const float rate = dt * (1.f + (0.15f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
+    float rate = dt * (1.f + (0.15f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
     
+    //and increases more with age
+    float ageMultiplier = 1.f + (static_cast<float>(m_stats.age) * 0.0625); //doubles every 16 days
+    rate *= ageMultiplier;
+
     m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * rate));
     m_personalAttribs[Personal::Thirst] = std::min(100.f, m_personalAttribs[Personal::Thirst] + (thirstPerSecond * rate));
     m_personalAttribs[Personal::Cleanliness] = std::min(100.f, m_personalAttribs[Personal::Cleanliness] + (cleanlinessPerSecond * rate));
@@ -413,8 +420,6 @@ void AttribManager::updateHealth()
         //request dying animation
         auto msg2 = m_messageBus.post<Message::AnimationEvent>(Message::Animation);
         msg2->id = Message::AnimationEvent::Die;
-
-        //TODO set all values to 0?
     }
 
     //income rate drops with health
