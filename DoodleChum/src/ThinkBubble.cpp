@@ -42,12 +42,13 @@ namespace
 ThinkBubble::ThinkBubble(xy::MessageBus& mb, const sf::Texture& texture)
     : xy::Component (mb, this),
     m_sprite    (texture),
-    m_scale     (1.f),
-    m_grow      (true),
+    m_scale     (0.f),
+    m_grow      (false),
     m_entity    (nullptr)
 {
     m_sprite.setOrigin(0.f, static_cast<float>(texture.getSize().y));
     m_sprite.setPosition(offset);
+    m_sprite.setScale(0.f, 0.f);
 
     xy::Component::MessageHandler mh;
     mh.id = Message::Animation;

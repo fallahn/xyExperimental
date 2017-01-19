@@ -44,7 +44,7 @@ namespace
 }
 
 Game::Game()
-    : xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
+    : //xy::App   (/*sf::ContextSettings(0, 0, 0, 3, 2, sf::ContextSettings::Core)*/),
     m_stateStack({ getRenderWindow(), *this })
 {
     xy::Console::addCommand("gametime", [](const std::string& value)

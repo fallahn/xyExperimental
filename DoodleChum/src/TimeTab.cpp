@@ -74,7 +74,7 @@ TimeTab::TimeTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& 
 
     auto& clockFont = fr.get("assets/fonts/Clock.ttf");
     m_clockText.setFont(clockFont);
-    m_clockText.setFillColor({ 255, 0, 0, 140 });
+    m_clockText.setFillColor({ 42, 48, 45, 255 });
     m_clockText.setCharacterSize(100);
     m_clockText.setString("00:00");
     xy::Util::Position::centreOrigin(m_clockText);

@@ -154,6 +154,9 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
             requestStackPush(States::ID::Intro);
             break;*/
         case sf::Keyboard::Escape:
+#ifdef _DEBUG_
+            xy::App::quit();
+#endif //_DEBUG_
         case sf::Keyboard::P:
         case sf::Keyboard::Pause:
         case sf::Keyboard::BackSpace:
