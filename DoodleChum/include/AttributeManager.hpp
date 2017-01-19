@@ -83,6 +83,7 @@ public:
 
     std::int32_t getIncome() const { return m_stats.currentIncome; }
     std::int32_t getDaysToPayDay() const { return m_stats.daysToPayDay; }
+    std::int32_t getAge() const { return m_stats.age; }
 
     const std::array<int, Household::Count>& getCosts() const;
     bool dead() const { return m_stats.dead; }
@@ -102,6 +103,7 @@ private:
     {
         std::int32_t currentIncome = 1000;
         std::int32_t daysToPayDay = 7;
+        std::int32_t age = 0;
 
         std::int64_t totalIncoming = 0;
         std::int64_t totalOutGoing = 0;

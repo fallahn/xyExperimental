@@ -292,6 +292,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
     //time based events such as pay day
     else if (msg.id == Message::DayChanged)
     {
+        if (!m_stats.dead) m_stats.age++;
         m_stats.daysToPayDay--;
         if (m_stats.daysToPayDay == 0)
         {

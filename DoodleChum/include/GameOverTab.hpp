@@ -58,6 +58,8 @@ private:
     sf::Sprite m_buttonSprite;
     sf::Text m_titleText;
     sf::Text m_dateText;
+    sf::Text m_ageText;
+    sf::Text m_messageText;
     sf::Text m_statText;
 
     float m_scale;

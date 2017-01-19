@@ -61,6 +61,7 @@ private:
     xy::Entity* m_entity;
 
     sf::Text m_titleText;
+    sf::Text m_ageText;
     std::vector<std::unique_ptr<ValueBar>> m_bars;
 
     std::unique_ptr<Printout> m_printout;

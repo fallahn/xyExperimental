@@ -40,7 +40,7 @@ namespace
 {
 #include "StringConsts.inl"
 
-    const sf::Vector2f barOffset(410.f, 220.f);
+    const sf::Vector2f barOffset(410.f, 260.f);
     const sf::Vector2f barSize(260.f, 45.f);
     const float verticalSpacing = barSize.y + 22.f;
     const std::string balanceString("Balance Cr: ");
@@ -72,7 +72,7 @@ HouseholdTab::HouseholdTab(xy::MessageBus& mb, xy::FontResource& fr, xy::Texture
     m_balanceText.setCharacterSize(52u);
     m_balanceText.setOrigin(0.f, 0.f);
 
-    m_currentActivity.setPosition(290.f, 720.f);
+    m_currentActivity.setPosition(290.f, 780.f);
     m_currentActivity.setScale(-1.f, 1.f);
     m_activityBorder.setTexture(tr.get("assets/images/ui/pen_border_small.png"));
     m_activityBorder.setPosition(m_currentActivity.getPosition());

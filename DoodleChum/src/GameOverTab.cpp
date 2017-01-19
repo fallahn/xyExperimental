@@ -56,7 +56,7 @@ GameOverTab::GameOverTab(xy::MessageBus& mb, sf::Font& font, xy::TextureResource
     m_titleText.setPosition(-16.f, -202.f);
 
     m_dateText.setString(am.getBirthdates());
-    m_dateText.setPosition(-240.f, -140.f);
+    m_dateText.setPosition(-130.f, -100.f);
     m_dateText.setCharacterSize(40u);
     xy::Util::Position::centreOrigin(m_dateText);
 
@@ -65,7 +65,37 @@ GameOverTab::GameOverTab(xy::MessageBus& mb, sf::Font& font, xy::TextureResource
     xy::Util::Position::centreOrigin(m_statText);
     m_statText.setPosition(0.f, 220.f);
 
-    //TODO random headstone message
+    m_ageText = m_dateText;
+    auto age = am.getAge();
+    m_ageText.setString("Aged " + std::to_string(age) + " days");
+    xy::Util::Position::centreOrigin(m_ageText);
+    m_ageText.move(0.f, 46.f);
+
+    m_messageText = m_ageText;
+    switch (age)
+    {
+    case 0:
+    case 1:
+    case 2:
+        m_messageText.setString("Why do the good die young?");
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+        m_messageText.setString("He lived longer than my goldfish");
+        break;
+    case 7:
+    case 8:
+    case 9:
+        m_messageText.setString("At least he made it to pay day");
+        break;
+    default:
+        m_messageText.setString("He lived a good long life");
+        break;
+    }
+    xy::Util::Position::centreOrigin(m_messageText);
+    m_messageText.move(0.f, 46.f);
 
     m_buttonSprite.setTexture(tr.get("assets/images/ui/new_game_button.png"));
     xy::Util::Position::centreOrigin(m_buttonSprite);
@@ -109,5 +139,7 @@ void GameOverTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     rt.draw(m_titleText, states);
     rt.draw(m_dateText, states);
     rt.draw(m_statText, states);
+    rt.draw(m_ageText, states);
+    rt.draw(m_messageText, states);
     rt.draw(m_buttonSprite, states);
 }

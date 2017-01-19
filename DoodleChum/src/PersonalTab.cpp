@@ -45,7 +45,7 @@ namespace
 #include "StringConsts.inl"
 #include "BobStrings.inl"
 
-    const sf::Vector2f barOffset(40.f, 220.f);
+    const sf::Vector2f barOffset(40.f, 260.f);
     const sf::Vector2f barSize(260.f, 45.f);
     const float verticalSpacing = barSize.y + 22.f;
 }
@@ -65,6 +65,11 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
     m_titleText.rotate(-87.f);
     m_titleText.setPosition(466.f, xy::DefaultSceneSize.y / 2.f);
 
+    m_ageText = m_titleText;
+    m_ageText.setOrigin(0.f, 0.f);
+    m_ageText.setRotation(0.f);
+    m_ageText.setPosition(40.f, 200.f);
+
     auto& texture = tr.get("assets/images/ui/value_bar.png");
     const auto values = am.getPersonalAttribs();
     auto position = barOffset;
@@ -80,7 +85,7 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
 
     auto& printFont = fr.get("assets/fonts/Printer.ttf");
     m_printout = std::make_unique<Printout>(printFont, tr, mb);
-    m_printout->setPosition(40.f, 720.f);
+    m_printout->setPosition(40.f, 740.f);
 
     //message handler for low resources
     xy::Component::MessageHandler mh;
@@ -216,6 +221,9 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
             }
             m_bars[i]->setValue(value);
         }
+
+        m_ageText.setString("Age: " + std::to_string(m_attribManager.getAge()) + " days");
+
         timer = 1.f;
     }
 
@@ -230,6 +238,7 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
 void PersonalTab::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     rt.draw(m_titleText, states);
+    rt.draw(m_ageText, states);
 
     for (const auto& bar : m_bars)
     {
