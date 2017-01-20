@@ -49,13 +49,15 @@ namespace Command
 {
     enum ID
     {
-        Vacuum      = 0x8,
-        MusicPlayer = 0x10,
-        PianoPlayer = 0x20,
-        TVAudio     = 0x40,
-        LeftTab     = 0x80,
-        TopTab      = 0x100,
-        RightTab    = 0x200
+        Vacuum        = 0x8,
+        MusicPlayer   = 0x10,
+        PianoPlayer   = 0x20,
+        TVAudio       = 0x40,
+        LeftTab       = 0x80,
+        TopTab        = 0x100,
+        RightTab      = 0x200,
+        MiniGame      = 0x400,
+        RouletteWheel = 0x800
     };
 }
 
@@ -160,7 +162,9 @@ namespace Message
             PrintBegin,
             PrintScroll,
             PrintEnd,
-            NoMoney
+            NoMoney,
+            MiniGameOpen,
+            MiniGameClose
         }type;
         float positionX = 0.f;
         float positionY = 0.f;

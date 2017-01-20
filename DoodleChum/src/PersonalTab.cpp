@@ -222,7 +222,7 @@ void PersonalTab::entityUpdate(xy::Entity&, float dt)
             m_bars[i]->setValue(value);
         }
 
-        m_ageText.setString("Age: " + std::to_string(m_attribManager.getAge()) + " days");
+        m_ageText.setString("Age: " + std::to_string(m_attribManager.getAge()) + " day(s)");
 
         timer = 1.f;
     }

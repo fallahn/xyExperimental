@@ -39,6 +39,7 @@ source distribution.
 #include <xygine/Resource.hpp>
 #include <xygine/ShaderResource.hpp>
 #include <xygine/mesh/MaterialResource.hpp>
+#include <xygine/physics/World.hpp>
 
 class WorldClientState final : public xy::State
 {
@@ -57,6 +58,7 @@ private:
     xy::MessageBus& m_messageBus;
     xy::Scene m_scene;
     xy::MeshRenderer m_meshRenderer;
+    xy::Physics::World m_physWorld;
 
     xy::TextureResource m_textureResource;
     xy::ShaderResource m_shaderResource;
@@ -79,7 +81,11 @@ private:
     void initCat();
     void initParticles();
     void initUI();
+    void initMiniGame();
     void initSounds();
+
+    //minigame creators
+    void createRoulette();
 
     sf::Sprite m_loadingSprite;
     void updateLoadingScreen(float, sf::RenderWindow&) override;

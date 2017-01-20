@@ -84,6 +84,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     m_messageBus            (context.appInstance.getMessageBus()),
     m_scene                 (m_messageBus),
     m_meshRenderer          ({ context.appInstance.getVideoSettings().VideoMode.width, context.appInstance.getVideoSettings().VideoMode.height }, m_scene),
+    m_physWorld             (m_messageBus),
     m_attribManager         (m_messageBus)
 {
     auto& loadingTex = m_textureResource.get("assets/images/sprites/bob.png");
@@ -103,6 +104,7 @@ WorldClientState::WorldClientState(xy::StateStack& stateStack, Context context)
     initBud();
     initParticles();
     initUI();
+    initMiniGame();
     initSounds();
 
     auto pp = xy::PostProcess::create<xy::PostBlur>();
@@ -198,6 +200,34 @@ bool WorldClientState::handleEvent(const sf::Event& evt)
             m_scene.sendCommand(cmd);
         }
             break;
+#ifdef _DEBUG_
+        case sf::Keyboard::Down:
+        {
+            static bool show = true;
+            if (show)
+            {
+                xy::Console::doCommand("show_minigame 1");
+            }
+            else
+            {
+                xy::Console::doCommand("show_minigame 0");
+            }
+            show = !show;
+        }
+
+            break;
+        case sf::Keyboard::Space:
+        {
+            xy::Command cmd;
+            cmd.category = Command::ID::RouletteWheel;
+            cmd.action = [](xy::Entity& entity, float)
+            {
+                entity.getComponent<xy::Physics::RigidBody>()->applyAngularImpulse(5000.f);
+            };
+            m_scene.sendCommand(cmd);
+        }
+            break;
+#endif //_DEBUG
         }
     }
     else if (evt.type == sf::Event::MouseButtonReleased)
@@ -323,6 +353,26 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             }
         }
             break;
+        case Message::Interface:
+        {
+            const auto& data = msg.getData<Message::InterfaceEvent>();
+            if (data.type == Message::InterfaceEvent::MiniGameOpen)
+            {
+                //TODO pick random mini game
+                createRoulette();
+            }
+            else if (data.type == Message::InterfaceEvent::MiniGameClose)
+            {
+                xy::Command cmd;
+                cmd.category = Command::ID::MiniGame;
+                cmd.action = [](xy::Entity& entity, float)
+                {
+                    entity.destroy();
+                };
+                m_scene.sendCommand(cmd);
+            }
+        }
+            break;
     }
 }
 
@@ -335,6 +385,7 @@ void WorldClientState::draw()
 #ifdef _DEBUG_
     //rw.setView(getContext().defaultView);
     //rw.draw(m_pathFinder);
+    rw.draw(m_physWorld);
 #endif //_DEBUG_    
 }
 
@@ -872,7 +923,7 @@ void WorldClientState::initBud()
 
     entity->addChild(vacEnt);
 
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
     //create the shower here too for proper draw order
     auto& showerMat = m_meshRenderer.getMaterial(Material::Shower);
@@ -963,7 +1014,7 @@ void WorldClientState::initCat()
     entity->addComponent(snoreSound);
     entity->addComponent(eatSound);
 
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 }
 
 void WorldClientState::initParticles()
@@ -980,7 +1031,7 @@ void WorldClientState::initParticles()
     auto ps = steam.createSystem(m_messageBus);
     entity->addComponent(ps);
     entity->addComponent(showerSound);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
     xy::ParticleSystem::Definition music;
     music.loadFromFile("assets/particles/music.xyp", m_textureResource);
@@ -989,7 +1040,7 @@ void WorldClientState::initParticles()
     ps = music.createSystem(m_messageBus);
     ps->followParent(true);
     entity->addComponent(ps);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 
     xy::ParticleSystem::Definition zz;
     zz.loadFromFile("assets/particles/zz.xyp", m_textureResource);
@@ -997,7 +1048,7 @@ void WorldClientState::initParticles()
     entity->addCommandCategories(Particle::Sleep);
     ps = zz.createSystem(m_messageBus);
     entity->addComponent(ps);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
 }
 
 namespace
@@ -1009,6 +1060,13 @@ namespace
 #include <TimeTab.hpp>
 #include <PersonalTab.hpp>
 #include <HouseholdTab.hpp>
+
+#include <xygine/components/SfDrawableComponent.hpp>
+#include <xygine/physics/RigidBody.hpp>
+#include <xygine/physics/CollisionCircleShape.hpp>
+#include <xygine/physics/JointHinge.hpp>
+#include <xygine/physics/CollisionEdgeShape.hpp>
+#include <MGDisplayController.hpp>
 
 void WorldClientState::initUI()
 {
@@ -1049,6 +1107,24 @@ void WorldClientState::initUI()
     entity->addComponent(dnc);
     entity->setPosition(20.f, 10.f);
     m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}
+
+void WorldClientState::initMiniGame()
+{
+    auto screenDrawable = xy::Component::create<xy::SfDrawableComponent<sf::RectangleShape>>(m_messageBus);
+    screenDrawable->getDrawable().setSize({ 1330.f, 1000.f });
+    screenDrawable->getDrawable().setOrigin(screenDrawable->getDrawable().getSize() / 2.f);
+
+    auto controller = xy::Component::create<DisplayController>(m_messageBus);
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    entity->move(0.f, xy::DefaultSceneSize.y);
+    entity->addComponent(screenDrawable);
+    entity->addComponent(controller);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontMiddle);
+
+    //TODO preload all the textures here for each game
 }
 
 namespace
@@ -1395,6 +1471,59 @@ void WorldClientState::initSounds()
         }
     }
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
+}
+
+void WorldClientState::createRoulette()
+{
+    auto staticBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
+    xy::Physics::CollisionCircleShape cs(320.f);
+    cs.setRestitution(0.2f);
+    cs.setDensity(20.f);
+    staticBody->addCollisionShape(cs);
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    entity->addCommandCategories(Command::ID::MiniGame);
+    auto bPtr = entity->addComponent(staticBody);
+
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    auto rotatingBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
+    auto angle = xy::Util::Const::TAU / 7.f;
+    float radius = 480.f;
+    std::vector<sf::Vector2f> points(7);
+    for (auto i = 0u; i < 7u; ++i)
+    {
+        auto theta = angle * i;
+        points[i].x = std::sin(theta);
+        points[i].y = std::cos(theta);
+        points[i] *= radius;
+    }
+    xy::Physics::CollisionEdgeShape edge(points, xy::Physics::CollisionEdgeShape::Option::Loop);
+    edge.setDensity(0.1f);
+    rotatingBody->addCollisionShape(edge);
+    xy::Physics::HingeJoint hj(*bPtr, xy::DefaultSceneSize / 2.f);
+    hj.canCollide(false);
+    hj.motorEnabled(true);
+    hj.setMotorSpeed(360.f);
+    rotatingBody->addJoint(hj);
+
+    entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteWheel);
+    entity->addComponent(rotatingBody);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    auto ballBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
+    cs.setRadius(20.f);
+    ballBody->addCollisionShape(cs);
+
+    entity = xy::Entity::create(m_messageBus);
+    entity->setPosition(xy::DefaultSceneSize / 2.f);
+    entity->move(0.f, 240.f);
+    entity->addCommandCategories(Command::ID::MiniGame);
+    entity->addComponent(ballBody);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
 namespace

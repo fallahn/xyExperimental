@@ -43,6 +43,12 @@
     <Filter Include="Source Files\Controllers\cat">
       <UniqueIdentifier>{4706b565-646e-4aa9-a288-26b1630b784a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Controllers\minigame">
+      <UniqueIdentifier>{9df26ad1-77e6-4283-bd4a-e63d0fdb0c97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Controllers\minigame">
+      <UniqueIdentifier>{b5ae92a1-3a32-49b0-8a77-3cc0b3e2a200}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -186,6 +192,9 @@
     <ClInclude Include="include\Rain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MGDisplayController.hpp">
+      <Filter>Header Files\Controllers\minigame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -316,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="src\Rain.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGDisplayController.cpp">
+      <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

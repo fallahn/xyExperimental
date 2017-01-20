@@ -387,7 +387,7 @@ void AttribManager::updateValues(float dt)
     float rate = dt * (1.f + (0.15f * (1.f - (m_personalAttribs[Personal::Health] / 100.f))));
     
     //and increases more with age
-    float ageMultiplier = 1.f + (static_cast<float>(m_stats.age) * 0.0625); //doubles every 16 days
+    float ageMultiplier = 1.f + (static_cast<float>(m_stats.age) * 0.0625f); //doubles every 16 days
     rate *= ageMultiplier;
 
     m_personalAttribs[Personal::Hunger] = std::min(100.f, m_personalAttribs[Personal::Hunger] + (hungerPerSecond * rate));
@@ -519,8 +519,8 @@ bool AttribManager::load()
     auto newTime = std::localtime((std::time_t*)&timeNow);
 
     auto dayCount = newTime->tm_yday - oldTime;
-    if (dayCount < 0) dayCount = std::abs(dayCount) + newTime->tm_yday;
-    dayCount = std::min(dayCount, 90); //prevent overloading the message bus if the gamee wasn't loaded for a long time
+    if (dayCount < 0) dayCount += 365;
+    dayCount = std::min(dayCount, 90); //prevent overloading the message bus if the game wasn't loaded for a long time
     for (auto i = 0u; i < dayCount; ++i)
     {
         auto dayChangeMsg = m_messageBus.post<float>(Message::DayChanged);
