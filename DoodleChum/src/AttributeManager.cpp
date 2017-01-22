@@ -361,6 +361,7 @@ void AttribManager::initValues()
     m_stats.totalIncoming = initialIncome;
     m_stats.totalOutGoing = 0;
     m_stats.dead = false;
+    m_stats.age = 0;
         
     m_personalAttribs[Personal::Health] = 100.f;
     m_personalAttribs[Personal::Hunger] = xy::Util::Random::value(30.f, 45.f);

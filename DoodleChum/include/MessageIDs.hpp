@@ -57,7 +57,8 @@ namespace Command
         TopTab        = 0x100,
         RightTab      = 0x200,
         MiniGame      = 0x400,
-        RouletteWheel = 0x800
+        RouletteWheel = 0x800,
+        RouletteBall  = 0x1000
     };
 }
 
@@ -164,7 +165,8 @@ namespace Message
             PrintEnd,
             NoMoney,
             MiniGameOpen,
-            MiniGameClose
+            MiniGameClose,
+            KeyPress
         }type;
         float positionX = 0.f;
         float positionY = 0.f;

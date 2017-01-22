@@ -59,7 +59,23 @@ DisplayController::DisplayController(xy::MessageBus& mb)
 
 #endif //_DEBUG_
 
-    //TODO message handler for close button
+    m_closeButtonLocal = { 312.f, 380.f, 64.f, 46.f };
+
+    //message handler for close button
+    xy::Component::MessageHandler mh;
+    mh.id = Message::Interface;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::InterfaceEvent>();
+        if (data.type == Message::InterfaceEvent::MouseClick)
+        {
+            if (m_closeButtonGlobal.contains(data.positionX, data.positionY))
+            {
+                show(false);
+            }
+        }
+    };
+    addMessageHandler(mh);
 }
 
 DisplayController::~DisplayController()
@@ -89,6 +105,8 @@ void DisplayController::entityUpdate(xy::Entity& entity, float dt)
         {
             entity.move(distance * (dt * 4.f));
         }
+
+        m_closeButtonGlobal = entity.getTransform().transformRect(m_closeButtonLocal);
     }
 }
 

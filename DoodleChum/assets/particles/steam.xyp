@@ -1,10 +1,10 @@
 {
   "Editor": {
-    "EmitterPosition": "0, 0",
+    "EmitterPosition": "-6, 74",
     "BackgroundColour": 255,
     "EnableMovement": false
   },
-  "ReleaseCount": 4,
+  "ReleaseCount": 1,
   "Delay": 0.0,
   "Duration": -1.0,
   "Texture": "assets/images/particles/puff01.png",
@@ -13,7 +13,7 @@
   "ParticleSize": "8, 8",
   "ParticlePosition": "0, 0",
   "FollowParent": false,
-  "Lifetime": 2.0,
+  "Lifetime": 3.6,
   "InitialVelocity": "0, -41",
   "RandomInitialVelocities": [],
   "EmitRate": 10.0,
@@ -58,7 +58,7 @@
       "Data": [
         255.0,
         -1.0,
-        2.0
+        3.2
       ]
     }
   ]

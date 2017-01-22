@@ -195,6 +195,12 @@
     <ClInclude Include="include\MGDisplayController.hpp">
       <Filter>Header Files\Controllers\minigame</Filter>
     </ClInclude>
+    <ClInclude Include="include\MGRoulette.hpp">
+      <Filter>Header Files\Controllers\minigame</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MGPowerbar.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -328,6 +334,12 @@
     </ClCompile>
     <ClCompile Include="src\MGDisplayController.cpp">
       <Filter>Source Files\Controllers\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGRoulette.cpp">
+      <Filter>Source Files\Controllers\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGPowerbar.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

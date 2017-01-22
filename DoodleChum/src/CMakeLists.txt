@@ -1,4 +1,3 @@
-#add source files used by your project here
 set(PROJECT_SRC
   ${PROJECT_DIR}/AttributeManager.cpp
   ${PROJECT_DIR}/Background.cpp
@@ -19,6 +18,8 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/MenuState.cpp
   ${PROJECT_DIR}/MGDisplayController.cpp
+  ${PROJECT_DIR}/MGPowerbar.cpp
+  ${PROJECT_DIR}/MGRoulette.cpp
   ${PROJECT_DIR}/MusicTask.cpp
   ${PROJECT_DIR}/PathFinder.cpp
   ${PROJECT_DIR}/PersonalTab.cpp

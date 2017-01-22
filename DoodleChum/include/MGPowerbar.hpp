@@ -25,27 +25,43 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_MGDISPLAY_HPP_
-#define DC_MGDISPLAY_HPP_
+#ifndef DC_POWERBAR_HPP_
+#define DC_POWERBAR_HPP_
 
-#include <xygine/components/Component.hpp>
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
-class DisplayController final : public xy::Component
+#include <array>
+
+namespace sf
+{
+    class Texture;
+}
+
+class Powerbar final : public sf::Drawable, public sf::Transformable
 {
 public:
-    explicit DisplayController(xy::MessageBus&);
-    ~DisplayController();
+    explicit Powerbar(const sf::Texture&);
+    Powerbar() = default;
 
-    xy::Component::Type type() const override { return xy::Component::Type::Script; }
-    void entityUpdate(xy::Entity&, float) override;
+    void reset();
+    float getValue() const;
 
-    void show(bool = true);
+    void update(float);
+
+    const sf::FloatRect& getLocalBounds() const { return m_localBounds; }
+    sf::FloatRect getGlobalBounds() const { return getTransform().transformRect(m_localBounds); }
 
 private:
-    bool m_moving;
-    sf::Vector2f m_target;
-    sf::FloatRect m_closeButtonLocal;
-    sf::FloatRect m_closeButtonGlobal;
+    const sf::Texture& m_texture;
+    std::array<sf::Vertex, 8u> m_vertices;
+
+    std::size_t m_wavetableIdx;
+    sf::FloatRect m_localBounds;
+
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    void updateIndicator();
 };
 
-#endif //DC_MGDISPLAY_HPP_
+#endif //DC_POWERBAR_HPP_
