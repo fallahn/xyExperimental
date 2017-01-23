@@ -210,6 +210,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\MGDisplayController.cpp" />
     <ClCompile Include="src\MGPowerbar.cpp" />
     <ClCompile Include="src\MGRoulette.cpp" />
+    <ClCompile Include="src\MiniGames.cpp" />
     <ClCompile Include="src\MusicTask.cpp" />
     <ClCompile Include="src\PathFinder.cpp" />
     <ClCompile Include="src\PersonalTab.cpp" />

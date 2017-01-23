@@ -110,6 +110,7 @@ void Game::initialise()
     {
         m_config.insert("play_full_tracks", false);
         m_config.insert("use_shadowmapping", true);
+        m_config.insert("play_minigame", true);
         m_config.save(cfgName);
     }
     

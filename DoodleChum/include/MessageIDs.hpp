@@ -205,6 +205,7 @@ namespace Message
         {
             ToggleShadowMapping,
             ToggleFullTrack,
+            ToggleMinigame,
             ResetGame
         }action;
         bool value = false;

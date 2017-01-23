@@ -259,7 +259,7 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(text);
     
     auto soundSlider = std::make_shared<xy::UI::Slider>(m_font, m_textureResource.get("assets/images/ui/slider_handle.png"), 375.f);
-    soundSlider->setPosition(620.f, 554.f);
+    soundSlider->setPosition(620.f, 524.f);
     soundSlider->setString("Volume");
     soundSlider->setTextColour(sf::Color::Black);
     soundSlider->setBarColour(sf::Color::Black);
@@ -276,7 +276,7 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(soundSlider);
 
     auto muteCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
-    muteCheckbox->setPosition(1060.f, 534.f);
+    muteCheckbox->setPosition(1060.f, 504.f);
     muteCheckbox->setString("Mute");
     muteCheckbox->setTextColour(sf::Color::Black);
     muteCheckbox->addCallback([this, soundSlider](const xy::UI::CheckBox* checkBox)
@@ -289,7 +289,7 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(muteCheckbox);
 
     auto resolutionBox = std::make_shared<xy::UI::Selection>(m_font, m_textureResource.get("assets/images/ui/scroll_arrow.png"), 375.f);
-    resolutionBox->setPosition(620.f, 604.f);
+    resolutionBox->setPosition(620.f, 574.f);
     resolutionBox->setTextColour(sf::Color::Black);
 
     const auto& modes = getContext().appInstance.getVideoSettings().AvailableVideoModes;
@@ -311,14 +311,14 @@ void MenuState::buildOptions()
     m_optionContainer.addControl(resolutionBox);
 
     auto fullscreenCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
-    fullscreenCheckbox->setPosition(1060.f, 604.f);
+    fullscreenCheckbox->setPosition(1060.f, 574.f);
     fullscreenCheckbox->setString("Full Screen");
     fullscreenCheckbox->setTextColour(sf::Color::Black);
     fullscreenCheckbox->check((getContext().appInstance.getVideoSettings().WindowStyle & sf::Style::Fullscreen) != 0);
     m_optionContainer.addControl(fullscreenCheckbox);
 
     auto shadowCheckbox = std::make_shared<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
-    shadowCheckbox->setPosition(1060.f, 674.f);
+    shadowCheckbox->setPosition(1060.f, 644.f);
     shadowCheckbox->setString("Shadow Maps");
     shadowCheckbox->setTextColour(sf::Color::Black);   
     shadowCheckbox->addCallback([this](const xy::UI::CheckBox* cb)
@@ -334,7 +334,7 @@ void MenuState::buildOptions()
 
     auto fullTrackCheckbox = xy::UI::create<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
     fullTrackCheckbox->setString("Play full audio tracks");
-    fullTrackCheckbox->setPosition(620.f, 674.f);
+    fullTrackCheckbox->setPosition(620.f, 644.f);
     fullTrackCheckbox->setTextColour(sf::Color::Black);
     fullTrackCheckbox->addCallback([this](const xy::UI::CheckBox* cb)
     {
@@ -346,6 +346,21 @@ void MenuState::buildOptions()
     }, xy::UI::CheckBox::Event::CheckChanged);
     fullTrackCheckbox->check(m_config["play_full_tracks"].asBool());
     m_optionContainer.addControl(fullTrackCheckbox);
+
+    auto minigameCheckbox = xy::UI::create<xy::UI::CheckBox>(m_font, m_textureResource.get("assets/images/ui/checkbox.png"));
+    minigameCheckbox->setString("Enable mini-games");
+    minigameCheckbox->setPosition(800.f, 714.f);
+    minigameCheckbox->setTextColour(sf::Color::Black);
+    minigameCheckbox->addCallback([this](const xy::UI::CheckBox* cb)
+    {
+        auto msg = m_messageBus.post<Message::SystemEvent>(Message::System);
+        msg->action = Message::SystemEvent::ToggleMinigame;
+        msg->value = cb->checked();
+
+        m_config["play_minigame"] = cb->checked();
+    }, xy::UI::CheckBox::Event::CheckChanged);
+    minigameCheckbox->check(m_config["play_minigame"].asBool());
+    m_optionContainer.addControl(minigameCheckbox);
 
     auto applyButton = std::make_shared<xy::UI::Button>(m_font, m_textureResource.get("assets/images/ui/small_button.png"));
     applyButton->setString("Apply");

@@ -21,6 +21,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/MGPowerbar.cpp
   ${PROJECT_DIR}/MGRoulette.cpp
   ${PROJECT_DIR}/MusicTask.cpp
+  ${PROJECT_DIR}/MiniGames.cpp
   ${PROJECT_DIR}/PathFinder.cpp
   ${PROJECT_DIR}/PersonalTab.cpp
   ${PROJECT_DIR}/PianoTask.cpp

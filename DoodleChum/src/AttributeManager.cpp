@@ -413,7 +413,7 @@ void AttribManager::updateHealth()
     if (m_personalAttribs[Personal::Health] < 5 && !m_stats.dead)
     {
         m_stats.dead = true;
-        m_stats.gameEndTime = std::time(nullptr);
+        m_stats.gameEndTime = m_stats.gameStartTime + (m_stats.age * 86164);//std::time(nullptr);
 
         auto msg = m_messageBus.post<Message::PlayerEvent>(Message::Player);
         msg->action = Message::PlayerEvent::Died;

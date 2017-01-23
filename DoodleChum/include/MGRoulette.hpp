@@ -31,6 +31,9 @@ source distribution.
 #include <MGPowerbar.hpp>
 
 #include <xygine/components/Component.hpp>
+#include <xygine/physics/World.hpp>
+#include <xygine/BitmapFont.hpp>
+#include <xygine/BitmapText.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -41,10 +44,11 @@ namespace xy
     class Scene;
 }
 
+class AttribManager;
 class RouletteGame final : public xy::Component, public sf::Drawable
 {
 public:
-    RouletteGame(xy::MessageBus&, xy::TextureResource&, xy::Scene&);
+    RouletteGame(xy::MessageBus&, xy::TextureResource&, xy::Scene&, const AttribManager&);
     ~RouletteGame() = default;
 
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
@@ -56,18 +60,27 @@ private:
     
     xy::TextureResource& m_textureResource;
     xy::Scene& m_scene;
+    const AttribManager& m_attribManager;
     
     enum class State
     {
-        PlaceBet, Charging, Running
+        PlaceBet, Charging, Running, GameOver
     }m_currentState;
 
     float m_chargeTimeout;
     float m_chargeTime;
     bool m_wheelActive;
 
+    std::int32_t m_wheelValue;
+    std::int32_t m_triesLeft;
+
     Powerbar m_powerbar;
     sf::Sprite m_reflection;
+    xy::BitmapFont m_font;
+    xy::BitmapText m_gameOverText;
+    xy::BitmapText m_pressSpaceText;
+    xy::BitmapText m_triesText;
+    xy::BitmapText m_creditText;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
     void startWheel();

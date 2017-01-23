@@ -398,7 +398,7 @@ void WorldClientState::draw()
 #ifdef _DEBUG_
     //rw.setView(getContext().defaultView);
     //rw.draw(m_pathFinder);
-    rw.draw(m_physWorld);
+    //rw.draw(m_physWorld);
 #endif //_DEBUG_    
 }
 
@@ -1075,12 +1075,7 @@ namespace
 #include <HouseholdTab.hpp>
 
 #include <xygine/components/SfDrawableComponent.hpp>
-#include <xygine/physics/RigidBody.hpp>
-#include <xygine/physics/CollisionCircleShape.hpp>
-#include <xygine/physics/JointHinge.hpp>
-#include <xygine/physics/CollisionPolygonShape.hpp>
 #include <MGDisplayController.hpp>
-#include <MGRoulette.hpp>
 
 void WorldClientState::initUI()
 {
@@ -1140,8 +1135,10 @@ void WorldClientState::initMiniGame()
 
     //preload all the textures here for each game
     m_textureResource.get("assets/images/minigames/roulette/ball.png").setSmooth(true);
+    m_textureResource.get("assets/images/minigames/roulette/wheel.png").setSmooth(true);
     m_textureResource.get("assets/images/minigames/roulette/powerbar.png");
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
+    m_textureResource.get("assets/fonts/charset_transparent.png");
 }
 
 namespace
@@ -1149,9 +1146,6 @@ namespace
     const std::string musicPath("assets/sound/music/");
     const std::string pianoPath("assets/sound/piano/");
     const std::string TVPath("assets/sound/fx/tv/");
-
-    const sf::Vector2f roulettePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
-    const float rouletteRadius = 260.f;
 }
 
 void WorldClientState::initSounds()
@@ -1491,102 +1485,6 @@ void WorldClientState::initSounds()
         }
     }
     if (count > 0) m_scene.addEntity(entity, xy::Scene::Layer::UI);
-}
-
-void WorldClientState::createRoulette()
-{
-    auto staticBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
-    auto gameController = xy::Component::create<RouletteGame>(m_messageBus, m_textureResource, m_scene);
-
-    auto entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
-    entity->addCommandCategories(Command::ID::MiniGame);
-    auto bPtr = entity->addComponent(staticBody);
-    entity->addComponent(gameController);
-
-    m_scene.addEntity(entity, xy::Scene::Layer::UI);
-
-    auto rotatingBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
-    rotatingBody->setAngularDamping(0.45f);
-    auto angle = xy::Util::Const::TAU / 7.f;
-
-    std::vector<sf::Vector2f> points(7);
-    for (auto i = 0u; i < 7u; ++i)
-    {
-        auto theta = angle * i;
-        points[i].x = std::sin(theta);
-        points[i].y = std::cos(theta);
-        points[i] *= rouletteRadius;
-    }
-
-    for (auto i = 0; i < 7; ++i)
-    {
-        auto nextPoint = points[(i + 1) % points.size()];
-        std::vector<sf::Vector2f> poly =
-        {
-            points[i],
-            nextPoint
-        };
-        poly.push_back(poly[0] - poly[1]);
-        float temp = poly[2].y;
-        poly[2].y = -poly[2].x;
-        poly[2].x = temp;
-        poly[2] *= 1.1f;
-
-        xy::Physics::CollisionPolygonShape ps(poly);
-        ps.setDensity(0.8f);
-        ps.setRestitution(0.4f);
-        ps.setFriction(0.05f);
-        ps.setIsSensor(false);
-        rotatingBody->addCollisionShape(ps);
-        
-        poly[0] = points[i] + ((nextPoint - points[i]) / 2.f);
-        poly[1] = nextPoint;
-        poly[2] = nextPoint + ((points[(i + 2) % points.size()] - nextPoint) / 2.f);
-        poly.emplace_back();
-        ps.setPoints(poly);
-        ps.setDensity(0.005f);
-        ps.setIsSensor(true);
-        rotatingBody->addCollisionShape(ps);
-    }
-    
-    //needs a shape for the pivot / friction
-    xy::Physics::CollisionCircleShape cs(80.f);
-    cs.setRestitution(0.2f);
-    cs.setDensity(0.5f);
-    cs.setFriction(0.25f);
-    rotatingBody->addCollisionShape(cs);
-
-    xy::Physics::HingeJoint hj(*bPtr, roulettePosition);
-    rotatingBody->addJoint(hj);
-
-    entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
-    entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteWheel);
-    entity->addComponent(rotatingBody);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
-
-
-    //ball
-    auto ballBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Dynamic);
-    cs.setRadius(14.f);
-    cs.setRestitution(0.4f);
-    cs.setFriction(2.1f);
-    cs.setDensity(2.f);
-    ballBody->addCollisionShape(cs);
-    ballBody->isBullet(true);
-
-    auto ballDwb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
-    ballDwb->getDrawable().setTexture(m_textureResource.get("assets/images/minigames/roulette/ball.png"));
-    xy::Util::Position::centreOrigin(ballDwb->getDrawable());
-
-    entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
-    entity->move(0.f, 240.f);
-    entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteBall);
-    entity->addComponent(ballBody);
-    entity->addComponent(ballDwb);
-    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }
 
 namespace
