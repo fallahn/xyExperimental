@@ -159,6 +159,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\MGDisplayController.hpp" />
     <ClInclude Include="include\MGPowerbar.hpp" />
     <ClInclude Include="include\MGRoulette.hpp" />
+    <ClInclude Include="include\MGSelector.hpp" />
     <ClInclude Include="include\MusicTask.hpp" />
     <ClInclude Include="include\PathFinder.hpp" />
     <ClInclude Include="include\PersonalTab.hpp" />
@@ -210,6 +211,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\MGDisplayController.cpp" />
     <ClCompile Include="src\MGPowerbar.cpp" />
     <ClCompile Include="src\MGRoulette.cpp" />
+    <ClCompile Include="src\MGSelector.cpp" />
     <ClCompile Include="src\MiniGames.cpp" />
     <ClCompile Include="src\MusicTask.cpp" />
     <ClCompile Include="src\PathFinder.cpp" />

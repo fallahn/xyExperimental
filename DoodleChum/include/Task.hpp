@@ -55,6 +55,8 @@ public:
     virtual void update(float) = 0;
     bool completed() const { return m_completed; }
 
+    virtual Message::TaskEvent::Name getName() const = 0;
+
 protected:
     xy::Entity&  getEntity() { return m_entity; }
     void setCompleted(Message::TaskEvent::Name name)

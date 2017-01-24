@@ -20,6 +20,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/MGDisplayController.cpp
   ${PROJECT_DIR}/MGPowerbar.cpp
   ${PROJECT_DIR}/MGRoulette.cpp
+  ${PROJECT_DIR}/MGSelector.cpp
   ${PROJECT_DIR}/MusicTask.cpp
   ${PROJECT_DIR}/MiniGames.cpp
   ${PROJECT_DIR}/PathFinder.cpp

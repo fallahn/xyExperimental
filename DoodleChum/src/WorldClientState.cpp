@@ -1068,6 +1068,17 @@ namespace
 {
     const float tabWidth = 450.f;
     const float tabHeight = 180.f;
+
+    const std::string pixelate = R"(
+        #version 120
+        uniform sampler2D u_texture;
+
+        void main()
+        {
+            float factor = 180.0;
+            vec2 pos = floor(gl_TexCoord[0].xy * factor + 0.5) / factor;
+            gl_FragColor = texture2D(u_texture, pos) * gl_Color;
+        })";
 }
 
 #include <TimeTab.hpp>
@@ -1075,6 +1086,7 @@ namespace
 #include <HouseholdTab.hpp>
 
 #include <xygine/components/SfDrawableComponent.hpp>
+#include <xygine/shaders/PostOldSchool.hpp>
 #include <MGDisplayController.hpp>
 
 void WorldClientState::initUI()
@@ -1137,8 +1149,12 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/roulette/ball.png").setSmooth(true);
     m_textureResource.get("assets/images/minigames/roulette/wheel.png").setSmooth(true);
     m_textureResource.get("assets/images/minigames/roulette/powerbar.png");
+    m_textureResource.get("assets/images/minigames/roulette/chance_selector.png");
+    m_textureResource.get("assets/images/minigames/roulette/credit_selector.png");
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
     m_textureResource.get("assets/fonts/charset_transparent.png");
+
+    //m_shaderResource.preload(xy::Shader::Count, /*xy::Shader::PostOldSchool::fragment*/pixelate, sf::Shader::Fragment);
 }
 
 namespace

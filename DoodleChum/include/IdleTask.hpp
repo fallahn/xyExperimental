@@ -39,6 +39,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Idle; }
+
 private:
     std::int32_t m_animID;
     std::int32_t m_taskID;

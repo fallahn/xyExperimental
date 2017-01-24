@@ -43,6 +43,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Travel; }
+
 private:
     std::vector<sf::Vector2f> m_points;
     int m_currentAnimation;

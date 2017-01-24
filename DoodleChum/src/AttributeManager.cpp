@@ -276,13 +276,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
                     break;
                 }
 
-                m_stats.currentIncome -= cost;
-                m_stats.totalOutGoing += cost;
-
-                //raise a message saying money went out
-                auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
-                payMsg->action = Message::AttribEvent::SpentMoney;
-                payMsg->value = m_stats.currentIncome;
+                spend(cost);
             }
             else //can't do this :/
             {
@@ -301,13 +295,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
         {
             m_stats.daysToPayDay = daysPerWeek;
             auto pay = static_cast<std::int32_t>(payPerWeek * (m_householdAttribs[Household::IncomeRate] / 100.f));
-            m_stats.currentIncome += pay;
-            m_stats.totalIncoming += pay;
-
-            //raise a message saying we got paid $$$
-            auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
-            payMsg->action = Message::AttribEvent::GotPaid;
-            payMsg->value = m_stats.currentIncome;
+            earn(pay);
         }
     }
 }
@@ -344,6 +332,28 @@ std::string AttribManager::getIncomeStats() const
 {
     std::string retVal = "Total Earned: " + std::to_string(m_stats.totalIncoming) + "    Total Spent: " + std::to_string(m_stats.totalOutGoing);
     return std::move(retVal);
+}
+
+void AttribManager::earn(std::int32_t amount)
+{
+    m_stats.currentIncome += amount;
+    m_stats.totalIncoming += amount;
+
+    //raise a message saying we got paid $$$
+    auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
+    payMsg->action = Message::AttribEvent::GotPaid;
+    payMsg->value = m_stats.currentIncome;
+}
+
+void AttribManager::spend(std::int32_t amount)
+{
+    m_stats.currentIncome -= amount;
+    m_stats.totalOutGoing += amount;
+
+    //raise a message saying money went out
+    auto payMsg = m_messageBus.post<Message::AttribEvent>(Message::Attribute);
+    payMsg->action = Message::AttribEvent::SpentMoney;
+    payMsg->value = m_stats.currentIncome;
 }
 
 void AttribManager::reset()

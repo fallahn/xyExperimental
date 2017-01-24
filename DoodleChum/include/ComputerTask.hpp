@@ -33,11 +33,15 @@ source distribution.
 class ComputerTask final : public Task
 {
 public:
-    ComputerTask(xy::Entity&, xy::MessageBus&);
+    ComputerTask(xy::Entity&, xy::MessageBus&, float);
     ~ComputerTask() = default;
 
     void onStart() override;
     void update(float) override;
+
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::PlayComputer; }
+
+    void end();
 
 private:
     float m_time;

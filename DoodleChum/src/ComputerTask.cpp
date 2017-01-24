@@ -28,9 +28,9 @@ source distribution.
 #include <ComputerTask.hpp>
 #include <MessageIDs.hpp>
 
-ComputerTask::ComputerTask(xy::Entity& e, xy::MessageBus& mb)
+ComputerTask::ComputerTask(xy::Entity& e, xy::MessageBus& mb, float time)
     : Task(e, mb),
-    m_time(15.f)
+    m_time(time)
 {
 
 }
@@ -49,4 +49,9 @@ void ComputerTask::update(float dt)
     {
         setCompleted(Message::TaskEvent::PlayComputer);
     }
+}
+
+void ComputerTask::end()
+{
+    m_time = 0.f;
 }

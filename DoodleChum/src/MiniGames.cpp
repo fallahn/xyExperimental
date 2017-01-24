@@ -36,6 +36,8 @@ source distribution.
 #include <xygine/physics/JointHinge.hpp>
 #include <xygine/physics/CollisionPolygonShape.hpp>
 
+#include <xygine/shaders/Default.hpp>
+
 namespace
 {
     const sf::Vector2f roulettePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
@@ -52,6 +54,7 @@ void WorldClientState::createRoulette()
 {
     auto staticBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
     auto gameController = xy::Component::create<RouletteGame>(m_messageBus, m_textureResource, m_scene, m_attribManager);
+    //gameController->setShader(&m_shaderResource.get(xy::Shader::Count));
 
     auto entity = xy::Entity::create(m_messageBus);
     entity->setPosition(roulettePosition);
@@ -122,6 +125,7 @@ void WorldClientState::createRoulette()
 
     auto wheelDrb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
     wheelDrb->getDrawable().setTexture(m_textureResource.get("assets/images/minigames/roulette/wheel.png"));
+    //wheelDrb->setShader(&m_shaderResource.get(xy::Shader::Count));
     xy::Util::Position::centreOrigin(wheelDrb->getDrawable());
 
     entity = xy::Entity::create(m_messageBus);
@@ -143,6 +147,7 @@ void WorldClientState::createRoulette()
 
     auto ballDwb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
     ballDwb->getDrawable().setTexture(m_textureResource.get("assets/images/minigames/roulette/ball.png"));
+    //ballDwb->setShader(&m_shaderResource.get(xy::Shader::Count));
     xy::Util::Position::centreOrigin(ballDwb->getDrawable());
 
     entity = xy::Entity::create(m_messageBus);

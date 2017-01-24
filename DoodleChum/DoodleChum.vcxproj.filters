@@ -49,6 +49,12 @@
     <Filter Include="Source Files\Controllers\minigame">
       <UniqueIdentifier>{b5ae92a1-3a32-49b0-8a77-3cc0b3e2a200}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI\minigame">
+      <UniqueIdentifier>{ac18924d-408e-48a4-85e6-5857fe89bcca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI\minigame">
+      <UniqueIdentifier>{59a68e5a-5e47-4de0-9391-871ad6a03541}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.hpp">
@@ -199,7 +205,10 @@
       <Filter>Header Files\Controllers\minigame</Filter>
     </ClInclude>
     <ClInclude Include="include\MGPowerbar.hpp">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files\UI\minigame</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MGSelector.hpp">
+      <Filter>Header Files\UI\minigame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -338,11 +347,14 @@
     <ClCompile Include="src\MGRoulette.cpp">
       <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
-    <ClCompile Include="src\MGPowerbar.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\MiniGames.cpp">
       <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGPowerbar.cpp">
+      <Filter>Source Files\UI\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGSelector.cpp">
+      <Filter>Source Files\UI\minigame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

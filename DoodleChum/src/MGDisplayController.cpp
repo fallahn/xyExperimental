@@ -41,7 +41,8 @@ namespace
 DisplayController::DisplayController(xy::MessageBus& mb)
     : xy::Component (mb, this),
     m_moving    (false),
-    m_target    (outTarget)
+    m_target    (outTarget),
+    m_enable    (false)
 {
 #ifdef _DEBUG_
 
@@ -73,6 +74,40 @@ DisplayController::DisplayController(xy::MessageBus& mb)
             {
                 show(false);
             }
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::System;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::SystemEvent>();
+        if (data.action == Message::SystemEvent::ToggleMinigame)
+        {
+            m_enable = data.value;
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::Animation;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Computer
+            && m_enable)
+        {
+            show(true);
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::TaskCompleted;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::TaskEvent>();
+        if (data.taskName == Message::TaskEvent::PlayComputer)
+        {
+            show(false);
         }
     };
     addMessageHandler(mh);

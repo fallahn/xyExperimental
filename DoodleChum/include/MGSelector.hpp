@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2016
+Matt Marchant 2017
 http://trederia.blogspot.com
 
 DoodleChum - Zlib license.
@@ -25,28 +25,48 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#ifndef DC_SLEEP_TASK_HPP_
-#define DC_SLEEP_TASK_HPP_
+#ifndef DC_MG_SELECTOR_HPP_
+#define DC_MG_SELECTOR_HPP_
 
-#include <Task.hpp>
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
-class SleepTask final : public Task
+#include <array>
+
+namespace sf
+{
+    class Texture;
+}
+
+class Selector final : public sf::Drawable, public sf::Transformable
 {
 public:
-    SleepTask(xy::Entity&, xy::MessageBus&, const sf::Vector2f&, float);
-    ~SleepTask() = default;
+    explicit Selector(const sf::Texture&);
+    ~Selector() = default;
 
-    void onStart() override;
-    void update(float) override;
+    void update(float);
+    void click(sf::Vector2f);
 
-    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Sleep; }
+    std::size_t getIndex() const { return m_currentIndex; }
+
+    const sf::FloatRect& getLocalBounds() const { return m_localBounds; }
+    sf::FloatRect getGlobalBounds() const { return getTransform().transformRect(m_localBounds); }
 
 private:
-    float m_time;
-    sf::Vector2f m_position;
+    const sf::Texture& m_texture;
+    std::size_t m_currentIndex;
 
-    float m_rotation;
-    float m_rotationSpeed;
+    sf::FloatRect m_topButton;
+    sf::FloatRect m_bottomButton;
+
+    float m_target;
+
+    sf::FloatRect m_localBounds;
+
+    std::array<sf::Vertex, 8u> m_vertices;
+    void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 
-#endif //DC_SLEEP_TASK_HPP_
+
+#endif //DC_MG_SELECTOR_HPP_

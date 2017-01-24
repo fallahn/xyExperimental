@@ -47,6 +47,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::CatTask; }
+
 private:
     Action m_action;
     float m_time;

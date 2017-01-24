@@ -35,25 +35,35 @@ source distribution.
 #include <xygine/Reports.hpp>
 #include <xygine/util/Random.hpp>
 #include <xygine/util/Position.hpp>
+#include <xygine/util/Vector.hpp>
 #include <xygine/physics/RigidBody.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
-RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scene& scene, const AttribManager& am)
+namespace
+{
+    const float summaryTime = 3.f;
+}
+
+RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scene& scene, AttribManager& am)
     : xy::Component     (mb, this),
     m_textureResource   (tr),
     m_scene             (scene),
     m_attribManager     (am),
-    m_currentState      (State::PlaceBet),
+    m_entity            (nullptr),
+    m_currentState      ((am.getIncome() > 50) ? State::PlaceBet : State::GameOver),
     m_chargeTimeout     (xy::Util::Random::value(9.f, 11.f)),
     m_chargeTime        (0.f),
     m_wheelActive       (false),
+    m_summaryTime       (0.f),
     m_wheelValue        (6),
     m_triesLeft         (5),
     m_powerbar          (tr.get("assets/images/minigames/roulette/powerbar.png")),
-    m_font              (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f })
+    m_font              (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f }),
+    m_creditSelector    (tr.get("assets/images/minigames/roulette/credit_selector.png")),
+    m_chanceSelector    (tr.get("assets/images/minigames/roulette/chance_selector.png"))
 {
     xy::Component::MessageHandler mh;
     mh.id = Message::Interface;
@@ -74,6 +84,15 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
                 {                    
                     startWheel();
                 }
+            }
+        }
+        else if (data.type == Message::InterfaceEvent::MouseClick)
+        {
+            if (m_currentState == State::PlaceBet)
+            {
+                auto point = m_entity->getInverseTransform().transformPoint(data.positionX, data.positionY);
+                m_chanceSelector.click(point);
+                m_creditSelector.click(point);
             }
         }
     };
@@ -97,11 +116,29 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
     };
     addMessageHandler(mh);
 
+    mh.id = Message::Attribute;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AttribEvent>();
+        if (data.action == Message::AttribEvent::GotPaid ||
+            data.action == Message::AttribEvent::SpentMoney)
+        {
+            m_creditText.setString("Credit: " + std::to_string(data.value));
+        }
+    };
+    addMessageHandler(mh);
+
     m_powerbar.setPosition(0.f, 300.f);
     m_reflection.setTexture(tr.get("assets/images/ui/bob_screen.png"));
     m_reflection.setScale(2.f, 2.f);
     xy::Util::Position::centreOrigin(m_reflection);
     m_reflection.setPosition(0.f, 66.f);
+
+    xy::Util::Position::centreOrigin(m_chanceSelector);
+    m_chanceSelector.setPosition(-280.f, 270.f);
+
+    xy::Util::Position::centreOrigin(m_creditSelector);
+    m_creditSelector.setPosition(280.f, 270.f);
 
     m_gameOverText.setFont(m_font);
     m_gameOverText.setColour(sf::Color::Black);
@@ -109,6 +146,8 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
     m_gameOverText.setScale(5.f, 5.f);
     m_gameOverText.setPosition(0.f, 100.f);
     xy::Util::Position::centreOrigin(m_gameOverText);
+
+    m_summaryText = m_gameOverText;
 
     m_pressSpaceText.setFont(m_font);
     m_pressSpaceText.setString("Press Space");
@@ -146,9 +185,12 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
     switch (m_currentState)
     {
     default: break;
-    case State::PlaceBet: //bet amount slider / bet outcome checkbox
+    case State::PlaceBet:
     {
         flash();
+
+        m_chanceSelector.update(dt);
+        m_creditSelector.update(dt);
     }
         break;
     case State::Charging: //moving power bar - -60 to 60, min 30
@@ -169,7 +211,8 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
         cmd.category = Command::ID::RouletteBall;
         cmd.action = [this](xy::Entity& entity, float)
         {
-            m_wheelActive = entity.getComponent<xy::Physics::RigidBody>()->awake();
+            m_wheelActive = xy::Util::Vector::lengthSquared(entity.getComponent<xy::Physics::RigidBody>()->getLinearVelocity()) > 1.5f;
+            //m_wheelActive = entity.getComponent<xy::Physics::RigidBody>()->awake();
         };
         m_scene.sendCommand(cmd);
 
@@ -178,20 +221,55 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
             //wheel has stopped, award points
             if (m_wheelValue == 6)
             {
-                std::cout << "Lucky 7!" << std::endl;
+                //std::cout << "Lucky 7!" << std::endl;
+                if (m_chanceSelector.getIndex() == 2)
+                {
+                    win();
+                }
+                else
+                {
+                    lose();
+                }
             }
             else if (m_wheelValue % 2 == 0)
             {
-                std::cout << "Evens!" << std::endl;
+                //std::cout << "Evens!" << std::endl;
+                if (m_chanceSelector.getIndex() == 0)
+                {
+                    win();
+                }
+                else
+                {
+                    lose();
+                }
             }
             else
             {
-                std::cout << "Odds!" << std::endl;
+                //std::cout << "Odds!" << std::endl;
+                if (m_chanceSelector.getIndex() == 1)
+                {
+                    win();
+                }
+                else
+                {
+                    lose();
+                }
             }
 
             m_triesLeft--;
             m_triesText.setString("Tries Left: " + std::to_string(m_triesLeft));
-            if (m_triesLeft > 0)
+            
+            m_currentState = State::Summary;
+            m_summaryTime = summaryTime;          
+        }
+    }
+        break;
+    case State::Summary:
+    {
+        m_summaryTime -= dt;
+        if (m_summaryTime < 0)
+        {
+            if (m_triesLeft > 0 && m_attribManager.getIncome() > 50)
             {
                 m_currentState = State::PlaceBet;
                 m_powerbar.reset();
@@ -212,8 +290,12 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
 
 //private
 void RouletteGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
-{
+{   
+    states.shader = getActiveShader();
     rt.draw(m_powerbar, states);
+    rt.draw(m_chanceSelector, states);
+    rt.draw(m_creditSelector, states);
+    states.shader = nullptr;
     rt.draw(m_triesText, states);
     rt.draw(m_creditText, states);
     switch (m_currentState)
@@ -222,6 +304,9 @@ void RouletteGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     case State::Charging:
     case State::PlaceBet:
         rt.draw(m_pressSpaceText, states);
+        break;
+    case State::Summary:
+        rt.draw(m_summaryText, states);
         break;
     case State::GameOver:
         rt.draw(m_gameOverText, states);
@@ -268,4 +353,55 @@ void RouletteGame::startWheel()
 
     m_currentState = State::Running;
     m_wheelActive = true;
+}
+
+void RouletteGame::win()
+{
+    m_summaryText.setString("WIN");
+    xy::Util::Position::centreOrigin(m_summaryText);
+
+    int prize = 0;
+    switch (m_creditSelector.getIndex())
+    {
+    default:
+    case 0:
+        prize = 10;
+        break;
+    case 1:
+        prize = 20;
+        break;
+    case 2:
+        prize = 50;
+        break;
+    }
+
+    if (m_chanceSelector.getIndex() == 2)
+    {
+        prize *= 4;
+    }
+
+    m_attribManager.earn(prize);
+}
+
+void RouletteGame::lose()
+{
+    m_summaryText.setString("LOSE");
+    xy::Util::Position::centreOrigin(m_summaryText);
+
+    int prize = 0;
+    switch (m_creditSelector.getIndex())
+    {
+    default:
+    case 0:
+        prize = 10;
+        break;
+    case 1:
+        prize = 20;
+        break;
+    case 2:
+        prize = 50;
+        break;
+    }
+
+    m_attribManager.spend(prize);
 }

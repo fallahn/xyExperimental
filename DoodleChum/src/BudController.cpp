@@ -88,6 +88,7 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
     m_taskData      (taskData),
     m_taskIdleData  (idleData),
     m_playFullTrack (false),
+    m_playMiniGame  (false),
     m_spriteSheet   (spriteSheet)
 {
     //set up render texture ready for animations
@@ -207,7 +208,7 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         case Message::TaskEvent::PlayComputer:
             LOG("Bob decided to play computer!", xy::Logger::Type::Info);
             //probably recycle piano animation
-            m_tasks.emplace_back(std::make_unique<ComputerTask>(*m_entity, getMessageBus()));
+            m_tasks.emplace_back(std::make_unique<ComputerTask>(*m_entity, getMessageBus(), (m_playMiniGame) ? 300.f : 15.f));
             break;
         }
 
@@ -234,6 +235,23 @@ BudController::BudController(xy::MessageBus& mb, const AttribManager& am, const 
         if (data.action == Message::SystemEvent::ToggleFullTrack)
         {
             m_playFullTrack = data.value;
+        }
+        else if (data.action == Message::SystemEvent::ToggleMinigame)
+        {
+            m_playMiniGame = data.value;
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::Interface;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::InterfaceEvent>();
+        if (data.type == Message::InterfaceEvent::MiniGameClose
+            && !m_tasks.empty()
+            && m_tasks.front()->getName() == Message::TaskEvent::PlayComputer)
+        {
+            dynamic_cast<ComputerTask*>(m_tasks.front().get())->end();
         }
     };
     addMessageHandler(mh);

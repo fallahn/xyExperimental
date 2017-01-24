@@ -40,6 +40,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Think; }
+
 private:
     float m_time;
     const AttribManager& m_attribManager;

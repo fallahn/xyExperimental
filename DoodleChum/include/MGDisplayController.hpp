@@ -46,6 +46,8 @@ private:
     sf::Vector2f m_target;
     sf::FloatRect m_closeButtonLocal;
     sf::FloatRect m_closeButtonGlobal;
+
+    bool m_enable;
 };
 
 #endif //DC_MGDISPLAY_HPP_

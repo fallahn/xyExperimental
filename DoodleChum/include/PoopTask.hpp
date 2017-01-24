@@ -39,6 +39,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Poop; }
+
 private:
     float m_time;
 };

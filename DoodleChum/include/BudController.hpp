@@ -68,6 +68,7 @@ private:
 
     std::list<Task::Ptr> m_tasks;
     bool m_playFullTrack;
+    bool m_playMiniGame;
 
     const sf::Texture& m_spriteSheet;
     xy::AnimatedDrawable::Ptr m_sprite; //unconventional but saves reinventing the wheel

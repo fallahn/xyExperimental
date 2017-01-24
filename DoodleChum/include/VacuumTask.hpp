@@ -39,6 +39,8 @@ public:
     void onStart() override;
     void update(float) override;
 
+    Message::TaskEvent::Name getName() const override { return Message::TaskEvent::Vacuum; }
+
 private:
     sf::Vector2f m_startPosition;
     bool m_returning;

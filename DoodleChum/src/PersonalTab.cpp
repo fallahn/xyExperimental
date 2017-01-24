@@ -53,7 +53,8 @@ namespace
 PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& tr, const AttribManager& am)
     : xy::Component(mb, this),
     m_attribManager(am),
-    m_entity(nullptr)
+    m_entity(nullptr),
+    m_playMiniGame(false)
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
@@ -167,8 +168,8 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
             m_messageList.clear();
             m_messageIDs.clear();
 
-            //display if tab hidden
-            if (m_entity->getPosition().x < -10)
+            //display if tab hidden and not playing minigame
+            if (!m_playMiniGame && (m_entity->getPosition().x < -10))
             {
                 m_entity->getComponent<TabComponent>()->toggle();
             }
@@ -184,6 +185,17 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
             && m_entity->getPosition().x > -10)
         {
             m_entity->getComponent<TabComponent>()->toggle();
+        }
+    };
+    addMessageHandler(mh);
+
+    mh.id = Message::System;
+    mh.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::SystemEvent>();
+        if (data.action == Message::SystemEvent::ToggleMinigame)
+        {
+            m_playMiniGame = data.value;
         }
     };
     addMessageHandler(mh);
