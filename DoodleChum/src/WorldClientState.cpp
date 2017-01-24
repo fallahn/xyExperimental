@@ -373,6 +373,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             {
                 //TODO pick random mini game
                 createRoulette();
+                //createDarts();
             }
             else if (data.type == Message::InterfaceEvent::MiniGameClose)
             {

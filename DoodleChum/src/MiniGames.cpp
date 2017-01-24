@@ -27,6 +27,7 @@ source distribution.
 
 #include <WorldClientState.hpp>
 #include <MGRoulette.hpp>
+#include <MGDarts.hpp>
 
 #include <xygine/components/SfDrawableComponent.hpp>
 #include <xygine/util/Const.hpp>
@@ -40,6 +41,7 @@ source distribution.
 
 namespace
 {
+    //TODO rename this to gamePosition or something
     const sf::Vector2f roulettePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
     const float rouletteRadius = 260.f;
 
@@ -156,5 +158,17 @@ void WorldClientState::createRoulette()
     entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteBall);
     entity->addComponent(ballBody);
     entity->addComponent(ballDwb);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+}
+
+void WorldClientState::createDarts()
+{
+    auto dartsController = xy::Component::create<DartsGame>(m_messageBus, m_textureResource, m_attribManager);
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::ID::MiniGame);
+    entity->addComponent(dartsController);
+    entity->setPosition(roulettePosition);
+
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }

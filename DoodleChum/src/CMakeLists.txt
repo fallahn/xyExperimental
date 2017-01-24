@@ -17,6 +17,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/IntroState.cpp
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/MenuState.cpp
+  ${PROJECT_DIR}/MGDarts.cpp
   ${PROJECT_DIR}/MGDisplayController.cpp
   ${PROJECT_DIR}/MGPowerbar.cpp
   ${PROJECT_DIR}/MGRoulette.cpp
