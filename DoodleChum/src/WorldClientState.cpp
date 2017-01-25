@@ -372,8 +372,8 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             if (data.type == Message::InterfaceEvent::MiniGameOpen)
             {
                 //TODO pick random mini game
-                createRoulette();
-                //createDarts();
+                //createRoulette();
+                createDarts();
             }
             else if (data.type == Message::InterfaceEvent::MiniGameClose)
             {
@@ -1072,13 +1072,13 @@ namespace
 
     const std::string pixelate = R"(
         #version 120
-        uniform sampler2D u_texture;
+        uniform sampler2D u_sourceTexture;
 
         void main()
         {
             float factor = 180.0;
             vec2 pos = floor(gl_TexCoord[0].xy * factor + 0.5) / factor;
-            gl_FragColor = texture2D(u_texture, pos) * gl_Color;
+            gl_FragColor = texture2D(u_sourceTexture, pos) * gl_Color;
         })";
 }
 
@@ -1152,6 +1152,11 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/roulette/powerbar.png");
     m_textureResource.get("assets/images/minigames/roulette/chance_selector.png");
     m_textureResource.get("assets/images/minigames/roulette/credit_selector.png");
+
+    m_textureResource.get("assets/images/minigames/darts/board.png");
+    m_textureResource.get("assets/images/minigames/darts/wheel_front.png");
+    m_textureResource.get("assets/images/minigames/darts/wheel_back.png").setSmooth(true);
+
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
     m_textureResource.get("assets/fonts/charset_transparent.png");
 

@@ -91,8 +91,8 @@ public:
     std::string getBirthdates() const;
     std::string getIncomeStats() const;
 
-    void earn(std::int32_t);
-    void spend(std::int32_t);
+    void earn(std::uint32_t);
+    void spend(std::uint32_t);
 
     void reset();
 

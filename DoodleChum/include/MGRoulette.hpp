@@ -60,7 +60,6 @@ public:
 
 private:
     
-    xy::TextureResource& m_textureResource;
     xy::Scene& m_scene;
     AttribManager& m_attribManager;
     xy::Entity* m_entity;

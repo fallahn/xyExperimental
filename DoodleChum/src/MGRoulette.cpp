@@ -49,7 +49,6 @@ namespace
 
 RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scene& scene, AttribManager& am)
     : xy::Component     (mb, this),
-    m_textureResource   (tr),
     m_scene             (scene),
     m_attribManager     (am),
     m_entity            (nullptr),
@@ -298,6 +297,7 @@ void RouletteGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     states.shader = nullptr;
     rt.draw(m_triesText, states);
     rt.draw(m_creditText, states);
+
     switch (m_currentState)
     {
     default: break;

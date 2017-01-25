@@ -334,7 +334,7 @@ std::string AttribManager::getIncomeStats() const
     return std::move(retVal);
 }
 
-void AttribManager::earn(std::int32_t amount)
+void AttribManager::earn(std::uint32_t amount)
 {
     m_stats.currentIncome += amount;
     m_stats.totalIncoming += amount;
@@ -345,7 +345,7 @@ void AttribManager::earn(std::int32_t amount)
     payMsg->value = m_stats.currentIncome;
 }
 
-void AttribManager::spend(std::int32_t amount)
+void AttribManager::spend(std::uint32_t amount)
 {
     m_stats.currentIncome -= amount;
     m_stats.totalOutGoing += amount;
@@ -532,7 +532,7 @@ bool AttribManager::load()
     auto dayCount = newTime->tm_yday - oldTime;
     if (dayCount < 0) dayCount += 365;
     dayCount = std::min(dayCount, 90); //prevent overloading the message bus if the game wasn't loaded for a long time
-    for (auto i = 0u; i < dayCount; ++i)
+    for (auto i = 0; i < dayCount; ++i)
     {
         auto dayChangeMsg = m_messageBus.post<float>(Message::DayChanged);
         *dayChangeMsg = 0.f;

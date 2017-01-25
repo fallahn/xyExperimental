@@ -30,8 +30,12 @@ source distribution.
 
 #include <MGPowerbar.hpp>
 #include <MGSelector.hpp>
+#include <MGWheel.hpp>
+#include <MGDartboard.hpp>
 
 #include <xygine/components/Component.hpp>
+#include <xygine/BitmapFont.hpp>
+#include <xygine/BitmapText.hpp>
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -51,23 +55,44 @@ public:
     xy::Component::Type type() const override { return xy::Component::Type::Drawable; }
     void entityUpdate(xy::Entity&, float) override;
     sf::FloatRect globalBounds() const override { return{ 0.f, 0.f, 1920.f, 1080.f }; }
-
+    void onStart(xy::Entity& e) override { m_entity = &e; }
 private:
 
-    xy::TextureResource& m_textureResource;
     AttribManager& m_attribManager;
+    xy::Entity* m_entity;
 
     enum class State
     {
-        PlaceBet, Charging, Shooting, Summary, GameOver
+        PlaceBet, Charging, Spinning, Shooting, Summary, GameOver
     }m_currentState;
 
     Powerbar m_powerbar;
-    Selector m_chanceSelector;
     Selector m_creditSelector;
+    Wheel m_wheel;
+    Dartboard m_dartboard;
     sf::Sprite m_reflection;
 
+    float m_chargeTimeout;
+    float m_chargeTime;
+
+    std::size_t m_dartsRemaining;
+
+    xy::BitmapFont m_font;
+    xy::BitmapText m_summaryText;
+    xy::BitmapText m_gameOverText;
+    xy::BitmapText m_pressSpaceText;
+    xy::BitmapText m_triesText;
+    xy::BitmapText m_creditText;
+    xy::BitmapText m_targetText;
+    xy::BitmapText m_targetValueText;
+    xy::BitmapText m_scoreText;
+    xy::BitmapText m_scoreValueText;
+
+    std::size_t m_target;
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+    void startWheel();
 };
 
 #endif //DC_DARTS_HPP_

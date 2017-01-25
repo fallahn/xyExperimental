@@ -41,8 +41,7 @@ source distribution.
 
 namespace
 {
-    //TODO rename this to gamePosition or something
-    const sf::Vector2f roulettePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
+    const sf::Vector2f gamePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
     const float rouletteRadius = 260.f;
 
     enum CollisionID
@@ -59,7 +58,7 @@ void WorldClientState::createRoulette()
     //gameController->setShader(&m_shaderResource.get(xy::Shader::Count));
 
     auto entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
+    entity->setPosition(gamePosition);
     entity->addCommandCategories(Command::ID::MiniGame);
     auto bPtr = entity->addComponent(staticBody);
     entity->addComponent(gameController);
@@ -122,7 +121,7 @@ void WorldClientState::createRoulette()
     cs.setFriction(0.25f);
     rotatingBody->addCollisionShape(cs);
 
-    xy::Physics::HingeJoint hj(*bPtr, roulettePosition);
+    xy::Physics::HingeJoint hj(*bPtr, gamePosition);
     rotatingBody->addJoint(hj);
 
     auto wheelDrb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
@@ -131,7 +130,7 @@ void WorldClientState::createRoulette()
     xy::Util::Position::centreOrigin(wheelDrb->getDrawable());
 
     entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
+    entity->setPosition(gamePosition);
     entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteWheel);
     entity->addComponent(rotatingBody);
     entity->addComponent(wheelDrb);
@@ -153,7 +152,7 @@ void WorldClientState::createRoulette()
     xy::Util::Position::centreOrigin(ballDwb->getDrawable());
 
     entity = xy::Entity::create(m_messageBus);
-    entity->setPosition(roulettePosition);
+    entity->setPosition(gamePosition);
     entity->move(0.f, 240.f);
     entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteBall);
     entity->addComponent(ballBody);
@@ -168,7 +167,7 @@ void WorldClientState::createDarts()
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Command::ID::MiniGame);
     entity->addComponent(dartsController);
-    entity->setPosition(roulettePosition);
+    entity->setPosition(gamePosition);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 }

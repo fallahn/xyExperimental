@@ -213,6 +213,12 @@
     <ClInclude Include="include\MGDarts.hpp">
       <Filter>Header Files\Controllers\minigame</Filter>
     </ClInclude>
+    <ClInclude Include="include\MGWheel.hpp">
+      <Filter>Header Files\UI\minigame</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MGDartboard.hpp">
+      <Filter>Header Files\UI\minigame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -361,6 +367,12 @@
     </ClCompile>
     <ClCompile Include="src\MGDarts.cpp">
       <Filter>Source Files\Controllers\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGWheel.cpp">
+      <Filter>Source Files\UI\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGDartboard.cpp">
+      <Filter>Source Files\UI\minigame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
