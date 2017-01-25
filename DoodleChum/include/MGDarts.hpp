@@ -71,11 +71,10 @@ private:
     Wheel m_wheel;
     Dartboard m_dartboard;
     sf::Sprite m_reflection;
+    sf::Sprite m_quitTip;
 
     float m_chargeTimeout;
     float m_chargeTime;
-
-    std::size_t m_dartsRemaining;
 
     xy::BitmapFont m_font;
     xy::BitmapText m_summaryText;

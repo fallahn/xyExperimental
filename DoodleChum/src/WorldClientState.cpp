@@ -371,7 +371,7 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             const auto& data = msg.getData<Message::InterfaceEvent>();
             if (data.type == Message::InterfaceEvent::MiniGameOpen)
             {
-                //TODO pick random mini game
+                //TODO switch game index
                 //createRoulette();
                 createDarts();
             }
@@ -1158,6 +1158,7 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/darts/wheel_back.png").setSmooth(true);
 
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
+    m_textureResource.get("assets/images/ui/quit_tip.png");
     m_textureResource.get("assets/fonts/charset_transparent.png");
 
     //m_shaderResource.preload(xy::Shader::Count, /*xy::Shader::PostOldSchool::fragment*/pixelate, sf::Shader::Fragment);

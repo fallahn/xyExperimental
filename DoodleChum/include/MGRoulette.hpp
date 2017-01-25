@@ -89,6 +89,8 @@ private:
     Selector m_creditSelector;
     Selector m_chanceSelector;
 
+    sf::Sprite m_quitTip;
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
     void startWheel();
     void win();

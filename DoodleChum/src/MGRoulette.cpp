@@ -163,6 +163,10 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
     m_creditText = m_triesText;
     m_creditText.setString("Credit: " + std::to_string(am.getIncome()));
     m_creditText.move(-600.f, 0.f);
+
+    m_quitTip.setTexture(tr.get("assets/images/ui/quit_tip.png"));
+    m_quitTip.setPosition(-100.f, 420.f);
+    m_quitTip.setColor(sf::Color::Transparent);
 }
 
 //public
@@ -281,7 +285,17 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
     }
         break;
     case State::GameOver:
-
+    {
+        static float countdown = 5.f;
+        countdown -= dt;
+        if (countdown < 0)
+        {
+            static float alpha = 0.f;
+            alpha = std::min(1.f, alpha + dt);
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+            m_quitTip.setColor(c);
+        }
+    }
         break;
     }
 }
@@ -310,8 +324,10 @@ void RouletteGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
         break;
     case State::GameOver:
         rt.draw(m_gameOverText, states);
+        rt.draw(m_quitTip, states);
         break;
     }
+ 
     rt.draw(m_reflection, states);
 }
 

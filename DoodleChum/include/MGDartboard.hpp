@@ -47,9 +47,10 @@ public:
     ~Dartboard() = default;
 
     void update(float, sf::Vector2f);
-    std::uint32_t getScore() const;
+    std::uint32_t getScore() const { return m_score; }
+    std::uint32_t getDartsRemaining() const { return m_remainingDarts; }
 
-    bool fire();
+    void fire();
     void showCrosshair(bool);
 
 
@@ -64,6 +65,9 @@ private:
 
     sf::Vector2f m_boardSize;
     sf::Vector2f m_mousePos;
+
+    std::uint32_t m_score;
+    std::uint32_t m_remainingDarts;
 
     const sf::Texture& m_texture;
     std::array<sf::Vertex, 12u> m_vertices;

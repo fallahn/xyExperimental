@@ -41,10 +41,12 @@ namespace
 }
 
 Dartboard::Dartboard(const sf::Texture& t)
-    : m_texture (t),
-    m_xIdx      (0),
-    m_yIdx      (0),
-    m_ampIdx    (0)
+    : m_texture     (t),
+    m_xIdx          (0),
+    m_yIdx          (0),
+    m_ampIdx        (0),
+    m_score         (0u),
+    m_remainingDarts(3u)
 {
     m_boardSize = static_cast<sf::Vector2f>(t.getSize());
     setOrigin(m_boardSize / 2.f);
@@ -58,9 +60,9 @@ Dartboard::Dartboard(const sf::Texture& t)
 
     showCrosshair(false);
 
-    m_xOffsets = xy::Util::Wavetable::sine(2.72f, 3.f);
-    m_yOffsets = xy::Util::Wavetable::sine(2.28f, 4.f);
-    m_amplitudeModifier = xy::Util::Wavetable::sine(0.54f);
+    m_xOffsets = xy::Util::Wavetable::sine(1.72f, 1.2f);
+    m_yOffsets = xy::Util::Wavetable::sine(2.28f, 2.7f);
+    m_amplitudeModifier = xy::Util::Wavetable::sine(0.34f);
 }
 
 //public
@@ -90,17 +92,15 @@ void Dartboard::update(float dt, sf::Vector2f mousePos)
         m_vertices[i].position.x = xy::Util::Math::clamp(m_vertices[i].position.x, 0.f, m_boardSize.x);
         m_vertices[i].position.y = xy::Util::Math::clamp(m_vertices[i].position.y, 0.f, m_boardSize.y);
     }
+
+    //update darts - make sure to subtract remaining once landed
 }
 
-std::uint32_t Dartboard::getScore() const
+void Dartboard::fire()
 {
-    return 0;
-}
-
-bool Dartboard::fire()
-{
-    //TODO check mouse is within bounds and return false if not
-    return true;
+    //TODO check mouse is within bounds
+    //TODO check we have enough darts left by considering number in flight
+    m_remainingDarts--;
 }
 
 void Dartboard::showCrosshair(bool show)

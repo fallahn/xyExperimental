@@ -65,6 +65,8 @@ Powerbar::Powerbar(const sf::Texture& t)
 
     m_localBounds.width = texSize.x;
     m_localBounds.height = texSize.y;
+
+    updateIndicator();
 }
 
 //public

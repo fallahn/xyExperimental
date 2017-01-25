@@ -51,18 +51,16 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_reflection    (tr.get("assets/images/ui/bob_screen.png")),
     m_chargeTimeout (10.f),
     m_chargeTime    (0.f),
-    m_dartsRemaining(3),
     m_font          (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f }),
     m_target        (0)
 {
-    m_powerbar.setPosition(0.f, 300.f);
+    m_powerbar.setPosition(0.f, 330.f);
 
     m_reflection.setScale(2.f, 2.f);
     xy::Util::Position::centreOrigin(m_reflection);
     m_reflection.setPosition(0.f, 66.f);
 
-    m_wheel.setPosition(-290.f, 220.f);
-    //m_dartboard.setPosition(0.f, -60.f);
+    m_wheel.setPosition(-300.f, 220.f);
 
     xy::Util::Position::centreOrigin(m_creditSelector);
     m_creditSelector.setPosition(300.f, 240.f);
@@ -81,7 +79,7 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_pressSpaceText.setColour(sf::Color::Black);
     m_pressSpaceText.setScale(2.f, 2.f);
     xy::Util::Position::centreOrigin(m_pressSpaceText);
-    m_pressSpaceText.setPosition(0.f, 330.f);
+    m_pressSpaceText.setPosition(0.f, 260.f);
 
     m_triesText.setFont(m_font);
     m_triesText.setString("Darts Left: 3");
@@ -115,6 +113,10 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     xy::Util::Position::centreOrigin(m_scoreValueText);
     m_scoreValueText.move(640.f, 0.f);
 
+    m_quitTip.setTexture(tr.get("assets/images/ui/quit_tip.png"));
+    m_quitTip.setPosition(-100.f, 420.f);
+    m_quitTip.setColor(sf::Color::Transparent);
+
     xy::Component::MessageHandler mh;
     mh.id = Message::Interface;
     mh.action = [this](xy::Component*, const xy::Message& msg)
@@ -145,11 +147,7 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
             }
             else if (m_currentState == State::Shooting)
             {
-                if (m_dartboard.fire())
-                {
-                    m_dartsRemaining--;
-                    m_triesText.setString("Darts left: " + std::to_string(m_dartsRemaining));
-                }
+                m_dartboard.fire();
             }
         }
     };
@@ -213,7 +211,7 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
                 m_currentState = State::Shooting;
                 m_dartboard.showCrosshair(true);
 
-                m_pressSpaceText.setString("Mouse to Aim");
+                m_pressSpaceText.setString("Mouse to Throw");
                 xy::Util::Position::centreOrigin(m_pressSpaceText);
 
                 xy::App::setMouseCursorVisible(false);
@@ -222,10 +220,13 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
         break;
     case State::Shooting:
         m_dartboard.update(dt, entity.getInverseTransform().transformPoint(xy::App::getMouseWorldPosition()));
+        
+        m_triesText.setString("Darts left: " + std::to_string(m_dartboard.getDartsRemaining()));
         m_scoreValueText.setString(std::to_string(m_dartboard.getScore()));
         xy::Util::Position::centreOrigin(m_scoreValueText);
+
         flash();
-        if (m_dartboard.getScore() > m_target || m_dartsRemaining == 0)
+        if (m_dartboard.getScore() > m_target || m_dartboard.getDartsRemaining() == 0)
         {
             xy::App::setMouseCursorVisible(true);
             m_currentState = State::Summary;
@@ -264,7 +265,15 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
     }
         break;
     case State::GameOver:
-        //buns
+        static float countdown = 5.f;
+        countdown -= dt;
+        if (countdown < 0)
+        {
+            static float alpha = 0.f;
+            alpha = std::min(1.f, alpha + dt);
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+            m_quitTip.setColor(c);
+        }
         break;
     }
 }
@@ -297,6 +306,7 @@ void DartsGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
         break;
     case State::GameOver:
         rt.draw(m_gameOverText, states);
+        rt.draw(m_quitTip, states);
         break;
     }
 
