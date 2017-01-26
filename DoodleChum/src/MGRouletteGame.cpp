@@ -57,6 +57,8 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
     m_chargeTime        (0.f),
     m_wheelActive       (false),
     m_summaryTime       (0.f),
+    m_gameoverTime      (5.f),
+    m_gameoverAlpha     (0.f),
     m_wheelValue        (6),
     m_triesLeft         (5),
     m_powerbar          (tr.get("assets/images/minigames/roulette/powerbar.png")),
@@ -286,13 +288,11 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
         break;
     case State::GameOver:
     {
-        static float countdown = 5.f;
-        countdown -= dt;
-        if (countdown < 0)
+        m_gameoverTime -= dt;
+        if (m_gameoverTime < 0)
         {
-            static float alpha = 0.f;
-            alpha = std::min(1.f, alpha + dt);
-            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+            m_gameoverAlpha = std::min(1.f, m_gameoverAlpha + dt);
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(m_gameoverAlpha * 255.f));
             m_quitTip.setColor(c);
         }
     }

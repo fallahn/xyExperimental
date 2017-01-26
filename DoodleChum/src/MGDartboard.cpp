@@ -141,12 +141,14 @@ void Dartboard::addDart()
         //get score from position
         sf::Vector2f centre = m_boardSize / 2.f;
         float distance = xy::Util::Vector::length(dart.getPosition() - centre);
-        float ratio = 1.f - (distance / centre.x);
-        std::uint32_t score = static_cast<std::uint32_t>(/*std::ceil*/(9.f * ratio)) + 1;
-        m_score += score;
-        
-        std::cout << score << std::endl;
+        if (distance < centre.x)
+        {
+            float ratio = 1.f - (distance / centre.x);
+            std::uint32_t score = static_cast<std::uint32_t>(/*std::ceil*/(9.f * ratio)) + 1;
+            m_score += score;
 
+         //   std::cout << score << std::endl;
+        }
         m_remainingDarts--;
         if (m_remainingDarts > 0) m_pendingDart = true;
     });

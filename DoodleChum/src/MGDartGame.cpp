@@ -51,6 +51,9 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_reflection    (tr.get("assets/images/ui/bob_screen.png")),
     m_chargeTimeout (10.f),
     m_chargeTime    (0.f),
+    m_pauseTime     (6.f),
+    m_gameoverAlpha (0.f),
+    m_gameoverTime  (5.f),
     m_font          (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f }),
     m_target        (0)
 {
@@ -250,9 +253,8 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
     case State::Summary:
         //count down for some time
     {
-        static float pauseTime = 6.f;
-        pauseTime -= dt;
-        if (pauseTime < 0)
+        m_pauseTime -= dt;
+        if (m_pauseTime < 0)
         {
             m_currentState = State::GameOver;
             m_messageText.setString("GAME OVER");
@@ -261,13 +263,11 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
     }
         break;
     case State::GameOver:
-        static float countdown = 5.f;
-        countdown -= dt;
-        if (countdown < 0)
+        m_gameoverTime -= dt;
+        if (m_gameoverTime < 0)
         {
-            static float alpha = 0.f;
-            alpha = std::min(1.f, alpha + dt);
-            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(alpha * 255.f));
+            m_gameoverAlpha = std::min(1.f, m_gameoverAlpha + dt);
+            sf::Color c(255, 255, 255, static_cast<sf::Uint8>(m_gameoverAlpha * 255.f));
             m_quitTip.setColor(c);
         }
         break;

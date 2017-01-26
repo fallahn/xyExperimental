@@ -100,7 +100,7 @@ void Dartboard::Dart::fire(sf::Vector2f velocity)
 {
     if (m_currentState == State::Ready)
     {
-        m_velocity = velocity * 4.f;
+        m_velocity = velocity * 8.f;
         m_currentState = State::InFlight;
     }
 }

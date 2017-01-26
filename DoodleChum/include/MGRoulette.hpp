@@ -73,6 +73,8 @@ private:
     float m_chargeTime;
     bool m_wheelActive;
     float m_summaryTime;
+    float m_gameoverTime;
+    float m_gameoverAlpha;
 
     std::int32_t m_wheelValue;
     std::int32_t m_triesLeft;
