@@ -41,8 +41,8 @@ namespace
 Dartboard::Dart::Dart(const sf::Texture& t, sf::Vector2f position)
     : m_texture(t),
     m_rotationSpeed(xy::Util::Random::value(120.f, 180.f)),
-    m_currentState(State::Ready),
-    m_pauseTime(1.f)
+    m_pauseTime(1.f),
+    m_currentState(State::Ready)
 {
     sf::Vector2f texSize(t.getSize());
 

@@ -57,6 +57,9 @@ public:
 
 private:
 
+    const sf::Texture& m_texture;
+    const sf::Texture& m_dartTexture;
+
     std::vector<float> m_xOffsets;
     std::vector<float> m_yOffsets;
     std::vector<float> m_amplitudeModifier;
@@ -71,8 +74,6 @@ private:
     std::uint32_t m_score;
     std::uint32_t m_remainingDarts;
 
-    const sf::Texture& m_texture;
-    const sf::Texture& m_dartTexture;
     std::array<sf::Vertex, 12u> m_vertices;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;

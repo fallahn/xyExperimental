@@ -99,4 +99,4 @@ private:
     void lose();
 };
 
-#endif DC_ROULETTE_HPP_
+#endif //DC_ROULETTE_HPP_
