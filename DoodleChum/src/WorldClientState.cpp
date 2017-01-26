@@ -1154,6 +1154,7 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/roulette/credit_selector.png");
 
     m_textureResource.get("assets/images/minigames/darts/board.png");
+    m_textureResource.get("assets/images/minigames/darts/dart.png").setSmooth(true);
     m_textureResource.get("assets/images/minigames/darts/wheel_front.png");
     m_textureResource.get("assets/images/minigames/darts/wheel_back.png").setSmooth(true);
 

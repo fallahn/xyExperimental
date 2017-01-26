@@ -47,7 +47,7 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_powerbar      (tr.get("assets/images/minigames/roulette/powerbar.png")),
     m_creditSelector(tr.get("assets/images/minigames/roulette/credit_selector.png")),
     m_wheel         (tr),
-    m_dartboard     (tr.get("assets/images/minigames/darts/board.png")),
+    m_dartboard     (tr.get("assets/images/minigames/darts/board.png"), tr.get("assets/images/minigames/darts/dart.png")),
     m_reflection    (tr.get("assets/images/ui/bob_screen.png")),
     m_chargeTimeout (10.f),
     m_chargeTime    (0.f),
@@ -65,21 +65,12 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     xy::Util::Position::centreOrigin(m_creditSelector);
     m_creditSelector.setPosition(300.f, 240.f);
 
-    m_gameOverText.setFont(m_font);
-    m_gameOverText.setColour(sf::Color::Black);
-    m_gameOverText.setString("GAME OVER");
-    m_gameOverText.setScale(5.f, 5.f);
-    m_gameOverText.setPosition(0.f, 100.f);
-    xy::Util::Position::centreOrigin(m_gameOverText);
-
-    m_summaryText = m_gameOverText;
-
-    m_pressSpaceText.setFont(m_font);
-    m_pressSpaceText.setString("Press Space");
-    m_pressSpaceText.setColour(sf::Color::Black);
-    m_pressSpaceText.setScale(2.f, 2.f);
-    xy::Util::Position::centreOrigin(m_pressSpaceText);
-    m_pressSpaceText.setPosition(0.f, 260.f);
+    m_messageText.setFont(m_font);
+    m_messageText.setString("Press Space");
+    m_messageText.setColour(sf::Color::Black);
+    m_messageText.setScale(2.f, 2.f);
+    xy::Util::Position::centreOrigin(m_messageText);
+    m_messageText.setPosition(0.f, 260.f);
 
     m_triesText.setFont(m_font);
     m_triesText.setString("Darts Left: 3");
@@ -176,9 +167,9 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
         if (flashTime < 0)
         {
             flashTime = 0.5f;
-            auto colour = m_pressSpaceText.getColour();
+            auto colour = m_messageText.getColour();
             colour.a = (colour.a == 255) ? 0 : 255;
-            m_pressSpaceText.setColour(colour);
+            m_messageText.setColour(colour);
         }
     };
 
@@ -211,8 +202,8 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
                 m_currentState = State::Shooting;
                 m_dartboard.showCrosshair(true);
 
-                m_pressSpaceText.setString("Mouse to Throw");
-                xy::Util::Position::centreOrigin(m_pressSpaceText);
+                m_messageText.setString("Mouse to Throw");
+                xy::Util::Position::centreOrigin(m_messageText);
 
                 xy::App::setMouseCursorVisible(false);
             }
@@ -230,20 +221,23 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
         {
             xy::App::setMouseCursorVisible(true);
             m_currentState = State::Summary;
+            m_dartboard.showCrosshair(false);
 
             //decide if we won or lost
             auto score = m_dartboard.getScore();
             if (score > m_target || score == 0)
             {
-                m_summaryText.setString("BUST");
-                xy::Util::Position::centreOrigin(m_summaryText);
+                m_messageText.setString("BUST");
+                m_messageText.setColour(sf::Color::Black);
+                xy::Util::Position::centreOrigin(m_messageText);
                 int cost = (m_creditSelector.getIndex() == 0) ? 10 : (m_creditSelector.getIndex() == 1) ? 20 : 50;
                 m_attribManager.spend(cost);
             }
             else
             {
-                m_summaryText.setString("WIN");
-                xy::Util::Position::centreOrigin(m_summaryText);
+                m_messageText.setString("WIN");
+                m_messageText.setColour(sf::Color::Black);
+                xy::Util::Position::centreOrigin(m_messageText);
                 
                 //prize is a percentage of the wager as a ratio of the score to target
                 float ratio = static_cast<float>(score) / static_cast<float>(m_target);
@@ -256,11 +250,13 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
     case State::Summary:
         //count down for some time
     {
-        static float pauseTime = 3.f;
+        static float pauseTime = 6.f;
         pauseTime -= dt;
         if (pauseTime < 0)
         {
             m_currentState = State::GameOver;
+            m_messageText.setString("GAME OVER");
+            xy::Util::Position::centreOrigin(m_messageText);
         }
     }
         break;
@@ -299,13 +295,13 @@ void DartsGame::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     case State::Charging:
     case State::PlaceBet:
     case State::Shooting:
-        rt.draw(m_pressSpaceText, states);
+        rt.draw(m_messageText, states);
         break;
     case State::Summary:
-        rt.draw(m_summaryText, states);
+        rt.draw(m_messageText, states);
         break;
     case State::GameOver:
-        rt.draw(m_gameOverText, states);
+        rt.draw(m_messageText, states);
         rt.draw(m_quitTip, states);
         break;
     }

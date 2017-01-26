@@ -18,10 +18,11 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/main.cpp
   ${PROJECT_DIR}/MenuState.cpp
   ${PROJECT_DIR}/MGDartboard.cpp
-  ${PROJECT_DIR}/MGDarts.cpp
+  ${PROJECT_DIR}/MGDart.cpp
+  ${PROJECT_DIR}/MGDartGame.cpp
   ${PROJECT_DIR}/MGDisplayController.cpp
   ${PROJECT_DIR}/MGPowerbar.cpp
-  ${PROJECT_DIR}/MGRoulette.cpp
+  ${PROJECT_DIR}/MGRouletteGame.cpp
   ${PROJECT_DIR}/MGSelector.cpp
   ${PROJECT_DIR}/MGWheel.cpp
   ${PROJECT_DIR}/MusicTask.cpp

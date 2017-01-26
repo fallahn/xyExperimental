@@ -29,6 +29,8 @@ source distribution.
 
 #include <xygine/util/Wavetable.hpp>
 #include <xygine/util/Math.hpp>
+#include <xygine/util/Vector.hpp>
+#include <xygine/Reports.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -36,12 +38,13 @@ source distribution.
 
 namespace
 {
-    const sf::Color crosshairColour(128, 128, 128);
+    const sf::Color crosshairColour(128, 128, 128, 130);
     const float crosshairThickness = 2.f;
 }
 
-Dartboard::Dartboard(const sf::Texture& t)
+Dartboard::Dartboard(const sf::Texture& t, const sf::Texture& dt)
     : m_texture     (t),
+    m_dartTexture   (dt),
     m_xIdx          (0),
     m_yIdx          (0),
     m_ampIdx        (0),
@@ -63,6 +66,8 @@ Dartboard::Dartboard(const sf::Texture& t)
     m_xOffsets = xy::Util::Wavetable::sine(1.72f, 1.2f);
     m_yOffsets = xy::Util::Wavetable::sine(2.28f, 2.7f);
     m_amplitudeModifier = xy::Util::Wavetable::sine(0.34f);
+
+    m_darts.reserve(m_remainingDarts);
 }
 
 //public
@@ -72,9 +77,12 @@ void Dartboard::update(float dt, sf::Vector2f mousePos)
     m_yIdx = (m_yIdx + 1) % m_yOffsets.size();
     m_ampIdx = (m_ampIdx + 1) % m_amplitudeModifier.size();
     
+    m_lastPos = m_mousePos;
     m_mousePos = getInverseTransform().transformPoint(mousePos);
     m_mousePos.x += m_xOffsets[m_xIdx] + m_amplitudeModifier[m_ampIdx];
     m_mousePos.y += m_yOffsets[m_yIdx] + m_amplitudeModifier[m_ampIdx];
+    m_mousePos.x = xy::Util::Math::clamp(m_mousePos.x, 0.f, m_boardSize.x);
+    m_mousePos.y = xy::Util::Math::clamp(m_mousePos.y, 0.f, m_boardSize.y);
 
     //crosshair X
     m_vertices[4].position.x = m_mousePos.x - crosshairThickness;
@@ -87,20 +95,20 @@ void Dartboard::update(float dt, sf::Vector2f mousePos)
     m_vertices[10].position = { m_boardSize.x, m_mousePos.y + crosshairThickness };
     m_vertices[11].position.y = m_mousePos.y + crosshairThickness;
 
-    for (auto i = 4u; i < m_vertices.size(); ++i)
-    {
-        m_vertices[i].position.x = xy::Util::Math::clamp(m_vertices[i].position.x, 0.f, m_boardSize.x);
-        m_vertices[i].position.y = xy::Util::Math::clamp(m_vertices[i].position.y, 0.f, m_boardSize.y);
-    }
 
-    //update darts - make sure to subtract remaining once landed
+    //update darts
+    for (auto& d : m_darts) d.update(dt, m_mousePos);
+    if (m_pendingDart)
+    {
+        m_pendingDart = false;
+        addDart();
+    }
+    //REPORT("Dart Pos", std::to_string(m_mousePos.x) + ", " + std::to_string(m_mousePos.y));
 }
 
 void Dartboard::fire()
 {
-    //TODO check mouse is within bounds
-    //TODO check we have enough darts left by considering number in flight
-    m_remainingDarts--;
+    m_darts.back().fire(m_mousePos - m_lastPos);
 }
 
 void Dartboard::showCrosshair(bool show)
@@ -110,6 +118,7 @@ void Dartboard::showCrosshair(bool show)
         m_vertices[i].color = (show) ? crosshairColour : sf::Color::Transparent;
         m_vertices[i].texCoords = { m_boardSize.x / 2.f, 4.f }; //just try and grab a white bit of texture
     }
+    m_pendingDart = show;
 }
 
 //private
@@ -118,4 +127,27 @@ void Dartboard::draw(sf::RenderTarget& rt, sf::RenderStates states) const
     states.transform *= getTransform();
     states.texture = &m_texture;
     rt.draw(m_vertices.data(), m_vertices.size(), sf::Quads, states);
+    for (const auto& d : m_darts)
+    {
+        rt.draw(d, states);
+    }
+}
+
+void Dartboard::addDart()
+{
+    m_darts.emplace_back(m_dartTexture, m_mousePos);
+    m_darts.back().addCallback([this](const Dartboard::Dart& dart)
+    {
+        //get score from position
+        sf::Vector2f centre = m_boardSize / 2.f;
+        float distance = xy::Util::Vector::length(dart.getPosition() - centre);
+        float ratio = 1.f - (distance / centre.x);
+        std::uint32_t score = static_cast<std::uint32_t>(/*std::ceil*/(9.f * ratio)) + 1;
+        m_score += score;
+        
+        std::cout << score << std::endl;
+
+        m_remainingDarts--;
+        if (m_remainingDarts > 0) m_pendingDart = true;
+    });
 }

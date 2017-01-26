@@ -353,9 +353,6 @@
     <ClCompile Include="src\MGDisplayController.cpp">
       <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
-    <ClCompile Include="src\MGRoulette.cpp">
-      <Filter>Source Files\Controllers\minigame</Filter>
-    </ClCompile>
     <ClCompile Include="src\MiniGames.cpp">
       <Filter>Source Files\states</Filter>
     </ClCompile>
@@ -365,14 +362,20 @@
     <ClCompile Include="src\MGSelector.cpp">
       <Filter>Source Files\UI\minigame</Filter>
     </ClCompile>
-    <ClCompile Include="src\MGDarts.cpp">
-      <Filter>Source Files\Controllers\minigame</Filter>
-    </ClCompile>
     <ClCompile Include="src\MGWheel.cpp">
       <Filter>Source Files\UI\minigame</Filter>
     </ClCompile>
     <ClCompile Include="src\MGDartboard.cpp">
       <Filter>Source Files\UI\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGDart.cpp">
+      <Filter>Source Files\UI\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGDartGame.cpp">
+      <Filter>Source Files\Controllers\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGRouletteGame.cpp">
+      <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

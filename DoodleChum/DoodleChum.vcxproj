@@ -211,11 +211,12 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\IntroState.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MenuState.cpp" />
+    <ClCompile Include="src\MGDart.cpp" />
     <ClCompile Include="src\MGDartboard.cpp" />
-    <ClCompile Include="src\MGDarts.cpp" />
+    <ClCompile Include="src\MGDartGame.cpp" />
     <ClCompile Include="src\MGDisplayController.cpp" />
     <ClCompile Include="src\MGPowerbar.cpp" />
-    <ClCompile Include="src\MGRoulette.cpp" />
+    <ClCompile Include="src\MGRouletteGame.cpp" />
     <ClCompile Include="src\MGSelector.cpp" />
     <ClCompile Include="src\MGWheel.cpp" />
     <ClCompile Include="src\MiniGames.cpp" />

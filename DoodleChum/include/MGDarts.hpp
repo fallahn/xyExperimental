@@ -77,9 +77,7 @@ private:
     float m_chargeTime;
 
     xy::BitmapFont m_font;
-    xy::BitmapText m_summaryText;
-    xy::BitmapText m_gameOverText;
-    xy::BitmapText m_pressSpaceText;
+    xy::BitmapText m_messageText;
     xy::BitmapText m_triesText;
     xy::BitmapText m_creditText;
     xy::BitmapText m_targetText;

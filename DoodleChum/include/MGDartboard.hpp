@@ -34,6 +34,7 @@ source distribution.
 
 #include <array>
 #include <vector>
+#include <functional>
 
 namespace sf
 {
@@ -43,7 +44,7 @@ namespace sf
 class Dartboard final : public sf::Drawable, public sf::Transformable
 {
 public:
-    explicit Dartboard(const sf::Texture&);
+    explicit Dartboard(const sf::Texture&, const sf::Texture&);
     ~Dartboard() = default;
 
     void update(float, sf::Vector2f);
@@ -65,14 +66,46 @@ private:
 
     sf::Vector2f m_boardSize;
     sf::Vector2f m_mousePos;
+    sf::Vector2f m_lastPos;
 
     std::uint32_t m_score;
     std::uint32_t m_remainingDarts;
 
     const sf::Texture& m_texture;
+    const sf::Texture& m_dartTexture;
     std::array<sf::Vertex, 12u> m_vertices;
 
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+    class Dart final : public sf::Transformable, public sf::Drawable
+    {
+    public:
+        explicit Dart(const sf::Texture&, sf::Vector2f);
+        ~Dart() = default;
+
+        void update(float, sf::Vector2f);
+        void fire(sf::Vector2f);
+        void addCallback(const std::function<void(const Dart&)>&);
+
+    private:
+        const sf::Texture& m_texture;
+        float m_rotationSpeed;
+        sf::Vector2f m_velocity;
+        float m_pauseTime;
+
+        enum class State
+        {
+            Ready, InFlight, Landed, Spent
+        }m_currentState;
+
+        std::array<sf::Vertex, 4u> m_vertices;
+        void draw(sf::RenderTarget&, sf::RenderStates) const override;
+
+        std::function<void(const Dart&)> landedCallback;
+    };
+    std::vector<Dart> m_darts;
+    bool m_pendingDart;
+    void addDart();
 };
 
 #endif //DC_DARTBOARD_HPP_
