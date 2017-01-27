@@ -371,9 +371,27 @@ void WorldClientState::handleMessage(const xy::Message& msg)
             const auto& data = msg.getData<Message::InterfaceEvent>();
             if (data.type == Message::InterfaceEvent::MiniGameOpen)
             {
-                //TODO switch game index
+                //switch game index
+                static std::size_t gameIdx = 0;
+                switch (gameIdx)
+                {
+                default:
+                case 0:
+                    //createRoulette();
+                    break;
+                case 1:
+                    //createDarts();
+                    break;
+                case 2:
+                    //createPachinko();
+                    break;
+                }
+                gameIdx = (gameIdx + 1) % 3;
+
+
                 //createRoulette();
-                createDarts();
+                //createDarts();
+                createPachinko();
             }
             else if (data.type == Message::InterfaceEvent::MiniGameClose)
             {
@@ -399,7 +417,7 @@ void WorldClientState::draw()
 #ifdef _DEBUG_
     //rw.setView(getContext().defaultView);
     //rw.draw(m_pathFinder);
-    //rw.draw(m_physWorld);
+    rw.draw(m_physWorld);
 #endif //_DEBUG_    
 }
 
@@ -1157,6 +1175,8 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/darts/dart.png").setSmooth(true);
     m_textureResource.get("assets/images/minigames/darts/wheel_front.png");
     m_textureResource.get("assets/images/minigames/darts/wheel_back.png").setSmooth(true);
+
+    m_textureResource.get("assets/images/minigames/pachinko/table.png");
 
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
     m_textureResource.get("assets/images/ui/quit_tip.png");

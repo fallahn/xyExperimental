@@ -87,6 +87,7 @@ private:
     //minigame creators
     void createRoulette();
     void createDarts();
+    void createPachinko();
 
     sf::Sprite m_loadingSprite;
     void updateLoadingScreen(float, sf::RenderWindow&) override;

@@ -36,6 +36,8 @@ source distribution.
 #include <xygine/physics/CollisionCircleShape.hpp>
 #include <xygine/physics/JointHinge.hpp>
 #include <xygine/physics/CollisionPolygonShape.hpp>
+#include <xygine/physics/CollisionEdgeShape.hpp>
+#include <xygine/physics/CollisionRectangleShape.hpp>
 
 #include <xygine/shaders/Default.hpp>
 
@@ -44,7 +46,7 @@ namespace
     const sf::Vector2f gamePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
     const float rouletteRadius = 260.f;
 
-    enum CollisionID
+    enum CollisionID //TODO move to file along with some shape IDs
     {
         Ball    = 0x10,
         Segment = 0x20
@@ -170,4 +172,159 @@ void WorldClientState::createDarts()
     entity->setPosition(gamePosition);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+}
+
+void WorldClientState::createPachinko()
+{
+    auto fixedBody = xy::Component::create<xy::Physics::RigidBody>(m_messageBus, xy::Physics::BodyType::Static);
+
+    //edge shape
+    std::vector<sf::Vector2f> points = 
+    {
+        sf::Vector2f(176.f, 32.f),
+        {192.f, 0.f},
+        {256.f, 32.f},
+        {288.f, 64.f},
+        {352.f, 192.f},
+        {352.f, 416.f},
+        {336.f, 416.f},
+        {192.f, 512.f},
+        {160.f, 512.f},
+        {0.f, 416.f},
+        {0.f, 192.f},
+        {64.f, 64.f},
+        {96.f, 32.f},
+        {160.f, 0.f}
+    };
+    sf::Vector2f offset(176.f, 256.f);
+    for (auto& p : points) p -= offset;
+    xy::Physics::CollisionEdgeShape es(points, xy::Physics::CollisionEdgeShape::Option::Loop);
+    fixedBody->addCollisionShape(es);
+
+    //start edge
+    xy::Physics::CollisionRectangleShape rs({ 6.f, 208.f }, sf::Vector2f(326.f, 208.f) - offset);
+    rs.setDensity(1.f);
+    rs.setFriction(0.05f);
+    rs.setRestitution(0.2f);
+    fixedBody->addCollisionShape(rs);
+
+    //pins
+    points =
+    {
+        sf::Vector2f(112.f, 80.f),
+        {144.f, 80.f},
+        {176.f, 80.f},
+        {208.f, 80.f},
+        {240.f, 80.f},
+
+        {96.f, 112.f},
+        {128.f, 112.f},
+        {160.f, 112.f},
+        {192.f, 112.f},
+        {224.f, 112.f},
+        {256.f, 112.f},
+
+        {112.f, 80.f},
+        {144.f, 80.f},
+        {176.f, 80.f},
+        {208.f, 80.f},
+        {240.f, 80.f},
+
+        {128.f, 176.f},
+        {224.f, 176.f},
+        {176.f, 208.f},
+        {64.f, 224.f},
+        {288.f, 224.f},
+        {112.f, 256.f},
+        {240.f, 256.f},
+
+        {80.f, 336.f},
+        {112.f, 336.f},
+        {144.f, 336.f},
+        {176.f, 336.f},
+        {208.f, 336.f},
+        {240.f, 336.f},
+        {272.f, 336.f},
+
+        {96.f, 368.f},
+        {128.f, 368.f},
+        {160.f, 368.f},
+        {192.f, 368.f},
+        {224.f, 368.f},
+        {256.f, 368.f},
+
+        {80.f, 400.f},
+        {176.f, 400.f},
+        {272.f, 400.f}
+    };
+
+    for (const auto& p : points)
+    {
+        xy::Physics::CollisionCircleShape cs(8.f);
+        cs.setPosition(p - offset);
+        cs.setDensity(1.f);
+        cs.setRestitution(0.2f);
+        fixedBody->addCollisionShape(cs);
+    }
+
+    //bouncers
+    xy::Physics::CollisionCircleShape cs(24.f);
+    cs.setDensity(0.2f);
+    cs.setRestitution(1.f);
+    cs.setUserID(1); //used to find collision and apply ball force
+    cs.setPosition(sf::Vector2f(80.f, 288.f) - offset);
+    fixedBody->addCollisionShape(cs);
+    cs.setPosition(sf::Vector2f(272.f, 288.f) - offset);
+    fixedBody->addCollisionShape(cs);
+
+    //win 2 bucket
+    auto addBucket = [&](sf::Vector2f pos, int id)
+    {
+        xy::Physics::CollisionCircleShape sensor(5.f);
+        sensor.setIsSensor(true);
+        sensor.setUserID(id);
+        sensor.setPosition(pos);
+        xy::Physics::CollisionFilter cf;
+        cf.maskFlags = CollisionID::Ball;
+        sensor.setFilter(cf);
+        fixedBody->addCollisionShape(sensor);
+
+        std::vector<sf::Vector2f> edgePoints = 
+        {
+            sf::Vector2f(-20.f, -20.f) + pos,
+            sf::Vector2f(-12.f, 0.f) + pos,
+            sf::Vector2f(0.f, 6.f) + pos,
+            sf::Vector2f(12.f, 0.f) + pos,
+            sf::Vector2f(20.f, -20.f) + pos
+        };
+        xy::Physics::CollisionEdgeShape bucket(edgePoints);
+        fixedBody->addCollisionShape(bucket);
+    };
+    addBucket({ 0.f, 26.f }, 2);
+
+    //win 1 buckets
+    addBucket({ 48.f, 166.f }, 3);
+    addBucket({ -48.f, 166.f }, 3);
+
+    //loser hole
+    cs.setRadius(16.f);
+    cs.setIsSensor(true);
+    xy::Physics::CollisionFilter cf;
+    cf.maskFlags = CollisionID::Ball;
+    cs.setFilter(cf);
+    cs.setPosition({ 0.f, 256.f });
+    fixedBody->addCollisionShape(cs);
+
+    auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
+    dwb->getDrawable().setTexture(m_textureResource.get("assets/images/minigames/pachinko/table.png"));
+    xy::Util::Position::centreOrigin(dwb->getDrawable());
+
+    auto entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::ID::MiniGame);
+    entity->setPosition(gamePosition);
+    entity->addComponent(fixedBody);
+    entity->addComponent(dwb);
+    m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
+
+    //TODO controller spawns balls, does scoring
 }
