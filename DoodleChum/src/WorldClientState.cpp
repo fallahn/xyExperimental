@@ -1177,6 +1177,7 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/minigames/darts/wheel_back.png").setSmooth(true);
 
     m_textureResource.get("assets/images/minigames/pachinko/table.png");
+    m_textureResource.get("assets/images/minigames/pachinko/powerbar.png");
 
     m_textureResource.get("assets/images/ui/bob_screen.png").setSmooth(true);
     m_textureResource.get("assets/images/ui/quit_tip.png");

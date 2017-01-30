@@ -21,6 +21,7 @@ set(PROJECT_SRC
   ${PROJECT_DIR}/MGDart.cpp
   ${PROJECT_DIR}/MGDartGame.cpp
   ${PROJECT_DIR}/MGDisplayController.cpp
+  ${PROJECT_DIR}/MGPachinkoGame.cpp
   ${PROJECT_DIR}/MGPowerbar.cpp
   ${PROJECT_DIR}/MGRouletteGame.cpp
   ${PROJECT_DIR}/MGSelector.cpp

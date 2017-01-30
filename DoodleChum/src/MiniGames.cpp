@@ -28,6 +28,8 @@ source distribution.
 #include <WorldClientState.hpp>
 #include <MGRoulette.hpp>
 #include <MGDarts.hpp>
+#include <MGPachinko.hpp>
+#include <MiniGameIDs.hpp>
 
 #include <xygine/components/SfDrawableComponent.hpp>
 #include <xygine/util/Const.hpp>
@@ -45,12 +47,6 @@ namespace
 {
     const sf::Vector2f gamePosition(xy::DefaultSceneSize.x / 2.f, 420.f);
     const float rouletteRadius = 260.f;
-
-    enum CollisionID //TODO move to file along with some shape IDs
-    {
-        Ball    = 0x10,
-        Segment = 0x20
-    };
 }
 
 void WorldClientState::createRoulette()
@@ -81,8 +77,8 @@ void WorldClientState::createRoulette()
     }
 
     xy::Physics::CollisionFilter sensorFilter;
-    sensorFilter.categoryFlags = CollisionID::Segment;
-    sensorFilter.maskFlags = ~CollisionID::Ball;
+    sensorFilter.categoryFlags = Roulette::Segment;
+    sensorFilter.maskFlags = ~Roulette::Ball;
     for (auto i = 0; i < 7; ++i)
     {
         auto nextPoint = points[(i + 1) % points.size()];
@@ -199,13 +195,14 @@ void WorldClientState::createPachinko()
     sf::Vector2f offset(176.f, 256.f);
     for (auto& p : points) p -= offset;
     xy::Physics::CollisionEdgeShape es(points, xy::Physics::CollisionEdgeShape::Option::Loop);
+    es.setRestitution(0.01f);
     fixedBody->addCollisionShape(es);
 
     //start edge
     xy::Physics::CollisionRectangleShape rs({ 6.f, 208.f }, sf::Vector2f(326.f, 208.f) - offset);
     rs.setDensity(1.f);
     rs.setFriction(0.05f);
-    rs.setRestitution(0.2f);
+    rs.setRestitution(0.02f);
     fixedBody->addCollisionShape(rs);
 
     //pins
@@ -263,7 +260,7 @@ void WorldClientState::createPachinko()
         xy::Physics::CollisionCircleShape cs(8.f);
         cs.setPosition(p - offset);
         cs.setDensity(1.f);
-        cs.setRestitution(0.2f);
+        cs.setRestitution(0.1f);
         fixedBody->addCollisionShape(cs);
     }
 
@@ -271,7 +268,7 @@ void WorldClientState::createPachinko()
     xy::Physics::CollisionCircleShape cs(24.f);
     cs.setDensity(0.2f);
     cs.setRestitution(1.f);
-    cs.setUserID(1); //used to find collision and apply ball force
+    cs.setUserID(Pachinko::Bouncer); //used to find collision and apply ball force
     cs.setPosition(sf::Vector2f(80.f, 288.f) - offset);
     fixedBody->addCollisionShape(cs);
     cs.setPosition(sf::Vector2f(272.f, 288.f) - offset);
@@ -285,7 +282,7 @@ void WorldClientState::createPachinko()
         sensor.setUserID(id);
         sensor.setPosition(pos);
         xy::Physics::CollisionFilter cf;
-        cf.maskFlags = CollisionID::Ball;
+        cf.maskFlags = Roulette::Ball;
         sensor.setFilter(cf);
         fixedBody->addCollisionShape(sensor);
 
@@ -300,31 +297,40 @@ void WorldClientState::createPachinko()
         xy::Physics::CollisionEdgeShape bucket(edgePoints);
         fixedBody->addCollisionShape(bucket);
     };
-    addBucket({ 0.f, 26.f }, 2);
+    addBucket({ 0.f, 26.f }, Pachinko::WinTwoBucket);
 
     //win 1 buckets
-    addBucket({ 48.f, 166.f }, 3);
-    addBucket({ -48.f, 166.f }, 3);
+    addBucket({ 48.f, 166.f }, Pachinko::WinOneBucket);
+    addBucket({ -48.f, 166.f }, Pachinko::WinOneBucket);
 
     //loser hole
     cs.setRadius(16.f);
     cs.setIsSensor(true);
     xy::Physics::CollisionFilter cf;
-    cf.maskFlags = CollisionID::Ball;
+    cf.maskFlags = Roulette::Ball;
     cs.setFilter(cf);
     cs.setPosition({ 0.f, 256.f });
+    cs.setUserID(Pachinko::LoserHole);
     fixedBody->addCollisionShape(cs);
+
+    //ball launcher
+    xy::Physics::CollisionRectangleShape launchShape({ 16.f, 36.f }, { 160.f, 124.f });
+    launchShape.setIsSensor(true);
+    launchShape.setUserID(Pachinko::LaunchSpring);
+    launchShape.setFilter(cf);
+    fixedBody->addCollisionShape(launchShape);
 
     auto dwb = xy::Component::create<xy::SfDrawableComponent<sf::Sprite>>(m_messageBus);
     dwb->getDrawable().setTexture(m_textureResource.get("assets/images/minigames/pachinko/table.png"));
     xy::Util::Position::centreOrigin(dwb->getDrawable());
 
+    auto controller = xy::Component::create<PachinkoGame>(m_messageBus, m_scene, m_textureResource);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Command::ID::MiniGame);
-    entity->setPosition(gamePosition);
+    entity->setPosition(/*gamePosition*/(xy::DefaultSceneSize / 2.f) + sf::Vector2f(0.f, -100.f));
     entity->addComponent(fixedBody);
     entity->addComponent(dwb);
+    entity->addComponent(controller);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
-
-    //TODO controller spawns balls, does scoring
 }

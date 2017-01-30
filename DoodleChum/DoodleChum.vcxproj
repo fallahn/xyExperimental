@@ -159,10 +159,12 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClInclude Include="include\MGDartboard.hpp" />
     <ClInclude Include="include\MGDarts.hpp" />
     <ClInclude Include="include\MGDisplayController.hpp" />
+    <ClInclude Include="include\MGPachinko.hpp" />
     <ClInclude Include="include\MGPowerbar.hpp" />
     <ClInclude Include="include\MGRoulette.hpp" />
     <ClInclude Include="include\MGSelector.hpp" />
     <ClInclude Include="include\MGWheel.hpp" />
+    <ClInclude Include="include\MiniGameIDs.hpp" />
     <ClInclude Include="include\MusicTask.hpp" />
     <ClInclude Include="include\PathFinder.hpp" />
     <ClInclude Include="include\PersonalTab.hpp" />
@@ -215,6 +217,7 @@ xcopy /y /d "$(SolutionDir)extlib\lib\xygine\xygine.dll" "$(SolutionDir)Release\
     <ClCompile Include="src\MGDartboard.cpp" />
     <ClCompile Include="src\MGDartGame.cpp" />
     <ClCompile Include="src\MGDisplayController.cpp" />
+    <ClCompile Include="src\MGPachinkoGame.cpp" />
     <ClCompile Include="src\MGPowerbar.cpp" />
     <ClCompile Include="src\MGRouletteGame.cpp" />
     <ClCompile Include="src\MGSelector.cpp" />

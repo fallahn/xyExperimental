@@ -219,6 +219,12 @@
     <ClInclude Include="include\MGDartboard.hpp">
       <Filter>Header Files\UI\minigame</Filter>
     </ClInclude>
+    <ClInclude Include="include\MiniGameIDs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MGPachinko.hpp">
+      <Filter>Header Files\Controllers\minigame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -375,6 +381,9 @@
       <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
     <ClCompile Include="src\MGRouletteGame.cpp">
+      <Filter>Source Files\Controllers\minigame</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MGPachinkoGame.cpp">
       <Filter>Source Files\Controllers\minigame</Filter>
     </ClCompile>
   </ItemGroup>
