@@ -41,10 +41,15 @@ namespace sf
     class Texture;
 }
 
+namespace xy
+{
+    class MessageBus;
+}
+
 class Dartboard final : public sf::Drawable, public sf::Transformable
 {
 public:
-    explicit Dartboard(const sf::Texture&, const sf::Texture&);
+    explicit Dartboard(const sf::Texture&, const sf::Texture&, xy::MessageBus&);
     ~Dartboard() = default;
 
     void update(float, sf::Vector2f);
@@ -59,6 +64,7 @@ private:
 
     const sf::Texture& m_texture;
     const sf::Texture& m_dartTexture;
+    xy::MessageBus& m_messageBus;
 
     std::vector<float> m_xOffsets;
     std::vector<float> m_yOffsets;

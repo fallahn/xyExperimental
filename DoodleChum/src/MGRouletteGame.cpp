@@ -61,6 +61,7 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
     m_gameoverAlpha     (0.f),
     m_wheelValue        (6),
     m_triesLeft         (5),
+    m_flashColour       (160, 160, 160),
     m_powerbar          (tr.get("assets/images/minigames/roulette/powerbar.png")),
     m_font              (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f }),
     m_creditSelector    (tr.get("assets/images/minigames/roulette/credit_selector.png")),
@@ -80,6 +81,9 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
                     m_currentState = State::Charging;
                     m_chargeTimeout = xy::Util::Random::value(9.f, 11.f);
                     m_chargeTime = 0.f;
+                    
+                    m_creditSelector.setColour(sf::Color::White);
+                    m_chanceSelector.setColour(sf::Color::White);
                 }
                 else if (m_currentState == State::Charging)
                 {                    
@@ -92,8 +96,8 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
             if (m_currentState == State::PlaceBet)
             {
                 auto point = m_entity->getInverseTransform().transformPoint(data.positionX, data.positionY);
-                m_chanceSelector.click(point);
-                m_creditSelector.click(point);
+                m_chanceSelector.click(point, getMessageBus());
+                m_creditSelector.click(point, getMessageBus());
             }
         }
     };
@@ -184,6 +188,8 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
             auto colour = m_pressSpaceText.getColour();
             colour.a = (colour.a == 255) ? 0 : 255;
             m_pressSpaceText.setColour(colour);
+
+            m_flashColour = (m_flashColour.r == 255) ? sf::Color(160, 160, 160) : sf::Color::White;
         }
     };
 
@@ -196,6 +202,9 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
 
         m_chanceSelector.update(dt);
         m_creditSelector.update(dt);
+
+        m_creditSelector.setColour(m_flashColour);
+        m_chanceSelector.setColour(m_flashColour);
     }
         break;
     case State::Charging: //moving power bar - -60 to 60, min 30

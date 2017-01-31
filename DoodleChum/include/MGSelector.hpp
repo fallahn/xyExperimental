@@ -39,6 +39,11 @@ namespace sf
     class Texture;
 }
 
+namespace xy
+{
+    class MessageBus;
+}
+
 class Selector final : public sf::Drawable, public sf::Transformable
 {
 public:
@@ -46,12 +51,14 @@ public:
     ~Selector() = default;
 
     void update(float);
-    void click(sf::Vector2f);
+    void click(sf::Vector2f, xy::MessageBus&);
 
     std::size_t getIndex() const { return m_currentIndex; }
 
     const sf::FloatRect& getLocalBounds() const { return m_localBounds; }
     sf::FloatRect getGlobalBounds() const { return getTransform().transformRect(m_localBounds); }
+
+    void setColour(sf::Color c) { for (auto& v : m_vertices) v.color = c; }
 
 private:
     const sf::Texture& m_texture;

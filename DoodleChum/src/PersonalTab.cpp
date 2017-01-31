@@ -51,10 +51,10 @@ namespace
 }
 
 PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureResource& tr, const AttribManager& am)
-    : xy::Component(mb, this),
-    m_attribManager(am),
-    m_entity(nullptr),
-    m_playMiniGame(false)
+    : xy::Component (mb, this),
+    m_attribManager (am),
+    m_entity        (nullptr),
+    m_playMiniGame  (false)
 {
     auto& font = fr.get("assets/fonts/FallahnHand.ttf");
 
@@ -99,7 +99,6 @@ PersonalTab::PersonalTab(xy::MessageBus& mb, xy::FontResource& fr, xy::TextureRe
             //Household enum
             if (std::find(std::begin(m_messageIDs), std::end(m_messageIDs), data.task) == m_messageIDs.end())
             {
-                //TODO these should just look up messages, not copy them
                 switch (data.task)
                 {
                 default: break;

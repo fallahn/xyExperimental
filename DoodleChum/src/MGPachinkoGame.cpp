@@ -142,6 +142,7 @@ void PachinkoGame::spawnBall()
     xy::Physics::CollisionFilter cf;
     cf.categoryFlags = Roulette::Ball;
     cs.setFilter(cf);
+    cs.setUserID(Roulette::Ball);
     body->addCollisionShape(cs);
     body->isBullet(true);
 

@@ -29,8 +29,10 @@ source distribution.
 #include <MessageIDs.hpp>
 
 #include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/Console.hpp>
+#include <xygine/components/SoundPlayer.hpp>
 
 namespace
 {
@@ -40,6 +42,7 @@ namespace
 
 DisplayController::DisplayController(xy::MessageBus& mb)
     : xy::Component (mb, this),
+    m_entity    (nullptr),
     m_moving    (false),
     m_target    (outTarget),
     m_enable    (false)
@@ -73,6 +76,14 @@ DisplayController::DisplayController(xy::MessageBus& mb)
             if (m_closeButtonGlobal.contains(data.positionX, data.positionY))
             {
                 show(false);
+
+                xy::Command cmd;
+                cmd.category = Command::SoundPlayer;
+                cmd.action = [](xy::Entity& e, float)
+                {
+                    e.getComponent<xy::SoundPlayer>()->playSound(Sound::ButtonSelect, xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y / 2.f);
+                };
+                m_entity->getScene()->sendCommand(cmd);
             }
         }
     };
@@ -157,6 +168,14 @@ void DisplayController::show(bool show)
             auto msg = sendMessage<Message::InterfaceEvent>(Message::Interface);
             msg->type = Message::InterfaceEvent::MiniGameClose;
         }
+
+        xy::Command cmd;
+        cmd.category = Command::SoundPlayer;
+        cmd.action = [](xy::Entity& e, float)
+        {
+            e.getComponent<xy::SoundPlayer>()->playSound(Sound::TabOpen, xy::DefaultSceneSize.x / 2.f, xy::DefaultSceneSize.y / 2.f);
+        };
+        m_entity->getScene()->sendCommand(cmd);
     }
 }
 

@@ -38,10 +38,11 @@ public:
 
     xy::Component::Type type() const override { return xy::Component::Type::Script; }
     void entityUpdate(xy::Entity&, float) override;
-
+    void onStart(xy::Entity& e) override { m_entity = &e; }
     void show(bool = true);
 
 private:
+    xy::Entity* m_entity;
     bool m_moving;
     sf::Vector2f m_target;
     sf::FloatRect m_closeButtonLocal;

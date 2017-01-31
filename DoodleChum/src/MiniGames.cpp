@@ -141,6 +141,7 @@ void WorldClientState::createRoulette()
     cs.setRestitution(0.4f);
     cs.setFriction(2.1f);
     cs.setDensity(2.f);
+    cs.setUserID(Roulette::Ball);
     ballBody->addCollisionShape(cs);
     ballBody->isBullet(true);
 

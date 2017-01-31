@@ -41,6 +41,33 @@ CatController::CatController(xy::MessageBus& mb, const PathFinder& pf, const std
     m_spriteSheet   (spriteSheet)
 {
     initSprite();
+
+    //if we hear Bob feeding us, go get food :)
+    xy::Component::MessageHandler handler;
+    handler.id = Message::Animation;
+    handler.action = [this](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<Message::AnimationEvent>();
+        if (data.id == Message::AnimationEvent::Feed)
+        {
+            const auto taskData = std::find_if(std::begin(m_taskData), std::end(m_taskData),
+                [](const TaskData& t)
+            {
+                return t.id == 0;
+            });
+
+            if (taskData != std::end(m_taskData))
+            {
+                m_destinationPosition = taskData->position;
+
+                auto points = m_pathFinder.plotPath(m_currentPosition, m_destinationPosition);
+                m_tasks.emplace_back(std::make_unique<CatTravel>(*m_entity, getMessageBus(), points));
+
+                m_tasks.emplace_back(std::make_unique<CatAnim>(*m_entity, getMessageBus(), CatAnim::Action::Eat));
+            }
+        }
+    };
+    addMessageHandler(handler);
 }
 
 //public

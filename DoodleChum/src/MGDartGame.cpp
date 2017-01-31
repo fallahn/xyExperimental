@@ -44,10 +44,11 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_attribManager (am),
     m_entity        (nullptr),
     m_currentState  (State::PlaceBet),
+    m_flashColour   (160,160,160),
     m_powerbar      (tr.get("assets/images/minigames/roulette/powerbar.png")),
     m_creditSelector(tr.get("assets/images/minigames/roulette/credit_selector.png")),
     m_wheel         (tr),
-    m_dartboard     (tr.get("assets/images/minigames/darts/board.png"), tr.get("assets/images/minigames/darts/dart.png")),
+    m_dartboard     (tr.get("assets/images/minigames/darts/board.png"), tr.get("assets/images/minigames/darts/dart.png"), mb),
     m_reflection    (tr.get("assets/images/ui/bob_screen.png")),
     m_chargeTimeout (10.f),
     m_chargeTime    (0.f),
@@ -125,6 +126,8 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
                     m_currentState = State::Charging;
                     m_chargeTimeout = xy::Util::Random::value(9.f, 11.f);
                     m_chargeTime = 0.f;
+
+                    m_creditSelector.setColour(sf::Color::White);
                 }
                 else if (m_currentState == State::Charging)
                 {
@@ -137,7 +140,7 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
             if (m_currentState == State::PlaceBet)
             {
                 auto point = m_entity->getInverseTransform().transformPoint(data.positionX, data.positionY);
-                m_creditSelector.click(point);
+                m_creditSelector.click(point, getMessageBus());
             }
             else if (m_currentState == State::Shooting)
             {
@@ -173,6 +176,8 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
             auto colour = m_messageText.getColour();
             colour.a = (colour.a == 255) ? 0 : 255;
             m_messageText.setColour(colour);
+
+            m_flashColour = (m_flashColour.r == 255) ? sf::Color(160, 160, 160) : sf::Color::White;
         }
     };
 
@@ -181,6 +186,7 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
     default: break;
     case State::PlaceBet:
         m_creditSelector.update(dt);
+        m_creditSelector.setColour(m_flashColour);
         flash();
         break;
     case State::Charging:

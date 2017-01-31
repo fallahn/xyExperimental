@@ -26,11 +26,13 @@ source distribution.
 *********************************************************************/
 
 #include <MGDartboard.hpp>
+#include <MessageIDs.hpp>
 
 #include <xygine/util/Wavetable.hpp>
 #include <xygine/util/Math.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/Reports.hpp>
+#include <xygine/MessageBus.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -42,9 +44,10 @@ namespace
     const float crosshairThickness = 2.f;
 }
 
-Dartboard::Dartboard(const sf::Texture& t, const sf::Texture& dt)
+Dartboard::Dartboard(const sf::Texture& t, const sf::Texture& dt, xy::MessageBus& mb)
     : m_texture     (t),
     m_dartTexture   (dt),
+    m_messageBus    (mb),
     m_xIdx          (0),
     m_yIdx          (0),
     m_ampIdx        (0),
@@ -146,6 +149,9 @@ void Dartboard::addDart()
             float ratio = 1.f - (distance / centre.x);
             std::uint32_t score = static_cast<std::uint32_t>(/*std::ceil*/(9.f * ratio)) + 1;
             m_score += score;
+
+            auto msg = m_messageBus.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::MiniGameDart;
 
          //   std::cout << score << std::endl;
         }

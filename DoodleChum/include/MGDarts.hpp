@@ -66,6 +66,8 @@ private:
         PlaceBet, Charging, Spinning, Shooting, Summary, GameOver
     }m_currentState;
 
+    sf::Color m_flashColour;
+
     Powerbar m_powerbar;
     Selector m_creditSelector;
     Wheel m_wheel;

@@ -153,7 +153,7 @@ void AttribManager::handleMessage(const xy::Message& msg)
     if (msg.id == Message::TaskCompleted)
     {
         //as he gets older bob's activities have less benefit
-        float ageModifier = 0.9375f - ((static_cast<float>(m_stats.age) * 0.0625f) + 0.0625f);
+        float ageModifier = 0.96875f - ((static_cast<float>(m_stats.age) * 0.03125f) + 0.03125f);
 
         const auto& data = msg.getData<Message::TaskEvent>();
         switch (data.taskName)

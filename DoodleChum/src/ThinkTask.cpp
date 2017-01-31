@@ -72,7 +72,7 @@ void ThinkTask::update(float dt)
         
         //make sure we ignore the health attrib
         std::int32_t attrib = -1;
-        static std::int32_t lastAttrib = -1;
+        //static std::int32_t lastAttrib = -1;
         for (const auto& pa : personalAttribs)
         {
             if (canDo(pa.first)/* && lastAttrib != pa.first*/)

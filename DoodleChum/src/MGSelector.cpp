@@ -26,6 +26,9 @@ source distribution.
 *********************************************************************/
 
 #include <MGSelector.hpp>
+#include <MessageIDs.hpp>
+
+#include <xygine/MessageBus.hpp>
 
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -92,7 +95,7 @@ void Selector::update(float dt)
     }
 }
 
-void Selector::click(sf::Vector2f clickPos)
+void Selector::click(sf::Vector2f clickPos, xy::MessageBus& mb)
 {
     if (m_target != m_vertices[0].texCoords.y) return;
 
@@ -103,6 +106,9 @@ void Selector::click(sf::Vector2f clickPos)
         {
             m_currentIndex--;
             m_target = m_vertices[0].texCoords.y - m_bottomButton.height;
+
+            auto msg = mb.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::SelectorClick;
         }
     }
     else if (m_topButton.contains(point))
@@ -111,6 +117,9 @@ void Selector::click(sf::Vector2f clickPos)
         {
             m_currentIndex++;
             m_target = m_vertices[0].texCoords.y + m_topButton.height;
+
+            auto msg = mb.post<Message::InterfaceEvent>(Message::Interface);
+            msg->type = Message::InterfaceEvent::SelectorClick;
         }
     }
 }

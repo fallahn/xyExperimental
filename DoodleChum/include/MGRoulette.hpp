@@ -79,6 +79,8 @@ private:
     std::int32_t m_wheelValue;
     std::int32_t m_triesLeft;
 
+    sf::Color m_flashColour;
+
     Powerbar m_powerbar;
     sf::Sprite m_reflection;
     xy::BitmapFont m_font;

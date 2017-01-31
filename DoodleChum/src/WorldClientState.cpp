@@ -42,6 +42,7 @@ source distribution.
 #include <CatController.hpp>
 #include <Vacuum.hpp>
 #include <Rain.hpp>
+#include <MiniGameIDs.hpp>
 
 #include <xygine/App.hpp>
 #include <xygine/util/Vector.hpp>
@@ -377,21 +378,21 @@ void WorldClientState::handleMessage(const xy::Message& msg)
                 {
                 default:
                 case 0:
-                    //createRoulette();
+                    createRoulette();
                     break;
                 case 1:
-                    //createDarts();
+                    createDarts();
                     break;
                 case 2:
                     //createPachinko();
                     break;
                 }
-                gameIdx = (gameIdx + 1) % 3;
+                gameIdx = (gameIdx + 1) % 2;
 
 
                 //createRoulette();
                 //createDarts();
-                createPachinko();
+                //createPachinko();
             }
             else if (data.type == Message::InterfaceEvent::MiniGameClose)
             {
@@ -417,7 +418,7 @@ void WorldClientState::draw()
 #ifdef _DEBUG_
     //rw.setView(getContext().defaultView);
     //rw.draw(m_pathFinder);
-    rw.draw(m_physWorld);
+    //rw.draw(m_physWorld);
 #endif //_DEBUG_    
 }
 
@@ -1416,22 +1417,28 @@ void WorldClientState::initSounds()
 
     soundPlayer->preCache(Sound::TabOpen, "assets/sound/ui/tab_open.wav");
     soundPlayer->preCache(Sound::NoMoney, "assets/sound/ui/no_money.wav");
+    soundPlayer->preCache(Sound::MiniGameDart, "assets/sound/minigame/dart_land.wav");
     mh.id = Message::Interface;
     mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
     {
         const auto& data = msg.getData<Message::InterfaceEvent>();
         auto centre = xy::DefaultSceneSize / 2.f;
-        if (data.type == Message::InterfaceEvent::TabToggled)
+
+        switch (data.type)
         {
+        default: break;
+        case Message::InterfaceEvent::TabToggled:
             playerPtr->playSound(Sound::TabOpen, centre.x, centre.y);
-        }
-        /*else if (data.type == Message::InterfaceEvent::ButtonClick)
-        {
-            playerPtr->playSound(Sound::ButtonClick, centre.x, centre.y);
-        }*/
-        else if (data.type == Message::InterfaceEvent::NoMoney)
-        {
+            break;
+        case Message::InterfaceEvent::NoMoney:
             playerPtr->playSound(Sound::NoMoney, centre.x, centre.y);
+            break;
+        case Message::InterfaceEvent::SelectorClick:
+            playerPtr->playSound(Sound::ButtonClick, centre.x, centre.y);
+            break;
+        case Message::InterfaceEvent::MiniGameDart:
+            playerPtr->playSound(Sound::MiniGameDart, centre.x, centre.y);
+            break;
         }
     };
     soundPlayer->addMessageHandler(mh);
@@ -1484,7 +1491,25 @@ void WorldClientState::initSounds()
     };
     soundPlayer->addMessageHandler(mh);
 
+    soundPlayer->preCache(Sound::MiniGameBall, "assets/sound/minigame/ball.wav");
+    mh.id = xy::Message::PhysicsMessage;
+    mh.action = [playerPtr](xy::Component*, const xy::Message& msg)
+    {
+        const auto& data = msg.getData<xy::Message::PhysicsEvent>();
+        if (data.event == xy::Message::PhysicsEvent::BeginContact)
+        {
+            if (/*data.contact->getCollisionShapeA()->getUserID() == Roulette::Ball
+                ||*/ data.contact->getCollisionShapeB()->getUserID() == Roulette::Ball)
+            {
+                auto centre = xy::DefaultSceneSize / 2.f;
+                playerPtr->playSound(Sound::MiniGameBall, centre.x, centre.y);
+            }
+        }
+    };
+    soundPlayer->addMessageHandler(mh);
+
     entity = xy::Entity::create(m_messageBus);
+    entity->addCommandCategories(Command::SoundPlayer);
     entity->addComponent(clockSound);
     entity->addComponent(daySound);
     entity->addComponent(nightSound);

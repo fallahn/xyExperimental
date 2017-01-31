@@ -58,7 +58,8 @@ namespace Command
         RightTab      = 0x200,
         MiniGame      = 0x400,
         RouletteWheel = 0x800,
-        RouletteBall  = 0x1000
+        RouletteBall  = 0x1000,
+        SoundPlayer   = 0x2000
     };
 }
 
@@ -75,7 +76,9 @@ namespace Sound
         RemoteClick,
         VacuumEnd,
         NoMoney,
-        GotMoney
+        GotMoney,
+        MiniGameBall,
+        MiniGameDart
     };
 }
 
@@ -158,6 +161,7 @@ namespace Message
         {
             MouseClick,
             ButtonClick,
+            SelectorClick,
             MouseMoved,
             TabToggled,
             PrintBegin,
@@ -166,6 +170,7 @@ namespace Message
             NoMoney,
             MiniGameOpen,
             MiniGameClose,
+            MiniGameDart,
             KeyPress
         }type;
         float positionX = 0.f;
