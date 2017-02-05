@@ -5,7 +5,7 @@
  </tileset>
  <layer name="navigation" width="52" height="30" opacity="0.5">
   <data encoding="base64" compression="zlib">
-   eJzt1lEKACAIBNHo/ocOvy0IgnSXedABpgIdAwCA/6bpUXfTV33Hr++ya1Hl0nL6Yw6cWoJTS6Cnt+rZwV6QsR9ocGlhP9Dh1BLo6a16drAfZAvhqQJJ
+   eJzt1kEKwCAMRNGQ+x9a3IYIgqDO8B8E3P7W0kQAAHBfmo66nb7Xz/j0vXQtqlxaVndMVZazcstUe9TR87fu+1EfJ+wHGlxa2A/+5v7/Uefe4zBOBod4AmE=
   </data>
  </layer>
  <objectgroup name="lights">

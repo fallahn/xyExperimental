@@ -77,6 +77,7 @@ void Dartboard::Dart::update(float dt, sf::Vector2f position)
         if (getScale().x < 0.4f)
         {
             m_currentState = State::Landed;
+            landedCallback(*this);
         }
     }
         break;
@@ -85,7 +86,7 @@ void Dartboard::Dart::update(float dt, sf::Vector2f position)
         m_pauseTime -= dt;
         if (m_pauseTime < 0)
         {
-            landedCallback(*this);
+            //landedCallback(*this);
             m_currentState = State::Spent;
         }
     }

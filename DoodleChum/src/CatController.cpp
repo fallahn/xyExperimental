@@ -64,6 +64,7 @@ CatController::CatController(xy::MessageBus& mb, const PathFinder& pf, const std
                 m_tasks.emplace_back(std::make_unique<CatTravel>(*m_entity, getMessageBus(), points));
 
                 m_tasks.emplace_back(std::make_unique<CatAnim>(*m_entity, getMessageBus(), CatAnim::Action::Eat));
+                m_currentPosition = m_destinationPosition;
             }
         }
     };
