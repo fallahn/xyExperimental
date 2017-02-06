@@ -424,7 +424,7 @@ void MenuState::buildCredits()
     m_creditsContainer.addControl(text);
 
     text = xy::UI::create<xy::UI::Label>(m_font);
-    text->setString("Matt Marchant - programming & doodles");
+    text->setString("Matt Marchant - programming , sfx & doodles");
     text->setCharacterSize(40u);
     text->setAlignment(xy::UI::Alignment::Centre);
     text->setPosition(xy::DefaultSceneSize.x / 2.f, 560.f);
@@ -471,7 +471,7 @@ void MenuState::buildCredits()
     marquee->setPosition(xy::DefaultSceneSize.x / 2.f, 770.f);
     marquee->setTextColour(sf::Color::Black);
     marquee->setScrollSpeed(100.f);
-    marquee->addString("Special mention goes to: Jonny for his contributions to xygine, Doris for the exemplary xygine logo, Naomi for all her patience, Jo & Jamz for their creative input");
+    marquee->addString("Special mention goes to: Jonny for his contributions to xygine, Doris for the exemplary xygine logo, Jo & Jamz for their creative input");
     marquee->addString("And not to forget Malone and Jon for being just plain wonderful people!");
     m_creditsContainer.addControl(marquee);
 }
