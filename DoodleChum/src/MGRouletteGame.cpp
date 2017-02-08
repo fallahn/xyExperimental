@@ -109,14 +109,17 @@ RouletteGame::RouletteGame(xy::MessageBus& mb, xy::TextureResource& tr, xy::Scen
         const auto& data = msg.getData<xy::Message::PhysicsEvent>();
         if (data.event == xy::Message::PhysicsEvent::BeginContact)
         {
-            if (data.contact->getCollisionShapeA()->getUserID() != -1)
+            auto aVal = data.contact->getCollisionShapeA()->getUserID();
+            auto bVal = data.contact->getCollisionShapeB()->getUserID();
+            if (aVal > -1 && aVal < 8)
             {
-                m_wheelValue = data.contact->getCollisionShapeA()->getUserID();
+                m_wheelValue = aVal;
             }
-            else if(data.contact->getCollisionShapeB()->getUserID() != -1)
+            else if(bVal > -1 && bVal < 8)
             {
-                m_wheelValue = data.contact->getCollisionShapeB()->getUserID();
+                m_wheelValue = bVal;
             }
+            REPORT("Current Wheel Seg", std::to_string(m_wheelValue));
         }
     };
     addMessageHandler(mh);

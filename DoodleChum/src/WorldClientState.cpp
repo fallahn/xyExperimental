@@ -1498,8 +1498,8 @@ void WorldClientState::initSounds()
         const auto& data = msg.getData<xy::Message::PhysicsEvent>();
         if (data.event == xy::Message::PhysicsEvent::BeginContact)
         {
-            if (/*data.contact->getCollisionShapeA()->getUserID() == Roulette::Ball
-                ||*/ data.contact->getCollisionShapeB()->getUserID() == Roulette::Ball)
+            if (data.contact->getCollisionShapeA()->getUserID() == -1
+                && data.contact->getCollisionShapeB()->getUserID() == Roulette::Ball)
             {
                 auto centre = xy::DefaultSceneSize / 2.f;
                 playerPtr->playSound(Sound::MiniGameBall, centre.x, centre.y);
