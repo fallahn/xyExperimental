@@ -54,6 +54,7 @@ public:
     std::size_t getIndex(std::size_t segCount) const;
 
     bool stopped() const { return m_currentSpeed == 0; }
+    float getSpeed() const { return m_currentSpeed; }
 
 private:
     sf::Sprite m_wheelBack;

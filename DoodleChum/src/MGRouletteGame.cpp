@@ -37,6 +37,7 @@ source distribution.
 #include <xygine/util/Position.hpp>
 #include <xygine/util/Vector.hpp>
 #include <xygine/physics/RigidBody.hpp>
+#include <xygine/components/AudioSource.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -279,6 +280,19 @@ void RouletteGame::entityUpdate(xy::Entity& entity, float dt)
             m_currentState = State::Summary;
             m_summaryTime = summaryTime;          
         }
+
+        cmd.category = Command::ID::RouletteWheel;
+        cmd.action = [](xy::Entity& entity, float)
+        {
+            auto vel = std::abs(entity.getComponent<xy::Physics::RigidBody>()->getAngularVelocity());
+            auto audio = entity.getComponent<xy::AudioSource>();
+            audio->setPitch((vel / 2.f) + 0.1f);
+            if (vel < 0.1)
+            {
+                audio->stop();
+            }
+        };
+        m_scene.sendCommand(cmd);
     }
         break;
     case State::Summary:
@@ -368,6 +382,7 @@ void RouletteGame::startWheel()
     cmd.action = [impulse](xy::Entity& entity, float)
     {
         entity.getComponent<xy::Physics::RigidBody>()->applyAngularImpulse(impulse); //min amount 30, max 60
+        entity.getComponent<xy::AudioSource>()->play(true);
     };
     m_scene.sendCommand(cmd);
 

@@ -1184,6 +1184,8 @@ void WorldClientState::initMiniGame()
     m_textureResource.get("assets/images/ui/quit_tip.png");
     m_textureResource.get("assets/fonts/charset_transparent.png");
 
+    m_soundResource.get("assets/sound/minigame/wheel_click.wav");
+
     //m_shaderResource.preload(xy::Shader::Count, /*xy::Shader::PostOldSchool::fragment*/pixelate, sf::Shader::Fragment);
 }
 

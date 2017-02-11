@@ -32,7 +32,7 @@
   </object>
  </objectgroup>
  <objectgroup color="#00ff00" name="tasks">
-  <object id="8" name="eat" x="1600" y="928" width="32" height="32">
+  <object id="8" name="eat" x="1584" y="928" width="32" height="32">
    <properties>
     <property name="id" type="int" value="0"/>
    </properties>

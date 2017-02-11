@@ -32,6 +32,7 @@ source distribution.
 #include <MiniGameIDs.hpp>
 
 #include <xygine/components/SfDrawableComponent.hpp>
+#include <xygine/components/AudioSource.hpp>
 #include <xygine/util/Const.hpp>
 #include <xygine/util/Position.hpp>
 #include <xygine/physics/RigidBody.hpp>
@@ -127,11 +128,17 @@ void WorldClientState::createRoulette()
     //wheelDrb->setShader(&m_shaderResource.get(xy::Shader::Count));
     xy::Util::Position::centreOrigin(wheelDrb->getDrawable());
 
+    auto wheelSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    wheelSound->setSound("assets/sound/minigame/wheel_click.wav");
+    wheelSound->setAttenuation(0.01f);
+    wheelSound->setFadeOutTime(0.2f);
+    
     entity = xy::Entity::create(m_messageBus);
     entity->setPosition(gamePosition);
     entity->addCommandCategories(Command::ID::MiniGame | Command::ID::RouletteWheel);
     entity->addComponent(rotatingBody);
     entity->addComponent(wheelDrb);
+    entity->addComponent(wheelSound);
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);
 
 
@@ -163,9 +170,15 @@ void WorldClientState::createDarts()
 {
     auto dartsController = xy::Component::create<DartsGame>(m_messageBus, m_textureResource, m_attribManager);
 
+    auto wheelSound = xy::Component::create<xy::AudioSource>(m_messageBus, m_soundResource);
+    wheelSound->setSound("assets/sound/minigame/wheel_click.wav");
+    wheelSound->setAttenuation(0.01f);
+    wheelSound->setFadeOutTime(0.2f);
+
     auto entity = xy::Entity::create(m_messageBus);
     entity->addCommandCategories(Command::ID::MiniGame);
     entity->addComponent(dartsController);
+    entity->addComponent(wheelSound);
     entity->setPosition(gamePosition);
 
     m_scene.addEntity(entity, xy::Scene::Layer::FrontFront);

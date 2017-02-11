@@ -31,9 +31,11 @@ source distribution.
 
 #include <xygine/Resource.hpp>
 #include <xygine/Entity.hpp>
+#include <xygine/Scene.hpp>
 #include <xygine/App.hpp>
 #include <xygine/util/Position.hpp>
 #include <xygine/util/Random.hpp>
+#include <xygine/components/AudioSource.hpp>
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -206,6 +208,15 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
             m_target = m_wheel.getIndex(10) + 11;
             m_targetValueText.setString(std::to_string(m_target));
 
+            auto speed = std::abs(m_wheel.getSpeed());
+            xy::Command cmd;
+            cmd.category = Command::ID::MiniGame;
+            cmd.action = [speed](xy::Entity& entity, float)
+            {
+                entity.getComponent<xy::AudioSource>()->setPitch((speed / 360.f) + 0.1f);
+            };
+            m_entity->getScene()->sendCommand(cmd);
+
             if (m_wheel.stopped())
             {
                 m_currentState = State::Shooting;
@@ -215,6 +226,12 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
                 xy::Util::Position::centreOrigin(m_messageText);
 
                 xy::App::setMouseCursorVisible(false);
+
+                cmd.action = [](xy::Entity& entity, float)
+                {
+                    entity.getComponent<xy::AudioSource>()->stop();
+                };
+                m_entity->getScene()->sendCommand(cmd);
             }
         }
         break;
@@ -330,4 +347,12 @@ void DartsGame::startWheel()
     else speed += minSpeed;
 
     m_wheel.spin(speed);
+
+    xy::Command cmd;
+    cmd.category = Command::ID::MiniGame;
+    cmd.action = [](xy::Entity& entity, float)
+    {
+        entity.getComponent<xy::AudioSource>()->play(true);
+    };
+    m_entity->getScene()->sendCommand(cmd);
 }
