@@ -57,6 +57,7 @@ DartsGame::DartsGame(xy::MessageBus& mb, xy::TextureResource& tr, AttribManager&
     m_pauseTime     (6.f),
     m_gameoverAlpha (0.f),
     m_gameoverTime  (5.f),
+    m_tries         (3),
     m_font          (tr.get("assets/fonts/charset_transparent.png"), { 16.f, 16.f }),
     m_target        (0)
 {
@@ -279,8 +280,20 @@ void DartsGame::entityUpdate(xy::Entity& entity, float dt)
         m_pauseTime -= dt;
         if (m_pauseTime < 0)
         {
-            m_currentState = State::GameOver;
-            m_messageText.setString("GAME OVER");
+            if (--m_tries > 0)
+            {
+                //reset
+                m_powerbar.reset();
+                m_dartboard.reset();
+                m_currentState = State::PlaceBet;
+                m_pauseTime = 6.f;
+                m_messageText.setString("Press Space");
+            }
+            else
+            {
+                m_currentState = State::GameOver;
+                m_messageText.setString("GAME OVER");
+            }
             xy::Util::Position::centreOrigin(m_messageText);
         }
     }

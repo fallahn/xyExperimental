@@ -124,6 +124,13 @@ void Dartboard::showCrosshair(bool show)
     m_pendingDart = show;
 }
 
+void Dartboard::reset()
+{
+    m_darts.clear();
+    m_remainingDarts = 3u;
+    m_score = 0;
+}
+
 //private
 void Dartboard::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {

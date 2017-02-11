@@ -58,7 +58,7 @@ public:
 
     void fire();
     void showCrosshair(bool);
-
+    void reset();
 
 private:
 

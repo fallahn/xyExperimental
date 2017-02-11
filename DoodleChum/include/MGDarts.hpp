@@ -80,6 +80,7 @@ private:
     float m_pauseTime; //see Summary update
     float m_gameoverAlpha; //quitTip
     float m_gameoverTime;
+    std::int32_t m_tries;
 
     xy::BitmapFont m_font;
     xy::BitmapText m_messageText;
