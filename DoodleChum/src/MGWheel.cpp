@@ -34,9 +34,9 @@ source distribution.
 #include <SFML/Graphics/RenderTarget.hpp>
 
 Wheel::Wheel(xy::TextureResource& tr)
-    : m_currentSpeed(0.f),
-    m_wheelBack(tr.get("assets/images/minigames/darts/wheel_back.png")),
-    m_wheelFront(tr.get("assets/images/minigames/darts/wheel_front.png"))
+    : m_wheelBack(tr.get("assets/images/minigames/darts/wheel_back.png")),
+    m_wheelFront(tr.get("assets/images/minigames/darts/wheel_front.png")),
+    m_currentSpeed(0.f)
 {
     xy::Util::Position::centreOrigin(m_wheelBack);
     xy::Util::Position::centreOrigin(m_wheelFront);
