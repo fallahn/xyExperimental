@@ -38,6 +38,8 @@ source distribution.
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <cmath>
+
 namespace
 {
     const sf::Color crosshairColour(128, 128, 128, 130);

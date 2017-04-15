@@ -52,7 +52,7 @@ void CurrentActivity::update(float dt)
 {
     float movement = m_travelDest - m_vertices[0].texCoords.x;
         
-    if (std::abs(movement) > 2)
+    if (std::abs(static_cast<int>(movement)) > 2) //clang wants int for some reason
     {
         for (auto& v : m_vertices)
         {

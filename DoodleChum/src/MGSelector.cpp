@@ -83,7 +83,7 @@ void Selector::update(float dt)
     if (m_target != m_vertices[0].texCoords.y)
     {
         float movement = m_target - m_vertices[0].texCoords.y;
-        if (std::abs(movement) > 2.f)
+        if (std::abs(static_cast<int>(movement)) > 2.f) //clang wants int for some reason
         {
             movement *= (dt * 3.f);
         }

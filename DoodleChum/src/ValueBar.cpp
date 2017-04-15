@@ -90,7 +90,7 @@ void ValueBar::update(float dt)
 
     float diff = position - m_vertices[5].position.x;
 
-    if (std::abs(diff) > 2.f)
+    if (std::abs(static_cast<int>(diff)) > 2.f) //clang wants an int here
     {
         m_vertices[5].position.x += diff * dt;
         m_vertices[6].position.x += diff * dt;
